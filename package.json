@@ -1,0 +1,23 @@
+{
+  "name": "homey-no.easee",
+  "version": "1.0.0",
+  "description": "Interact with your Easee charger",
+  "main": "app.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "dependencies": {
+    "events": "^3.1.0",
+    "http.min": "^2.0.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "easee",
+    "charger"
+  ],
+  "author": "Richard Barkestam",
+  "license": "MIT"
+}

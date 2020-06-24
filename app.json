@@ -1,0 +1,394 @@
+{
+  "id": "no.easee",
+  "version": "0.9.1",
+  "brandColor": "#323232",
+  "compatibility": ">=3.0.0",
+  "sdk": 2,
+  "name": {
+    "en": "Easee Charger"
+  },
+  "tags": {
+    "en": [
+      "easee",
+      "charge",
+      "charger"
+    ]
+  },
+  "description": {
+    "en": "Control your Easee charger"
+  },
+  "author": {
+    "name": "Richard Barkestam",
+    "email": "richard@barkestam.se"
+  },
+  "contributing": {
+    "donate": {
+      "paypal": {
+        "username": "RBarkestam",
+        "currency": "EUR"
+      }
+    }
+  },
+  "bugs": {
+    "url": "https://github.com/ricott/homey-no.easee/issues"
+  },
+  "source": "https://github.com/ricott/homey-no.easee",
+  "category": [
+    "energy"
+  ],
+  "dependencies": {
+    "net": "*"
+  },
+  "images": {
+    "large": "/assets/images/large.png",
+    "small": "/assets/images/small.png"
+  },
+  "capabilities": {
+    "connected": {
+      "title": {
+        "en": "Online"
+      },
+      "type": "boolean",
+      "getable": true,
+      "setable": false,
+      "icon": "/assets/connected.svg"
+    },
+    "charger_status": {
+      "type": "string",
+      "title": {
+        "en": "Status"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/onoff.svg"
+    },
+    "current_offered": {
+      "type": "number",
+      "title": {
+        "en": "Current offered"
+      },
+      "units": {
+        "en": "A"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/max_charge.svg"
+    },
+    "current_used": {
+      "type": "number",
+      "title": {
+        "en": "Current used"
+      },
+      "units": {
+        "en": "A"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/charger.svg"
+    },
+    "threePhase": {
+      "title": {
+        "en": "3-phase charging"
+      },
+      "type": "boolean",
+      "getable": true,
+      "setable": false,
+      "icon": "/assets/phase.svg"
+    }
+  },
+  "drivers": [
+    {
+      "id": "charger",
+      "class": "other",
+      "name": {
+        "en": "Easee charger"
+      },
+      "images": {
+        "large": "/drivers/charger/assets/images/large.png",
+        "small": "/drivers/charger/assets/images/small.png"
+      },
+      "capabilities": [
+        "charger_status",
+        "connected",
+        "measure_power",
+        "measure_voltage",
+        "measure_current.offered",
+        "current_used",
+        "threePhase"
+      ],
+      "capabilitiesOptions": {
+        "measure_current.offered": {
+          "title": {
+            "en": "Current allocated"
+          }
+        }
+      },
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "Easee charger settings"
+          },
+          "children": [
+            {
+              "id": "refresh_status_cloud",
+              "type": "number",
+              "label": {
+                "en": "Refresh from cloud (seconds)"
+              },
+              "value": 10,
+              "min": 5,
+              "max": 3600
+            },
+            {
+              "id": "refresh_status_charger",
+              "type": "number",
+              "label": {
+                "en": "Refresh from charger (minutes)"
+              },
+              "value": 5,
+              "min": 1,
+              "max": 1440
+            }          
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Information"
+          },
+          "children": [
+            {
+              "id": "version",
+              "type": "label",
+              "label": {
+                "en": "Firmware version"
+              },
+              "value": ""
+            },
+            {
+              "id": "mainFuse",
+              "type": "label",
+              "label": {
+                "en": "Main fuse (A)"
+              },
+              "value": ""
+            },
+            {
+              "id": "chargerFuse",
+              "type": "label",
+              "label": {
+                "en": "Charger fuse (A)"
+              },
+              "value": ""
+            },
+            {
+              "id": "phaseMode",
+              "type": "label",
+              "label": {
+                "en": "Phase mode"
+              },
+              "value": ""
+            },
+            {
+              "id": "idleCurrent",
+              "type": "label",
+              "label": {
+                "en": "Enable idle current"
+              },
+              "value": ""
+            },
+            {
+              "id": "nodeType",
+              "type": "label",
+              "label": {
+                "en": "Local node type"
+              },
+              "value": ""
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Debug"
+          },
+          "children": [
+            {
+              "id": "state",
+              "type": "textarea",
+              "label": {
+                "en": "State"
+              },
+              "value": ""
+            },
+            {
+              "id": "config",
+              "type": "textarea",
+              "label": {
+                "en": "Config"
+              },
+              "value": ""
+            },
+            {
+              "id": "site",
+              "type": "textarea",
+              "label": {
+                "en": "Site info"
+              },
+              "value": ""
+            }
+          ]
+        }
+      ],
+      "pair": [
+        {
+          "id":"login_credentials",
+          "template":"login_credentials",
+          "options":{
+            "usernameLabel":"Phone number",
+            "usernamePlaceholder":"+46....",
+            "passwordLabel":"Password"
+          }
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ]
+    }
+  ],
+  "flow": {
+    "triggers": [
+      {
+        "id": "charger_status_changed",
+        "title": {
+          "en": "Charger status changed"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=charger"
+          }
+        ],
+        "tokens": [
+          {
+            "name": "status",
+            "type": "string",
+            "title": {
+                "en": "Charger status"
+            },
+            "example": {
+                "en": "Car connected"
+            }
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "id":"chargerStatus",
+        "title":{
+           "en":"Charger status is !{{|not}}"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter":"driver_id=charger"
+          },
+          {
+            "name": "status",
+            "type": "dropdown",
+            "title": {
+                "en": "Status"
+            },
+            "values": [
+              {"id": "Standby", "label": {"en": "Standby"}},
+              {"id": "Paused", "label": {"en": "Paused"}},
+              {"id": "Charging", "label": {"en": "Charging"}},
+              {"id": "Car connected", "label": {"en": "Car connected"}}
+            ]
+          }
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "id": "toggleCharger",
+        "title": {
+          "en": "Toggle charging"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=charger"
+          }
+        ]
+      },
+      {
+        "id": "chargerControl",
+        "title": {
+          "en": "Control charger"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=charger"
+          },
+          {
+            "name": "chargerAction",
+            "type": "dropdown",
+            "title": {
+              "en": "Charger action"
+            },
+            "values": [
+              {"id": "START", "label": {"en": "Start Charging"}},
+              {"id": "STOP", "label": {"en": "Stop Charging"}},
+              {"id": "PAUSE", "label": {"en": "Pause Charging"}},
+              {"id": "RESUME", "label": {"en": "Resume Charging"}}
+            ]
+          }
+        ]
+      },
+      {
+        "id":"chargerCurrentControl",
+        "title":{
+          "en":"Set charger current"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter":"driver_id=charger"
+          },
+          {
+            "name": "current",
+            "type": "range",
+            "title": {
+                "en": "Current"
+            },
+            "min": 1,
+            "max": 32,
+            "step": 1,
+            "label": " Amps",
+            "labelDecimals": 0
+          }
+        ]
+      }
+    ]
+  }
+}

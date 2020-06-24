@@ -1,0 +1,13 @@
+# Optional npm cache directory
+.npm
+
+# OS stuff
+.DS_Store
+
+#Secret environment variables
+/env.json
+
+*.code-workspace
+
+#Credentials used for mocha tests
+/test/config.js
