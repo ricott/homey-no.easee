@@ -11,3 +11,4 @@ Actions
 - Toggle charger action (Start/Stop/Pause/Resume)
 - Set charger current (amps)
 
+For more information about the app and the possibility to get support please visit the forum link in section below.
