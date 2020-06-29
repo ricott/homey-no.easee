@@ -2,7 +2,6 @@
 
 const Homey = require('homey');
 const EaseeCharger = require('../../lib/easee.js');
-const LoginHelper = require('../../lib/loginHelper.js');
 const enums = require('../../lib/enums.js');
 const crypto = require('crypto');
 const algorithm = 'aes-256-cbc';
@@ -30,19 +29,47 @@ class ChargerDevice extends Homey.Device {
         }
 
         let self = this;
-        LoginHelper.login({
-            userName: self.getUsername(),
-            password: self.getPassword()
-        }).then(function (tokens) {
-            self.charger.api = new EaseeCharger(tokens);
-            self.updateChargerConfig();
-            self.updateChargerState();
-            self.updateChargerSiteInfo();
-        }).catch(reason => {
-            self.error(reason);
-        });
+        self.getDriver().getTokens(self.getUsername(), self.getPassword())
+            .then(function (tokens) {
+                self.charger.api = new EaseeCharger(tokens);
+                self.updateChargerConfig();
+                self.updateChargerState();
+                self.updateChargerSiteInfo();
 
-        this._initilializeTimers();
+                self._initilializeTimers();
+                self._initializeEventListeners();
+            }).catch(reason => {
+                self.log(reason);
+            });
+    }
+
+    _initializeEventListeners() {
+        let self = this;
+        self.charger.api.on('easee_api_error', error => {
+            self.error('Houston we have a problem', error);
+
+            let message = '';
+            if (self.isError(error)) {
+                message = error.stack;
+            } else {
+                try {
+                    message = JSON.stringify(error, null, "  ");
+                } catch (e) {
+                    self.log('Failed to stringify object', e);
+                    message = error.toString();
+                }
+            }
+
+            let dateTime = new Date().toISOString();
+            self.setSettings({ easee_last_error: dateTime + '\n' + message })
+                .catch(err => {
+                    self.error('Failed to update settings', err);
+                });
+        });
+    }
+
+    isError(err) {
+        return (err && err.stack && err.message);
     }
 
     storeCredentialsEncrypted(plainUser, plainPassword) {
@@ -70,7 +97,7 @@ class ChargerDevice extends Homey.Device {
         encrypted = Buffer.concat([encrypted, cipher.final()]);
         return { iv: iv.toString('hex'), encryptedData: encrypted.toString('hex') };
     }
-    
+
     decryptText(text) {
         let iv = Buffer.from(text.iv, 'hex');
         let encryptedText = Buffer.from(text.encryptedData, 'hex');
@@ -82,10 +109,9 @@ class ChargerDevice extends Homey.Device {
 
     refreshAccessToken() {
         let self = this;
-        self.log('Refreshing access token');
-        LoginHelper.refreshToken(self.charger.api.getTokens())
+        self.log('Refreshing access tokens');
+        self.getDriver().getTokens(self.getUsername(), self.getPassword())
             .then(function (tokens) {
-                self.log('Access token refreshed');
                 self.charger.api.updateTokens(tokens);
             }).catch(reason => {
                 self.error(reason);
@@ -249,11 +275,10 @@ class ChargerDevice extends Homey.Device {
             this.updateChargerSiteInfo();
         }, 60 * 1000 * 60 * 24));
 
-        //Refresh access token, tokens are valid 24h
-        //refresh 12 mins before expiry
+        //Refresh access token, each 15 mins from connectionManager
         this.pollIntervals.push(setInterval(() => {
             this.refreshAccessToken();
-        }, 60 * 1000 * 60 * 23.8));
+        }, 60 * 1000 * 15));
     }
 
     _deleteTimers() {
@@ -280,41 +305,7 @@ class ChargerDevice extends Homey.Device {
                         status: value
                     }
                     this.getDriver().triggerFlow('trigger.charger_status_changed', tokens, this);
-
                 }
-                /* 
-      {
-        "id": "charger_current_changed",
-        "title": {
-          "en": "Offered charging current changed"
-        },
-        "args": [
-          {
-            "name": "device",
-            "type": "device",
-            "filter": "driver_id=charger"
-          }
-        ],
-        "tokens": [
-          {
-            "name": "current",
-            "type": "number",
-            "title": {
-                "en": "Current (A)"
-            },
-            "example": {
-                "en": "16"
-            }
-          }
-        ]
-      }
-                
-                else if (key === 'current_offered') {
-                    let tokens = {
-                        current: self.charger.currentOffered
-                      }
-                      this.getDriver().triggerFlow('trigger.charger_current_changed', tokens, this);
-                }*/
             } else {
                 this.setCapabilityValue(key, value);
             }

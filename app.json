@@ -1,6 +1,6 @@
 {
   "id": "no.easee",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "brandColor": "#323232",
   "compatibility": ">=3.0.0",
   "sdk": 2,
@@ -239,6 +239,14 @@
               "type": "textarea",
               "label": {
                 "en": "Site info"
+              },
+              "value": ""
+            },
+            {
+              "id": "easee_last_error",
+              "type": "textarea",
+              "label": {
+                "en": "Last API error"
               },
               "value": ""
             }

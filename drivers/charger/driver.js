@@ -2,7 +2,7 @@
 
 const Homey = require('homey');
 const EaseeCharger = require('../../lib/easee.js');
-const LoginHelper = require('../../lib/loginHelper.js');
+const ConnectionManager = require('../../lib/connectionManager.js');
 
 class ChargerDriver extends Homey.Driver {
 
@@ -11,6 +11,18 @@ class ChargerDriver extends Homey.Driver {
 
     this.flowCards = {};
     this._registerFlows();
+    this.connectionManager = new ConnectionManager();
+  }
+
+  //Creates a new one if none exists
+  //otherwise returns existing tokens
+  getTokens(username, password) {
+    return this.connectionManager.getTokens(username, password)
+      .then(function (tokens) {
+        return tokens;
+      }).catch(reason => {
+        return Promise.reject(reason);
+      });
   }
 
   _registerFlows() {
@@ -116,7 +128,7 @@ class ChargerDriver extends Homey.Driver {
         });
     });
   }
-  
+
   _registerFlow(type, keys, cls) {
     keys.forEach(key => {
       this.log(`- flow '${type}.${key}'`);
@@ -144,40 +156,38 @@ class ChargerDriver extends Homey.Driver {
         return callback(null, false);
       }
 
-      LoginHelper.login({
-        userName: data.username,
-        password: data.password
-      }).then(function (tokens) {
-        let easee = new EaseeCharger(tokens);
-        easee.getChargers().then(function (chargers) {
-          chargers.forEach(charger => {
-            let name = 'charger.name';
-            if (charger.id != charger.name) {
-              name = `${charger.name} (${charger.id})`;
-            }
-
-            devices.push({
-              name: name,
-              data: {
-                id: charger.id
-              },
-              store: {
-                username: data.username,
-                password: data.password
+      this.getTokens(data.username, data.password)
+        .then(function (tokens) {
+          let easee = new EaseeCharger(tokens);
+          easee.getChargers().then(function (chargers) {
+            chargers.forEach(charger => {
+              let name = 'charger.name';
+              if (charger.id != charger.name) {
+                name = `${charger.name} (${charger.id})`;
               }
+
+              devices.push({
+                name: name,
+                data: {
+                  id: charger.id
+                },
+                store: {
+                  username: data.username,
+                  password: data.password
+                }
+              });
             });
+
+            callback(null, true);
+
+          }).catch(reason => {
+            console.error(reason);
+            callback(null, false);
           });
-
-          callback(null, true);
-
         }).catch(reason => {
           console.error(reason);
           callback(null, false);
         });
-      }).catch(reason => {
-        console.error(reason);
-        callback(null, false);
-      });
 
     });
 
