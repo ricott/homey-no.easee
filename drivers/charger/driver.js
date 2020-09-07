@@ -59,7 +59,8 @@ class ChargerDriver extends Homey.Driver {
     triggers = [
       'chargerControl',
       'chargerCurrentControl',
-      'toggleCharger'
+      'toggleCharger',
+      'chargerState'
     ];
     this._registerFlow('action', triggers, Homey.FlowCardAction);
 
@@ -126,6 +127,29 @@ class ChargerDriver extends Homey.Driver {
         }).catch(reason => {
           return Promise.reject('Failed to set dynamic charger current');
         });
+    });
+
+    this.flowCards['action.chargerState'].registerRunListener((args, state) => {
+      this.log('----- Charger state control action triggered');
+      this.log(`State: '${args.chargerState}'`);
+
+      let errMsg = `Failed to change state to '${args.chargerState}'`;
+      if (args.chargerState === 'true') {
+        return args.device.setChargerState(true)
+          .then(function (result) {
+            return Promise.resolve(true);
+          }).catch(reason => {
+            return Promise.reject(errMsg);
+          });
+
+      } else if (args.chargerState === 'false') {
+        return args.device.setChargerState(false)
+          .then(function (result) {
+            return Promise.resolve(true);
+          }).catch(reason => {
+            return Promise.reject(errMsg);
+          });
+      }
     });
   }
 

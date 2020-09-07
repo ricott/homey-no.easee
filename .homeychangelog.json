@@ -1,4 +1,7 @@
 {
+    "0.9.3": {
+        "en": "New action for enabling and disabling the charger"
+    },
     "0.9.2": {
         "en": "Improved access token management"
     },

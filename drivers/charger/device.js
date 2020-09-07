@@ -257,6 +257,15 @@ class ChargerDevice extends Homey.Device {
             });
     }
 
+    setChargerState(state) {
+        return this.charger.api.setChargerState(this.charger.id, state)
+            .then(function (result) {
+                return result;
+            }).catch(reason => {
+                return Promise.reject(reason);
+            });
+    }
+
     _initilializeTimers() {
         this.log('Adding timers');
         // Request charger to push update to cloud
