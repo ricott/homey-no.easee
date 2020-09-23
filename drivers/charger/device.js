@@ -12,7 +12,6 @@ class ChargerDevice extends Homey.Device {
         this.log(`Easee charger initiated, '${this.getName()}'`);
 
         this.pollIntervals = [];
-        this.refresh_status_charger = this.getSettings().refresh_status_charger || 5;
         this.refresh_status_cloud = this.getSettings().refresh_status_cloud || 10;
 
         this.charger = {
@@ -193,14 +192,6 @@ class ChargerDevice extends Homey.Device {
             });
     }
 
-    refreshChargerObservations() {
-        let self = this;
-        self.charger.api.refreshChargerObservations(self.charger.id)
-            .catch(reason => {
-                self.error(reason);
-            });
-    }
-
     pauseCharging() {
         return this.charger.api.pauseCharging(this.charger.id)
             .then(function (result) {
@@ -268,10 +259,6 @@ class ChargerDevice extends Homey.Device {
 
     _initilializeTimers() {
         this.log('Adding timers');
-        // Request charger to push update to cloud
-        this.pollIntervals.push(setInterval(() => {
-            this.refreshChargerObservations();
-        }, 60 * 1000 * this.refresh_status_charger));
 
         //Get updates from cloud
         this.pollIntervals.push(setInterval(() => {
@@ -337,11 +324,6 @@ class ChargerDevice extends Homey.Device {
 
     async onSettings(oldSettings, newSettings, changedKeysArr) {
         let change = false;
-        if (changedKeysArr.indexOf("refresh_status_charger") > -1) {
-            this.log('Refresh charger value was change to:', newSettings.refresh_status_charger);
-            this.refresh_status_charger = newSettings.refresh_status_charger;
-            change = true;
-        }
 
         if (changedKeysArr.indexOf("refresh_status_cloud") > -1) {
             this.log('Refresh cloud value was change to:', newSettings.refresh_status_cloud);
