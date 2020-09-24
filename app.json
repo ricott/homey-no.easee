@@ -1,6 +1,6 @@
 {
   "id": "no.easee",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "brandColor": "#323232",
   "compatibility": ">=3.0.0",
   "sdk": 2,
@@ -143,17 +143,7 @@
               "value": 10,
               "min": 5,
               "max": 3600
-            },
-            {
-              "id": "refresh_status_charger",
-              "type": "number",
-              "label": {
-                "en": "Refresh from charger (minutes)"
-              },
-              "value": 5,
-              "min": 1,
-              "max": 1440
-            }          
+            }
           ]
         },
         {

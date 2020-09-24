@@ -1,4 +1,7 @@
 {
+    "0.9.4": {
+        "en": "Removed possibility to force charger to refresh all properties"
+    },
     "0.9.3": {
         "en": "New action for enabling and disabling the charger"
     },
