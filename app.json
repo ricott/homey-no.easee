@@ -317,6 +317,8 @@
               {"id": "Standby", "label": {"en": "Standby"}},
               {"id": "Paused", "label": {"en": "Paused"}},
               {"id": "Charging", "label": {"en": "Charging"}},
+              {"id": "Completed", "label": {"en": "Completed"}},
+              {"id": "Error", "label": {"en": "Error"}},              
               {"id": "Car connected", "label": {"en": "Car connected"}}
             ]
           }
