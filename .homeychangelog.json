@@ -1,4 +1,7 @@
 {
+    "0.9.6": {
+        "en": "Added missing statuses in condition"
+    },
     "0.9.5": {
         "en": "Added missing enumerations from Easee new public docs"
     },
