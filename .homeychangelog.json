@@ -1,4 +1,7 @@
 {
+    "0.9.5": {
+        "en": "Added missing enumerations from Easee new public docs"
+    },
     "0.9.4": {
         "en": "Removed possibility to force charger to refresh all properties"
     },
