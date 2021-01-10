@@ -25,7 +25,7 @@ describe('Easee', function () {
             let tokens = await connectionManager.getTokens(config.credentials.userName, config.credentials.password);
             let easee = new EaseeCharger(tokens);
             let chargers = await easee.getChargers();
-            assert.equal(chargers.length, 2);
+            assert.strictEqual(chargers.length, 2);
         });
     });
 
@@ -34,7 +34,7 @@ describe('Easee', function () {
             let tokens = await connectionManager.getTokens(config.credentials.userName, config.credentials.password);
             let easee = new EaseeCharger(tokens);
             let chargerConfig = await easee.getChargerConfig(config.charger);
-            assert.equal(chargerConfig.isEnabled, true);
+            assert.strictEqual(chargerConfig.isEnabled, true);
         });
     });
 
@@ -43,7 +43,7 @@ describe('Easee', function () {
             let tokens = await connectionManager.getTokens(config.credentials.userName, config.credentials.password);
             let easee = new EaseeCharger(tokens);
             let chargerDetails = await easee.getChargerDetails(config.charger);
-            assert.equal(chargerDetails.serialNumber, config.charger);
+            assert.strictEqual(chargerDetails.serialNumber, config.charger);
         });
     });
     
@@ -53,7 +53,7 @@ describe('Easee', function () {
             let easee = new EaseeCharger(tokens);
             let chargerState = await easee.getChargerState(config.charger);
             //console.log(chargerState);
-            assert.equal((chargerState.voltage>200), true);
+            assert.strictEqual((chargerState.voltage>200), true);
         });
     });
     
@@ -62,7 +62,37 @@ describe('Easee', function () {
             let tokens = await connectionManager.getTokens(config.credentials.userName, config.credentials.password);
             let easee = new EaseeCharger(tokens);
             let chargerSite = await easee.getSiteInfo(config.charger);
-            assert.equal(chargerSite.ratedCurrent, 25);
+            assert.strictEqual(chargerSite.ratedCurrent, 25);
+        });
+    });
+
+    describe('#getCurrentMonthChargekWh', function () {
+        it('config', async () => {
+            let tokens = await connectionManager.getTokens(config.credentials.userName, config.credentials.password);
+            let easee = new EaseeCharger(tokens);
+            let chargerConsumption = await easee.getCurrentMonthChargekWh(config.charger);
+            //console.log(chargerConsumption);
+            assert.strictEqual((isNaN(chargerConsumption) === false), true);
+        });
+    });
+
+    describe('#getLastChargeSessionkWh', function () {
+        it('config', async () => {
+            let tokens = await connectionManager.getTokens(config.credentials.userName, config.credentials.password);
+            let easee = new EaseeCharger(tokens);
+            let chargerSession = await easee.getLastChargeSessionkWh(config.charger);
+            //console.log(chargerSession);
+            assert.strictEqual((isNaN(chargerSession) === false), true);
+        });
+    });
+
+    describe('#getLast30DaysChargekWh', function () {
+        it('config', async () => {
+            let tokens = await connectionManager.getTokens(config.credentials.userName, config.credentials.password);
+            let easee = new EaseeCharger(tokens);
+            let chargerConsumption = await easee.getLast30DaysChargekWh(config.charger);
+            //console.log(chargerConsumption);
+            assert.strictEqual((isNaN(chargerConsumption) === false), true);
         });
     });
 

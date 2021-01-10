@@ -27,6 +27,8 @@ class ChargerDevice extends Homey.Device {
             this.storeCredentialsEncrypted(this.getStoreValue('username'), this.getStoreValue('password'));
         }
 
+        this.setupCapabilities();
+
         let self = this;
         self.getDriver().getTokens(self.getUsername(), self.getPassword())
             .then(function (tokens) {
@@ -34,12 +36,29 @@ class ChargerDevice extends Homey.Device {
                 self.updateChargerConfig();
                 self.updateChargerState();
                 self.updateChargerSiteInfo();
+                self.updateChargerStatistics();
 
                 self._initilializeTimers();
                 self._initializeEventListeners();
             }).catch(reason => {
                 self.log(reason);
             });
+    }
+
+    setupCapabilities() {
+        this.log('Setting up capabilities');
+        //Device should have capability
+        let capability = 'meter_power';
+        if (!this.hasCapability(capability)) {
+            this.log(`Adding missing capability '${capability}'`);
+            this.addCapability(capability);
+        }
+
+        capability = 'measure_charge';
+        if (!this.hasCapability(capability)) {
+            this.log(`Adding missing capability '${capability}'`);
+            this.addCapability(capability);
+        }
     }
 
     _initializeEventListeners() {
@@ -117,6 +136,17 @@ class ChargerDevice extends Homey.Device {
             });
     }
 
+    updateChargerStatistics() {
+        let self = this;
+        self.log('Getting charger statistics');
+        self.charger.api.getLast30DaysChargekWh(self.charger.id)
+            .then(function (last30DayskWh) {
+                self._updateProperty('measure_charge', last30DayskWh);
+            }).catch(reason => {
+                self.error(reason);
+            });
+    }
+
     updateChargerSiteInfo() {
         let self = this;
         self.log('Getting charger site info');
@@ -167,6 +197,8 @@ class ChargerDevice extends Homey.Device {
                 self._updateProperty('measure_voltage', Math.round(state.voltage));
                 self._updateProperty('measure_power', Math.round(state.totalPower * 1000));
                 self._updateProperty('measure_current.offered', state.outputCurrent);
+                //Last charge session kWh
+                self._updateProperty('meter_power', state.sessionEnergy);
 
                 let inCurrentT2 = Math.round((state.inCurrentT2 + Number.EPSILON) * 100) / 100;
                 let inCurrentT3 = Math.round((state.inCurrentT3 + Number.EPSILON) * 100) / 100;
@@ -264,6 +296,11 @@ class ChargerDevice extends Homey.Device {
         this.pollIntervals.push(setInterval(() => {
             this.updateChargerState();
         }, 1000 * this.refresh_status_cloud));
+
+        //Update last 30 days kWh every 30 mins
+        this.pollIntervals.push(setInterval(() => {
+            this.updateChargerStatistics();
+        }, 60 * 1000 * 30));
 
         //Refresh charger config, once per 24 hours
         this.pollIntervals.push(setInterval(() => {

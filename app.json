@@ -1,6 +1,6 @@
 {
   "id": "no.easee",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "brandColor": "#323232",
   "compatibility": ">=3.0.0",
   "sdk": 2,
@@ -98,6 +98,20 @@
       "getable": true,
       "setable": false,
       "icon": "/assets/phase.svg"
+    },
+    "measure_charge": {
+      "type": "number",
+      "title": {
+        "en": "Last 30 days total"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/last_month_charge.svg",
+      "decimals": 2,
+      "units": {
+        "en": "kWh"
+      }
     }
   },
   "drivers": [
@@ -118,12 +132,19 @@
         "measure_voltage",
         "measure_current.offered",
         "current_used",
-        "threePhase"
+        "threePhase",
+        "meter_power",
+        "measure_charge"
       ],
       "capabilitiesOptions": {
         "measure_current.offered": {
           "title": {
             "en": "Current allocated"
+          }
+        },
+        "meter_power": {
+          "title": {
+            "en": "Last charge session"
           }
         }
       },

@@ -1,4 +1,7 @@
 {
+    "0.9.7": {
+        "en": "Added last charge session kWh and last 30 days kWh capabilities"
+    },
     "0.9.6": {
         "en": "Added missing statuses in condition"
     },
