@@ -1,4 +1,7 @@
 {
+    "0.9.8": {
+        "en": "Added last month kWh usage, and settings to enable/disable statistics fields"
+    },
     "0.9.7": {
         "en": "Added last charge session kWh and last 30 days kWh capabilities"
     },

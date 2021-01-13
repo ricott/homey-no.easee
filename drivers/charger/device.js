@@ -13,6 +13,8 @@ class ChargerDevice extends Homey.Device {
 
         this.pollIntervals = [];
         this.refresh_status_cloud = this.getSettings().refresh_status_cloud || 10;
+        this.showLast30daysStats = this.getSettings().showLast30daysStats;
+        this.showLastMonthStats = this.getSettings().showLastMonthStats;
 
         this.charger = {
             id: this.getData().id,
@@ -55,9 +57,21 @@ class ChargerDevice extends Homey.Device {
         }
 
         capability = 'measure_charge';
-        if (!this.hasCapability(capability)) {
-            this.log(`Adding missing capability '${capability}'`);
+        if (!this.hasCapability(capability) && this.showLast30daysStats) {
+            this.log(`Adding capability '${capability}'`);
             this.addCapability(capability);
+        } else if (this.hasCapability(capability) && !this.showLast30daysStats) {
+            this.log(`Removing capability '${capability}'`);
+            this.removeCapability(capability);
+        }
+
+        capability = 'measure_charge.last_month';
+        if (!this.hasCapability(capability) && this.showLastMonthStats) {
+            this.log(`Adding capability '${capability}'`);
+            this.addCapability(capability);
+        } else if (this.hasCapability(capability) && !this.showLastMonthStats) {
+            this.log(`Removing capability '${capability}'`);
+            this.removeCapability(capability);
         }
     }
 
@@ -139,12 +153,23 @@ class ChargerDevice extends Homey.Device {
     updateChargerStatistics() {
         let self = this;
         self.log('Getting charger statistics');
-        self.charger.api.getLast30DaysChargekWh(self.charger.id)
-            .then(function (last30DayskWh) {
-                self._updateProperty('measure_charge', last30DayskWh);
-            }).catch(reason => {
-                self.error(reason);
-            });
+        if (self.hasCapability('measure_charge')) {
+            self.charger.api.getLast30DaysChargekWh(self.charger.id)
+                .then(function (last30DayskWh) {
+                    self._updateProperty('measure_charge', last30DayskWh);
+                }).catch(reason => {
+                    self.error(reason);
+                });
+        }
+
+        if (self.hasCapability('measure_charge.last_month')) {
+            self.charger.api.getLastMonthChargekWh(self.charger.id)
+                .then(function (lastMonthkWh) {
+                    self._updateProperty('measure_charge.last_month', lastMonthkWh);
+                }).catch(reason => {
+                    self.error(reason);
+                });
+        }
     }
 
     updateChargerSiteInfo() {
@@ -360,16 +385,32 @@ class ChargerDevice extends Homey.Device {
     }
 
     async onSettings(oldSettings, newSettings, changedKeysArr) {
-        let change = false;
+        let timeChanged = false;
+        let fieldsChanged = false;
 
         if (changedKeysArr.indexOf("refresh_status_cloud") > -1) {
             this.log('Refresh cloud value was change to:', newSettings.refresh_status_cloud);
             this.refresh_status_cloud = newSettings.refresh_status_cloud;
-            change = true;
+            timeChanged = true;
         }
 
-        if (change) {
+        if (changedKeysArr.indexOf("showLast30daysStats") > -1) {
+            this.log('showLast30daysStats changed to:', newSettings.showLast30daysStats);
+            this.showLast30daysStats = newSettings.showLast30daysStats;
+            fieldsChanged = true;
+        }
+        if (changedKeysArr.indexOf("showLastMonthStats") > -1) {
+            this.log('showLastMonthStats changed to:', newSettings.showLastMonthStats);
+            this.showLastMonthStats = newSettings.showLastMonthStats;
+            fieldsChanged = true;
+        }
+
+        if (timeChanged) {
             this._reinitializeTimers();
+        }
+
+        if (fieldsChanged) {
+            this.setupCapabilities();
         }
     }
 }

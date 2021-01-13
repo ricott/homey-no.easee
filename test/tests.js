@@ -66,11 +66,11 @@ describe('Easee', function () {
         });
     });
 
-    describe('#getCurrentMonthChargekWh', function () {
+    describe('#getLastMonthChargekWh', function () {
         it('config', async () => {
             let tokens = await connectionManager.getTokens(config.credentials.userName, config.credentials.password);
             let easee = new EaseeCharger(tokens);
-            let chargerConsumption = await easee.getCurrentMonthChargekWh(config.charger);
+            let chargerConsumption = await easee.getLastMonthChargekWh(config.charger);
             //console.log(chargerConsumption);
             assert.strictEqual((isNaN(chargerConsumption) === false), true);
         });

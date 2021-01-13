@@ -1,6 +1,6 @@
 {
   "id": "no.easee",
-  "version": "0.9.7",
+  "version": "0.9.8",
   "brandColor": "#323232",
   "compatibility": ">=3.0.0",
   "sdk": 2,
@@ -102,7 +102,7 @@
     "measure_charge": {
       "type": "number",
       "title": {
-        "en": "Last 30 days total"
+        "en": "Last 30 days"
       },
       "getable": true,
       "setable": false,
@@ -134,7 +134,8 @@
         "current_used",
         "threePhase",
         "meter_power",
-        "measure_charge"
+        "measure_charge",
+        "measure_charge.last_month"
       ],
       "capabilitiesOptions": {
         "measure_current.offered": {
@@ -145,6 +146,11 @@
         "meter_power": {
           "title": {
             "en": "Last charge session"
+          }
+        },
+        "measure_charge.last_month": {
+          "title": {
+            "en": "Last month"
           }
         }
       },
@@ -164,6 +170,22 @@
               "value": 10,
               "min": 5,
               "max": 3600
+            },
+            {
+              "id": "showLast30daysStats",
+              "type": "checkbox",
+              "label": {
+                "en": "Show last 30 days kWh capability"
+              },
+              "value": true
+            },
+            {
+              "id": "showLastMonthStats",
+              "type": "checkbox",
+              "label": {
+                "en": "Show last month kWh capability"
+              },
+              "value": true
             }
           ]
         },
