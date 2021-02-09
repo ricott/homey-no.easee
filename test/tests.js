@@ -9,7 +9,6 @@ var connectionManager = null;
 
 describe('Easee', function () {
 
-
     before(function () {
         // runs once before the first test in this block
         connectionManager = new ConnectionManager();
@@ -23,6 +22,7 @@ describe('Easee', function () {
     describe('#getChargers', function () {
         it('should return 2 of them', async () => {
             let tokens = await connectionManager.getTokens(config.credentials.userName, config.credentials.password);
+            console.log(tokens);
             let easee = new EaseeCharger(tokens);
             let chargers = await easee.getChargers();
             assert.strictEqual(chargers.length, 2);
@@ -75,7 +75,7 @@ describe('Easee', function () {
             assert.strictEqual((isNaN(chargerConsumption) === false), true);
         });
     });
-
+/*
     describe('#getLastChargeSessionkWh', function () {
         it('config', async () => {
             let tokens = await connectionManager.getTokens(config.credentials.userName, config.credentials.password);
@@ -95,6 +95,18 @@ describe('Easee', function () {
             assert.strictEqual((isNaN(chargerConsumption) === false), true);
         });
     });
+*/
+/*
+    describe('#setDynamicCurrent', function () {
+        it('config', async () => {
+            let tokens = await connectionManager.getTokens(config.credentials.userName, config.credentials.password);
+            let easee = new EaseeCharger(tokens);
+            let result = await easee.setDynamicCurrent(14652, 724, 15);
+            console.log(result);
+            //assert.strictEqual((isNaN(chargerConsumption) === false), true);
+        });
+    });
+*/
 
 });
 

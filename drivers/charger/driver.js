@@ -19,7 +19,7 @@ class ChargerDriver extends Homey.Driver {
   getTokens(username, password) {
     return this.connectionManager.getTokens(username, password)
       .then(function (tokens) {
-        return tokens;
+        return Object.freeze(tokens);
       }).catch(reason => {
         return Promise.reject(reason);
       });
@@ -58,9 +58,13 @@ class ChargerDriver extends Homey.Driver {
     //Register actions
     triggers = [
       'chargerControl',
-      'chargerCurrentControl',
+      'circuitCurrentControl',
+      'circuitCurrentControlPerPhase',
       'toggleCharger',
-      'chargerState'
+      'chargerState',
+      'enableIdleCurrent',
+      'lockCablePermanently',
+      'ledStripBrightness'
     ];
     this._registerFlow('action', triggers, Homey.FlowCardAction);
 
@@ -114,18 +118,36 @@ class ChargerDriver extends Homey.Driver {
       }
     });
 
-    this.flowCards['action.chargerCurrentControl'].registerRunListener((args, state) => {
-      this.log('----- Charger current control action triggered');
+    this.flowCards['action.circuitCurrentControlPerPhase'].registerRunListener((args, state) => {
+      this.log('----- Charger Circuit current control per phase action triggered');
+      this.log(`Current: '${args.current1}/${args.current2}/${args.current3}' amps`);
+      //Don't set charge current to higher than max value
+      let current1 = Math.min(args.current1, args.device.getSettings().chargerFuse);
+      let current2 = Math.min(args.current2, args.device.getSettings().chargerFuse);
+      let current3 = Math.min(args.current3, args.device.getSettings().chargerFuse);
+      this.log(`Actual used: '${current1}/${current2}/${current3}' Amps`);
+
+      return args.device.setDynamicCurrentPerPhase(current1, current2, current3)
+        .then(function (result) {
+          return Promise.resolve(true);
+        }).catch(reason => {
+          this.log(reason);
+          return Promise.reject('Failed to set dynamic Circuit current');
+        });
+    });
+
+    this.flowCards['action.circuitCurrentControl'].registerRunListener((args, state) => {
+      this.log('----- Charger Circuit current control action triggered');
       this.log(`Current: '${args.current}' amps`);
       //Don't set charge current to higher than max value
       let current = Math.min(args.current, args.device.getSettings().chargerFuse);
       this.log(`Actual used: '${current}' Amps`);
 
-      return args.device.setDynamicCurrent(current)
+      return args.device.setDynamicCurrentPerPhase(current, current, current)
         .then(function (result) {
           return Promise.resolve(true);
         }).catch(reason => {
-          return Promise.reject('Failed to set dynamic charger current');
+          return Promise.reject('Failed to set dynamic Circuit current');
         });
     });
 
@@ -134,22 +156,54 @@ class ChargerDriver extends Homey.Driver {
       this.log(`State: '${args.chargerState}'`);
 
       let errMsg = `Failed to change state to '${args.chargerState}'`;
-      if (args.chargerState === 'true') {
-        return args.device.setChargerState(true)
-          .then(function (result) {
-            return Promise.resolve(true);
-          }).catch(reason => {
-            return Promise.reject(errMsg);
-          });
+      let chargerState = (args.chargerState === 'true') ? true : false;
+      return args.device.setChargerState(chargerState)
+        .then(function (result) {
+          return Promise.resolve(true);
+        }).catch(reason => {
+          return Promise.reject(errMsg);
+        });
+    });
 
-      } else if (args.chargerState === 'false') {
-        return args.device.setChargerState(false)
-          .then(function (result) {
-            return Promise.resolve(true);
-          }).catch(reason => {
-            return Promise.reject(errMsg);
-          });
-      }
+    this.flowCards['action.enableIdleCurrent'].registerRunListener((args, state) => {
+      this.log('----- Charger idle current control action triggered');
+      this.log(`State: '${args.idleCurrent}'`);
+
+      let errMsg = `Failed to change idle current to '${args.idleCurrent}'`;
+      let idleCurrent = (args.idleCurrent === 'true') ? true : false;
+      return args.device.enableIdleCurrent(idleCurrent)
+        .then(function (result) {
+          return Promise.resolve(true);
+        }).catch(reason => {
+          return Promise.reject(errMsg);
+        });
+    });
+
+    this.flowCards['action.lockCablePermanently'].registerRunListener((args, state) => {
+      this.log('----- Charger lock cable permanently control action triggered');
+      this.log(`State: '${args.lockCable}'`);
+
+      let errMsg = `Failed to change lock cable permanently to '${args.lockCable}'`;
+      let lockCable = (args.lockCable === 'true') ? true : false;
+      return args.device.lockCablePermanently(lockCable)
+        .then(function (result) {
+          return Promise.resolve(true);
+        }).catch(reason => {
+          return Promise.reject(errMsg);
+        });
+    });
+
+    this.flowCards['action.ledStripBrightness'].registerRunListener((args, state) => {
+      this.log('----- Charger led brightness control action triggered');
+      this.log(`Brightness: '${args.ledBrightness}'`);
+
+      let errMsg = `Failed to change brightness to '${args.ledBrightness}'`;
+      return args.device.ledStripBrightness(args.ledBrightness)
+        .then(function (result) {
+          return Promise.resolve(true);
+        }).catch(reason => {
+          return Promise.reject(errMsg);
+        });
     });
   }
 
@@ -174,13 +228,14 @@ class ChargerDriver extends Homey.Driver {
 
   onPair(socket) {
     let devices = [];
+    var self = this;
 
     socket.on('login', (data, callback) => {
       if (data.username === '' || data.password === '') {
         return callback(null, false);
       }
 
-      this.getTokens(data.username, data.password)
+      self.getTokens(data.username, data.password)
         .then(function (tokens) {
           let easee = new EaseeCharger(tokens);
           easee.getChargers().then(function (chargers) {
@@ -205,14 +260,13 @@ class ChargerDriver extends Homey.Driver {
             callback(null, true);
 
           }).catch(reason => {
-            console.error(reason);
+            self.error(reason);
             callback(null, false);
           });
         }).catch(reason => {
-          console.error(reason);
-          callback(null, false);
+          self.error(reason);
+          callback(reason);
         });
-
     });
 
     socket.on('list_devices', (data, callback) => {

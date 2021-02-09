@@ -1,6 +1,6 @@
 {
   "id": "no.easee",
-  "version": "0.9.8",
+  "version": "0.9.9",
   "brandColor": "#323232",
   "compatibility": ">=3.0.0",
   "sdk": 2,
@@ -45,14 +45,14 @@
     "small": "/assets/images/small.png"
   },
   "capabilities": {
-    "connected": {
+    "enabled": {
       "title": {
-        "en": "Online"
+        "en": "Enabled"
       },
       "type": "boolean",
       "getable": true,
       "setable": false,
-      "icon": "/assets/connected.svg"
+      "icon": "/assets/enabled.svg"
     },
     "charger_status": {
       "type": "string",
@@ -66,6 +66,7 @@
     },
     "current_offered": {
       "type": "number",
+      "decimals": 2,
       "title": {
         "en": "Current offered"
       },
@@ -76,19 +77,6 @@
       "setable": false,
       "uiComponent": "sensor",
       "icon": "/assets/max_charge.svg"
-    },
-    "current_used": {
-      "type": "number",
-      "title": {
-        "en": "Current used"
-      },
-      "units": {
-        "en": "A"
-      },
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor",
-      "icon": "/assets/charger.svg"
     },
     "threePhase": {
       "title": {
@@ -101,6 +89,7 @@
     },
     "measure_charge": {
       "type": "number",
+      "decimals": 2,
       "title": {
         "en": "Last 30 days"
       },
@@ -108,7 +97,6 @@
       "setable": false,
       "uiComponent": "sensor",
       "icon": "/assets/last_month_charge.svg",
-      "decimals": 2,
       "units": {
         "en": "kWh"
       }
@@ -127,20 +115,38 @@
       },
       "capabilities": [
         "charger_status",
-        "connected",
-        "measure_power",
-        "measure_voltage",
+        "enabled",
         "measure_current.offered",
-        "current_used",
-        "threePhase",
+        "measure_power",
+        "measure_current.p1",
+        "measure_current.p2",
+        "measure_current.p3",
+        "measure_voltage",
         "meter_power",
+        "measure_charge.lifetime",
         "measure_charge",
-        "measure_charge.last_month"
+        "measure_charge.last_month",
+        "button.organize"
       ],
       "capabilitiesOptions": {
         "measure_current.offered": {
           "title": {
             "en": "Current allocated"
+          }
+        },
+        "measure_current.p1": {
+          "title": {
+            "en": "Current P1"
+          }
+        },
+        "measure_current.p2": {
+          "title": {
+            "en": "Current P2"
+          }
+        },
+        "measure_current.p3": {
+          "title": {
+            "en": "Current P3"
           }
         },
         "meter_power": {
@@ -152,7 +158,21 @@
           "title": {
             "en": "Last month"
           }
-        }
+        },
+        "measure_charge.lifetime": {
+          "title": {
+            "en": "Lifetime"
+          }
+        },
+        "button.organize": { 
+          "maintenanceAction": true,
+          "title": { 
+             "en": "Reorder capabilities"
+          },
+          "desc": { 
+             "en": "Reorder capabilities in the intended order."
+          }
+       }
       },
       "settings": [
         {
@@ -162,22 +182,12 @@
           },
           "children": [
             {
-              "id": "refresh_status_cloud",
-              "type": "number",
-              "label": {
-                "en": "Refresh from cloud (seconds)"
-              },
-              "value": 10,
-              "min": 5,
-              "max": 3600
-            },
-            {
               "id": "showLast30daysStats",
               "type": "checkbox",
               "label": {
                 "en": "Show last 30 days kWh capability"
               },
-              "value": true
+              "value": false
             },
             {
               "id": "showLastMonthStats",
@@ -185,7 +195,7 @@
               "label": {
                 "en": "Show last month kWh capability"
               },
-              "value": true
+              "value": false
             }
           ]
         },
@@ -196,10 +206,10 @@
           },
           "children": [
             {
-              "id": "version",
+              "id": "detectedPowerGridType",
               "type": "label",
               "label": {
-                "en": "Firmware version"
+                "en": "Power grid type"
               },
               "value": ""
             },
@@ -212,10 +222,26 @@
               "value": ""
             },
             {
-              "id": "chargerFuse",
+              "id": "circuitFuse",
               "type": "label",
               "label": {
-                "en": "Charger fuse (A)"
+                "en": "Circuit fuse (A)"
+              },
+              "value": ""
+            },
+            {
+              "id": "offlineChargingMode",
+              "type": "label",
+              "label": {
+                "en": "Allow offline charging"
+              },
+              "value": ""
+            },
+            {
+              "id": "maxOfflineCurrent",
+              "type": "label",
+              "label": {
+                "en": "Max current when offline (A)"
               },
               "value": ""
             },
@@ -224,6 +250,14 @@
               "type": "label",
               "label": {
                 "en": "Phase mode"
+              },
+              "value": ""
+            },
+            {
+              "id": "lockCablePermanently",
+              "type": "label",
+              "label": {
+                "en": "Cable locked permanently"
               },
               "value": ""
             },
@@ -242,6 +276,22 @@
                 "en": "Local node type"
               },
               "value": ""
+            },
+            {
+              "id": "smartCharging",
+              "type": "label",
+              "label": {
+                "en": "Smart charging"
+              },
+              "value": ""
+            },
+            {
+              "id": "version",
+              "type": "label",
+              "label": {
+                "en": "Firmware version"
+              },
+              "value": ""
             }
           ]
         },
@@ -252,18 +302,10 @@
           },
           "children": [
             {
-              "id": "state",
+              "id": "reasonForNoCurrent",
               "type": "textarea",
               "label": {
-                "en": "State"
-              },
-              "value": ""
-            },
-            {
-              "id": "config",
-              "type": "textarea",
-              "label": {
-                "en": "Config"
+                "en": "Reason for no current"
               },
               "value": ""
             },
@@ -272,6 +314,14 @@
               "type": "textarea",
               "label": {
                 "en": "Site info"
+              },
+              "value": ""
+            },
+            {
+              "id": "commandResponse",
+              "type": "textarea",
+              "label": {
+                "en": "Last command response"
               },
               "value": ""
             },
@@ -372,7 +422,7 @@
       {
         "id": "toggleCharger",
         "title": {
-          "en": "Toggle charging"
+          "en": "Toggle Charger state"
         },
         "args": [
           {
@@ -385,7 +435,7 @@
       {
         "id": "chargerControl",
         "title": {
-          "en": "Control charger"
+          "en": "Control Charger"
         },
         "args": [
           {
@@ -409,9 +459,9 @@
         ]
       },
       {
-        "id":"chargerCurrentControl",
+        "id":"circuitCurrentControl",
         "title":{
-          "en":"Set charger current"
+          "en":"Set dynamic Circuit current"
         },
         "args": [
           {
@@ -434,9 +484,58 @@
         ]
       },
       {
+        "id":"circuitCurrentControlPerPhase",
+        "title":{
+          "en":"Set dynamic Circuit current, per phase"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter":"driver_id=charger"
+          },
+          {
+            "name": "current1",
+            "type": "range",
+            "title": {
+                "en": "Current P1"
+            },
+            "min": 0,
+            "max": 32,
+            "step": 1,
+            "label": " Amps",
+            "labelDecimals": 0
+          },
+          {
+            "name": "current2",
+            "type": "range",
+            "title": {
+                "en": "Current P2"
+            },
+            "min": 0,
+            "max": 32,
+            "step": 1,
+            "label": " Amps",
+            "labelDecimals": 0
+          },
+          {
+            "name": "current3",
+            "type": "range",
+            "title": {
+                "en": "Current P3"
+            },
+            "min": 0,
+            "max": 32,
+            "step": 1,
+            "label": " Amps",
+            "labelDecimals": 0
+          }
+        ]
+      },
+      {
         "id": "chargerState",
         "title": {
-          "en": "Set charger state"
+          "en": "Set Charger state"
         },
         "args": [
           {
@@ -454,6 +553,79 @@
               {"id": "true", "label": {"en": "Enabled"}},
               {"id": "false", "label": {"en": "Disabled"}}
             ]
+          }
+        ]
+      },
+      {
+        "id": "enableIdleCurrent",
+        "title": {
+          "en": "Set Charger idle current state"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=charger"
+          },
+          {
+            "name": "idleCurrent",
+            "type": "dropdown",
+            "title": {
+              "en": "Idle current"
+            },
+            "values": [
+              {"id": "true", "label": {"en": "Enabled"}},
+              {"id": "false", "label": {"en": "Disabled"}}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "lockCablePermanently",
+        "title": {
+          "en": "Set permanent cable lock"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=charger"
+          },
+          {
+            "name": "lockCable",
+            "type": "dropdown",
+            "title": {
+              "en": "Permanent cable lock"
+            },
+            "values": [
+              {"id": "true", "label": {"en": "Enabled"}},
+              {"id": "false", "label": {"en": "Disabled"}}
+            ]
+          }
+        ]
+      },
+      {
+        "id":"ledStripBrightness",
+        "title":{
+          "en":"Set Charger led strip brightness"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter":"driver_id=charger"
+          },
+          {
+            "name": "ledBrightness",
+            "type": "range",
+            "title": {
+                "en": "Brightness"
+            },
+            "min": 0,
+            "max": 100,
+            "step": 1,
+            "label": " %",
+            "labelDecimals": 0
           }
         ]
       }

@@ -9,7 +9,11 @@ Conditions
 Actions
 - Control charger (Start/Stop/Pause/Resume)
 - Toggle charger action (Start/Stop/Pause/Resume)
-- Set charger current (amps)
+- Set dynamic circuit current (amps)
+- Set dynamic circuit current, per phase (amps)
 - Set charger state (Enabled/Disabled)
+- Set Charger idle current state
+- Set permanent cable lock
+- Set Charger led strip brightness
 
 For more information about the app and the possibility to get support please visit the forum link in section below.

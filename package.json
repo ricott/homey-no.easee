@@ -7,11 +7,11 @@
     "lib": "lib"
   },
   "dependencies": {
-    "async-mutex": "^0.2.6",
+    "@microsoft/signalr": "^5.0.2",
+    "async-mutex": "^0.3.0",
     "events": "^3.2.0",
-    "http.min": "^2.0.1"
+    "http.min": "^2.1.0"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "mocha"
   },
