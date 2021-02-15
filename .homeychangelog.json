@@ -1,4 +1,7 @@
 {
+    "1.0.0": {
+        "en": "Major rewrite of the app to use the Easee streaming API. New capabilities and actions added."
+    },
     "0.9.9": {
         "en": "Major rewrite of the app to use the Easee streaming API. New capabilities and actions added."
     },

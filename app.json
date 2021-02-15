@@ -1,6 +1,6 @@
 {
   "id": "no.easee",
-  "version": "0.9.9",
+  "version": "1.0.0",
   "brandColor": "#323232",
   "compatibility": ">=3.0.0",
   "sdk": 2,
@@ -122,8 +122,8 @@
         "measure_current.p2",
         "measure_current.p3",
         "measure_voltage",
+        "meter_power.lastCharge",
         "meter_power",
-        "measure_charge.lifetime",
         "measure_charge",
         "measure_charge.last_month",
         "button.organize"
@@ -149,19 +149,19 @@
             "en": "Current P3"
           }
         },
-        "meter_power": {
+        "meter_power.lastCharge": {
           "title": {
             "en": "Last charge session"
+          }
+        },
+        "meter_power": {
+          "title": {
+            "en": "Lifetime"
           }
         },
         "measure_charge.last_month": {
           "title": {
             "en": "Last month"
-          }
-        },
-        "measure_charge.lifetime": {
-          "title": {
-            "en": "Lifetime"
           }
         },
         "button.organize": { 

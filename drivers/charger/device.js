@@ -16,8 +16,8 @@ const deviceCapabilitesList = ['charger_status',
     'measure_current.p2',
     'measure_current.p3',
     'measure_voltage',
+    'meter_power.lastCharge',
     'meter_power',
-    'measure_charge.lifetime',
     'measure_charge',
     'measure_charge.last_month'];
 
@@ -30,13 +30,14 @@ class ChargerDevice extends Homey.Device {
         this.showLast30daysStats = this.getSettings().showLast30daysStats;
         this.showLastMonthStats = this.getSettings().showLastMonthStats;
 
+        this.setupCapabilities();
+
         this.registerCapabilityListener('button.organize', async () => {
             //Delete all capabilities and then add them in right order
             this.log(`Reorganizing all capabilities to correct order`);
             this.getCapabilities().forEach(capability => {
                 if (capability != 'button.organize') {
-                    this.log(`Removing capability '${capability}'`);
-                    this.removeCapability(capability);
+                    this.removeCapabilityHelper(capability);
                 }
             });
 
@@ -44,13 +45,12 @@ class ChargerDevice extends Homey.Device {
                 deviceCapabilitesList.forEach(capability => {
                     if (capability != 'measure_charge' && capability != 'measure_charge.last_month') {
                         //All other fields should be added
-                        this.log(`Adding capability '${capability}'`);
-                        this.addCapability(capability);
+                        this.addCapabilityHelper(capability);
                     } else if ((capability === 'measure_charge' && this.showLast30daysStats) ||
                         (capability === 'measure_charge.last_month' && this.showLastMonthStats)) {
                         //Add if configured to be shown
                         this.log(`Adding capability based on configuration '${capability}'`);
-                        this.addCapability(capability);
+                        this.addCapabilityHelper(capability);
                     }
                 });
             });
@@ -72,8 +72,6 @@ class ChargerDevice extends Homey.Device {
             this.log(`Storing credentials for user '${this.getStoreValue('username')}'`);
             this.storeCredentialsEncrypted(this.getStoreValue('username'), this.getStoreValue('password'));
         }
-
-        this.setupCapabilities();
 
         let self = this;
         self.getDriver().getTokens(self.getUsername(), self.getPassword())
@@ -105,80 +103,58 @@ class ChargerDevice extends Homey.Device {
         this.charger.stream.close();
     }
 
+    removeCapabilityHelper(capability) {
+        if (this.hasCapability(capability)) {
+            try {
+                this.log(`Remove existing capability '${capability}'`);
+                this.removeCapability(capability);
+            } catch (reason) {
+                this.error(`Failed to removed capability '${capability}'`);
+                this.error(reason);
+            }
+        }
+    }
+    addCapabilityHelper(capability) {
+        if (!this.hasCapability(capability)) {
+            try {
+                this.log(`Adding missing capability '${capability}'`);
+                this.addCapability(capability);
+            } catch (reason) {
+                this.error(`Failed to add capability '${capability}'`);
+                this.error(reason);
+            }
+        }
+    }
+
     setupCapabilities() {
         this.log('Setting up capabilities');
 
         //Add and remove capabilities as part of upgrading a device
-        let capability = 'connected';
-        if (this.hasCapability(capability)) {
-            this.log(`Remove existing capability '${capability}'`);
-            this.removeCapability(capability);
-        }
-        capability = 'enabled';
-        if (!this.hasCapability(capability)) {
-            this.log(`Adding missing capability '${capability}'`);
-            this.addCapability(capability);
-        }
-        capability = 'button.organize';
-        if (!this.hasCapability(capability)) {
-            this.log(`Adding missing capability '${capability}'`);
-            this.addCapability(capability);
-        }
+        this.removeCapabilityHelper('measure_charge.lifetime');
+        this.removeCapabilityHelper('connected');
+        this.removeCapabilityHelper('current_used');
+        this.removeCapabilityHelper('threePhase');
+        
+        this.addCapabilityHelper('enabled');
+        this.addCapabilityHelper('button.organize');
+        this.addCapabilityHelper('measure_current.p1');
+        this.addCapabilityHelper('measure_current.p2');
+        this.addCapabilityHelper('measure_current.p3');
+        this.addCapabilityHelper('meter_power.lastCharge');
+        this.addCapabilityHelper('meter_power');
 
-        capability = 'current_used';
-        if (this.hasCapability(capability)) {
-            this.log(`Remove existing capability '${capability}'`);
-            this.removeCapability(capability);
-        }
-        capability = 'threePhase';
-        if (this.hasCapability(capability)) {
-            this.log(`Remove existing capability '${capability}'`);
-            this.removeCapability(capability);
-        }
-        capability = 'measure_current.p1';
-        if (!this.hasCapability(capability)) {
-            this.log(`Adding missing capability '${capability}'`);
-            this.addCapability(capability);
-        }
-        capability = 'measure_current.p2';
-        if (!this.hasCapability(capability)) {
-            this.log(`Adding missing capability '${capability}'`);
-            this.addCapability(capability);
-        }
-        capability = 'measure_current.p3';
-        if (!this.hasCapability(capability)) {
-            this.log(`Adding missing capability '${capability}'`);
-            this.addCapability(capability);
-        }
-
-        //Device should have capability
-        capability = 'meter_power';
-        if (!this.hasCapability(capability)) {
-            this.log(`Adding missing capability '${capability}'`);
-            this.addCapability(capability);
-        }
-        capability = 'measure_charge.lifetime';
-        if (!this.hasCapability(capability)) {
-            this.log(`Adding missing capability '${capability}'`);
-            this.addCapability(capability);
-        }
-
-        capability = 'measure_charge';
+        let capability = 'measure_charge';
         if (!this.hasCapability(capability) && this.showLast30daysStats) {
-            this.log(`Adding capability '${capability}'`);
-            this.addCapability(capability);
+            this.addCapabilityHelper(capability);
         } else if (this.hasCapability(capability) && !this.showLast30daysStats) {
-            this.log(`Removing capability '${capability}'`);
-            this.removeCapability(capability);
+            this.removeCapabilityHelper(capability);
         }
 
         capability = 'measure_charge.last_month';
         if (!this.hasCapability(capability) && this.showLastMonthStats) {
-            this.log(`Adding capability '${capability}'`);
-            this.addCapability(capability);
+            this.addCapabilityHelper(capability);
         } else if (this.hasCapability(capability) && !this.showLastMonthStats) {
-            this.log(`Removing capability '${capability}'`);
-            this.removeCapability(capability);
+            this.removeCapabilityHelper(capability);
         }
     }
 
@@ -192,6 +168,7 @@ class ChargerDevice extends Homey.Device {
 
     _initializeEventListeners() {
         let self = this;
+        self.log('Setting up event listeners');
         self.charger.stream.on('CommandResponse', data => {
             this.log('Command response received:', data);
 
@@ -250,21 +227,17 @@ class ChargerDevice extends Homey.Device {
                 case 'InCurrent_T5':
                     self._updateProperty('measure_current.p3', data.value);
                     break;
-                //case 'InCurrent_T2':
-                //Current used
-                //self._updateProperty('current_used', data.value);
-                //break;
                 case 'OutputCurrent':
                     //Current allocated
                     self._updateProperty('measure_current.offered', data.value);
                     break;
                 case 'SessionEnergy':
                     //Last charge session kWh
-                    self._updateProperty('meter_power', data.value);
+                    self._updateProperty('meter_power.lastCharge', data.value);
                     break;
                 case 'LifetimeEnergy':
                     //Lifetime kWh
-                    self._updateProperty('measure_charge.lifetime', data.value);
+                    self._updateProperty('meter_power', data.value);
                     break;
                 case 'IsEnabled':
                     //Enabled
@@ -279,8 +252,6 @@ class ChargerDevice extends Homey.Device {
                 default:
                     break;
             }
-
-            //Observation: EnergyPerHour kWh/h ???
         });
     }
 
@@ -569,6 +540,8 @@ class ChargerDevice extends Homey.Device {
             } else {
                 this.setCapabilityValue(key, value);
             }
+        } else {
+            this.log(`Trying to set value for a missing capability: '${key}'`);
         }
     }
 

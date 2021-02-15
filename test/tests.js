@@ -3,6 +3,7 @@
 const EaseeCharger = require('../lib/easee.js');
 const ConnectionManager = require('../lib/connectionManager.js');
 const assert = require('assert');
+const util = require('util');
 var config = require('./config');
 
 var connectionManager = null;
@@ -22,12 +23,23 @@ describe('Easee', function () {
     describe('#getChargers', function () {
         it('should return 2 of them', async () => {
             let tokens = await connectionManager.getTokens(config.credentials.userName, config.credentials.password);
-            console.log(tokens);
+            //console.log(tokens);
             let easee = new EaseeCharger(tokens);
             let chargers = await easee.getChargers();
             assert.strictEqual(chargers.length, 2);
         });
     });
+
+    describe('#getEqualizers', function () {
+        it('should return 0 of them', async () => {
+            let tokens = await connectionManager.getTokens(config.credentials.userName, config.credentials.password);
+            let easee = new EaseeCharger(tokens);
+            let equalizers = await easee.getEqualizers();
+            //console.log(util.inspect(equalizers, {showHidden: false, depth: null}));
+            assert.strictEqual(equalizers.length, 0);
+        });
+    });
+    
 
     describe('#getChargerConfig', function () {
         it('config', async () => {
@@ -39,7 +51,7 @@ describe('Easee', function () {
     });
 
     describe('#getChargerDetails', function () {
-        it('config', async () => {
+        it('serial should match', async () => {
             let tokens = await connectionManager.getTokens(config.credentials.userName, config.credentials.password);
             let easee = new EaseeCharger(tokens);
             let chargerDetails = await easee.getChargerDetails(config.charger);
@@ -48,7 +60,7 @@ describe('Easee', function () {
     });
     
     describe('#getChargerState', function () {
-        it('config', async () => {
+        it('charger voltage should be above 200', async () => {
             let tokens = await connectionManager.getTokens(config.credentials.userName, config.credentials.password);
             let easee = new EaseeCharger(tokens);
             let chargerState = await easee.getChargerState(config.charger);
@@ -58,7 +70,7 @@ describe('Easee', function () {
     });
     
     describe('#getSiteInfo', function () {
-        it('config', async () => {
+        it('main fuse should be 25 amps', async () => {
             let tokens = await connectionManager.getTokens(config.credentials.userName, config.credentials.password);
             let easee = new EaseeCharger(tokens);
             let chargerSite = await easee.getSiteInfo(config.charger);
@@ -67,7 +79,7 @@ describe('Easee', function () {
     });
 
     describe('#getLastMonthChargekWh', function () {
-        it('config', async () => {
+        it('last month charger consumption should be numeric', async () => {
             let tokens = await connectionManager.getTokens(config.credentials.userName, config.credentials.password);
             let easee = new EaseeCharger(tokens);
             let chargerConsumption = await easee.getLastMonthChargekWh(config.charger);
@@ -75,9 +87,10 @@ describe('Easee', function () {
             assert.strictEqual((isNaN(chargerConsumption) === false), true);
         });
     });
+
 /*
     describe('#getLastChargeSessionkWh', function () {
-        it('config', async () => {
+        it('last charge session consumptions should be numeric', async () => {
             let tokens = await connectionManager.getTokens(config.credentials.userName, config.credentials.password);
             let easee = new EaseeCharger(tokens);
             let chargerSession = await easee.getLastChargeSessionkWh(config.charger);
@@ -87,7 +100,7 @@ describe('Easee', function () {
     });
 
     describe('#getLast30DaysChargekWh', function () {
-        it('config', async () => {
+        it('last 30 days charge consumption should be numeric', async () => {
             let tokens = await connectionManager.getTokens(config.credentials.userName, config.credentials.password);
             let easee = new EaseeCharger(tokens);
             let chargerConsumption = await easee.getLast30DaysChargekWh(config.charger);
@@ -98,7 +111,7 @@ describe('Easee', function () {
 */
 /*
     describe('#setDynamicCurrent', function () {
-        it('config', async () => {
+        it('setting dynamic current should not throw an error', async () => {
             let tokens = await connectionManager.getTokens(config.credentials.userName, config.credentials.password);
             let easee = new EaseeCharger(tokens);
             let result = await easee.setDynamicCurrent(14652, 724, 15);
