@@ -1,6 +1,6 @@
 {
   "id": "no.easee",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "brandColor": "#323232",
   "compatibility": ">=3.0.0",
   "sdk": 2,
@@ -330,6 +330,22 @@
               "type": "textarea",
               "label": {
                 "en": "Last API error"
+              },
+              "value": ""
+            },
+            {
+              "id": "streamMessages",
+              "type": "textarea",
+              "label": {
+                "en": "Last stream messages"
+              },
+              "value": ""
+            },
+            {
+              "id": "log",
+              "type": "textarea",
+              "label": {
+                "en": "Log"
               },
               "value": ""
             }

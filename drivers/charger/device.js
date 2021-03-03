@@ -24,7 +24,19 @@ const deviceCapabilitesList = ['charger_status',
 class ChargerDevice extends Homey.Device {
 
     onInit() {
-        this.log(`Easee charger initiated, '${this.getName()}'`);
+        this.charger = {
+            id: this.getData().id,
+            name: this.getName(),
+            siteId: 0,
+            circuitId: 0,
+            tokens: null,
+            stream: null,
+            lastStreamMessageTimestamp: 0,
+            streamMessages: [],
+            log: []
+        };
+
+        this.logMessage(`Easee charger initiated, '${this.getName()}'`);
 
         this.pollIntervals = [];
         this.showLast30daysStats = this.getSettings().showLast30daysStats;
@@ -34,7 +46,7 @@ class ChargerDevice extends Homey.Device {
 
         this.registerCapabilityListener('button.organize', async () => {
             //Delete all capabilities and then add them in right order
-            this.log(`Reorganizing all capabilities to correct order`);
+            this.logMessage(`Reorganizing all capabilities to correct order`);
             this.getCapabilities().forEach(capability => {
                 if (capability != 'button.organize') {
                     this.removeCapabilityHelper(capability);
@@ -49,7 +61,7 @@ class ChargerDevice extends Homey.Device {
                     } else if ((capability === 'measure_charge' && this.showLast30daysStats) ||
                         (capability === 'measure_charge.last_month' && this.showLastMonthStats)) {
                         //Add if configured to be shown
-                        this.log(`Adding capability based on configuration '${capability}'`);
+                        this.logMessage(`Adding capability based on configuration '${capability}'`);
                         this.addCapabilityHelper(capability);
                     }
                 });
@@ -58,18 +70,9 @@ class ChargerDevice extends Homey.Device {
             return Promise.resolve(true);
         });
 
-        this.charger = {
-            id: this.getData().id,
-            name: this.getName(),
-            siteId: 0,
-            circuitId: 0,
-            tokens: null,
-            stream: null
-        };
-
         if (!Homey.ManagerSettings.get(`${this.charger.id}.username`)) {
             //This is a newly added device, lets copy login details to homey settings
-            this.log(`Storing credentials for user '${this.getStoreValue('username')}'`);
+            this.logMessage(`Storing credentials for user '${this.getStoreValue('username')}'`);
             this.storeCredentialsEncrypted(this.getStoreValue('username'), this.getStoreValue('password'));
         }
 
@@ -86,11 +89,49 @@ class ChargerDevice extends Homey.Device {
                 self._initilializeTimers();
                 self._initializeEventListeners();
             }).catch(reason => {
-                self.log(reason);
+                self.logMessage(reason);
+            });
+    }
+
+    logStreamMessage(message) {
+        let now = new Date().toISOString();
+        if (this.charger.streamMessages.length > 9) {
+            //Remove oldest entry
+            this.charger.streamMessages.shift();
+        }
+        //Add new entry
+        this.charger.streamMessages.push(now + '\n' + message + '\n');
+    }
+
+    logMessage(message) {
+        this.log(message);
+        let now = new Date().toISOString();
+        if (this.charger.log.length > 49) {
+            //Remove oldest entry
+            this.charger.log.shift();
+        }
+        //Add new entry
+        this.charger.log.push(now + ' ' + message + '\n');
+    }
+
+    getLoggedStreamMessages() {
+        return this.charger.streamMessages.toString();
+    }
+
+    getLogMessages() {
+        return this.charger.log.toString();
+    }
+
+    updateDebugMessages() {
+        this.setSettings({ streamMessages: this.getLoggedStreamMessages(),
+                            log: this.getLogMessages() })
+            .catch(err => {
+                this.error('Failed to update debug messages', err);
             });
     }
 
     startSignalRStream() {
+        this.logMessage(`Creating and opening SignalR stream, for charger '${this.charger.id}'`);
         let options = {
             accessToken: this.charger.tokens.accessToken,
             chargerId: this.charger.id
@@ -100,13 +141,28 @@ class ChargerDevice extends Homey.Device {
     }
 
     stopSignalRStream() {
+        this.logMessage(`Closing SignalR stream, for charger '${this.charger.id}'`);
         this.charger.stream.close();
+    }
+
+    monitorSignalRStream() {
+        //Stream disconnected or no message in last one hour        
+        if ((new Date().getTime() - this.charger.lastStreamMessageTimestamp.getTime()) > (1000 * 3600) ||
+            this.charger.stream.disconnected()) {
+
+            //Lets start a new connection, after making sure previous is killed
+            this.logMessage(`SignalR stream is disconnected or idle, for charger '${this.charger.id}'`);
+            this.stopSignalRStream();
+            sleep(3000).then(() => {
+                this.startSignalRStream();
+            });
+        }
     }
 
     removeCapabilityHelper(capability) {
         if (this.hasCapability(capability)) {
             try {
-                this.log(`Remove existing capability '${capability}'`);
+                this.logMessage(`Remove existing capability '${capability}'`);
                 this.removeCapability(capability);
             } catch (reason) {
                 this.error(`Failed to removed capability '${capability}'`);
@@ -117,7 +173,7 @@ class ChargerDevice extends Homey.Device {
     addCapabilityHelper(capability) {
         if (!this.hasCapability(capability)) {
             try {
-                this.log(`Adding missing capability '${capability}'`);
+                this.logMessage(`Adding missing capability '${capability}'`);
                 this.addCapability(capability);
             } catch (reason) {
                 this.error(`Failed to add capability '${capability}'`);
@@ -127,14 +183,14 @@ class ChargerDevice extends Homey.Device {
     }
 
     setupCapabilities() {
-        this.log('Setting up capabilities');
+        this.logMessage('Setting up capabilities');
 
         //Add and remove capabilities as part of upgrading a device
         this.removeCapabilityHelper('measure_charge.lifetime');
         this.removeCapabilityHelper('connected');
         this.removeCapabilityHelper('current_used');
         this.removeCapabilityHelper('threePhase');
-        
+
         this.addCapabilityHelper('enabled');
         this.addCapabilityHelper('button.organize');
         this.addCapabilityHelper('measure_current.p1');
@@ -168,7 +224,7 @@ class ChargerDevice extends Homey.Device {
 
     _initializeEventListeners() {
         let self = this;
-        self.log('Setting up event listeners');
+        self.logMessage('Setting up event listeners');
         self.charger.stream.on('CommandResponse', data => {
             this.log('Command response received:', data);
 
@@ -181,81 +237,129 @@ class ChargerDevice extends Homey.Device {
         });
 
         self.charger.stream.on('Observation', data => {
+            //Keep timestamp from last message received
+            self.charger.lastStreamMessageTimestamp = new Date();
+            let property = data.observation;
+            let value = data.value;
+
             switch (data.observation) {
                 case 'SoftwareRelease':
-                    self.updateSetting('version', data.value);
+                    property = 'version';
+                    value = data.value;
+                    self.updateSetting(property, value);
                     break;
                 case 'PhaseMode':
-                    self.updateSetting('phaseMode', enums.decodePhaseMode(data.value));
+                    property = 'phaseMode';
+                    value = enums.decodePhaseMode(data.value);
+                    self.updateSetting(property, value);
                     break;
                 case 'LocalNodeType':
-                    self.updateSetting('nodeType', enums.decodeNodeType(data.value));
+                    property = 'nodeType';
+                    value = enums.decodeNodeType(data.value);
+                    self.updateSetting(property, value);
                     break;
                 case 'EnableIdleCurrent':
-                    self.updateSetting('idleCurrent', data.value ? 'Yes' : 'No');
+                    property = 'idleCurrent';
+                    value = data.value ? 'Yes' : 'No';
+                    self.updateSetting(property, value);
                     break;
                 case 'MaxCurrentOfflineFallback_P1':
-                    self.updateSetting('maxOfflineCurrent', data.value);
+                    property = 'maxOfflineCurrent';
+                    value = data.value;
+                    self.updateSetting(property, value);
                     break;
                 case 'DetectedPowerGridType':
-                    self.updateSetting('detectedPowerGridType', enums.decodePowerGridType(data.value));
+                    property = 'detectedPowerGridType';
+                    value = enums.decodePowerGridType(data.value);
+                    self.updateSetting(property, value);
                     break;
                 case 'OfflineChargingMode':
-                    self.updateSetting('offlineChargingMode', enums.decodeOfflineChargingModeType(data.value));
+                    property = 'offlineChargingMode';
+                    value = enums.decodeOfflineChargingModeType(data.value);
+                    self.updateSetting(property, value);
                     break;
                 case 'LockCablePermanently':
-                    self.updateSetting('lockCablePermanently', data.value ? 'Yes' : 'No');
+                    property = 'lockCablePermanently';
+                    value = data.value ? 'Yes' : 'No';
+                    self.updateSetting(property, value);
                     break;
                 case 'ChargerOpMode':
                     //Status
-                    self._updateProperty('charger_status', enums.decodeChargerMode(data.value));
+                    property = 'charger_status';
+                    value = enums.decodeChargerMode(data.value);
+                    self._updateProperty(property, value);
                     break;
                 case 'TotalPower':
                     //Power
-                    self._updateProperty('measure_power', Math.round(data.value * 1000));
+                    property = 'measure_power';
+                    value = Math.round(data.value * 1000);
+                    self._updateProperty(property, value);
                     break;
                 case 'InVolt_T2_T3':
                     //Voltage
-                    self._updateProperty('measure_voltage', Math.round(data.value));
+                    property = 'measure_voltage';
+                    value = Math.round(data.value);
+                    self._updateProperty(property, value);
                     break;
                 case 'InCurrent_T3':
-                    self._updateProperty('measure_current.p1', data.value);
+                    property = 'measure_current.p1';
+                    value = data.value;
+                    self._updateProperty(property, value);
                     break;
                 case 'InCurrent_T4':
-                    self._updateProperty('measure_current.p2', data.value);
+                    property = 'measure_current.p2';
+                    value = data.value;
+                    self._updateProperty(property, value);
                     break;
                 case 'InCurrent_T5':
-                    self._updateProperty('measure_current.p3', data.value);
+                    property = 'measure_current.p3';
+                    value = data.value;
+                    self._updateProperty(property, value);
                     break;
                 case 'OutputCurrent':
                     //Current allocated
-                    self._updateProperty('measure_current.offered', data.value);
+                    property = 'measure_current.offered';
+                    value = data.value;
+                    self._updateProperty(property, value);
                     break;
                 case 'SessionEnergy':
                     //Last charge session kWh
-                    self._updateProperty('meter_power.lastCharge', data.value);
+                    property = 'meter_power.lastCharge';
+                    value = data.value;
+                    self._updateProperty(property, value);
                     break;
                 case 'LifetimeEnergy':
                     //Lifetime kWh
-                    self._updateProperty('meter_power', data.value);
+                    property = 'meter_power';
+                    value = data.value;
+                    self._updateProperty(property, value);
                     break;
                 case 'IsEnabled':
                     //Enabled
-                    self._updateProperty('enabled', data.value);
+                    property = 'enabled';
+                    value = data.value;
+                    self._updateProperty(property, value);
                     break;
                 case 'SmartCharging':
-                    self.updateSetting('smartCharging', data.value ? 'Yes' : 'No');
+                    property = 'smartCharging';
+                    value = data.value ? 'Yes' : 'No';
+                    self.updateSetting(property, value);
                     break;
                 case 'ReasonForNoCurrent':
-                    self.updateSetting('reasonForNoCurrent', enums.decodeReasonForNoCurrent(data.value));
+                    property = 'reasonForNoCurrent';
+                    value = enums.decodeReasonForNoCurrent(data.value);
+                    self.updateSetting(property, value);
                     break;
                 default:
                     break;
             }
+
+            this.logStreamMessage(`'${property}' : '${value}'`);
         });
     }
 
     logError(error) {
+        this.error(error);
         let message = '';
         if (this.isError(error)) {
             message = error.stack;
@@ -263,7 +367,7 @@ class ChargerDevice extends Homey.Device {
             try {
                 message = JSON.stringify(error, null, "  ");
             } catch (e) {
-                this.log('Failed to stringify object', e);
+                this.error('Failed to stringify object', e);
                 message = error.toString();
             }
         }
@@ -280,7 +384,7 @@ class ChargerDevice extends Homey.Device {
     }
 
     storeCredentialsEncrypted(plainUser, plainPassword) {
-        this.log(`Encrypting credentials for user '${plainUser}'`);
+        this.logMessage(`Encrypting credentials for user '${plainUser}'`);
         Homey.ManagerSettings.set(`${this.charger.id}.username`, this.encryptText(plainUser));
         Homey.ManagerSettings.set(`${this.charger.id}.password`, this.encryptText(plainPassword));
 
@@ -318,34 +422,35 @@ class ChargerDevice extends Homey.Device {
         let self = this;
         self.getDriver().getTokens(self.getUsername(), self.getPassword())
             .then(function (tokens) {
+                if (self.charger.tokens.accessToken != tokens.accessToken) {
+                    self.logMessage('Renewed access token');
+                }
                 self.charger.tokens = tokens;
             }).catch(reason => {
                 self.logError(reason);
-                self.error(reason);
             });
     }
 
     //Info not part of streaming API, refreshed once every 30 mins
     updateChargerStatistics() {
         let self = this;
-        self.log('Getting charger statistics');
         if (self.hasCapability('measure_charge')) {
+            self.logMessage('Getting charger statistics, last 30 days');
             new EaseeCharger(self.charger.tokens).getLast30DaysChargekWh(self.charger.id)
                 .then(function (last30DayskWh) {
                     self._updateProperty('measure_charge', last30DayskWh);
                 }).catch(reason => {
                     self.logError(reason);
-                    self.error(reason);
                 });
         }
 
         if (self.hasCapability('measure_charge.last_month')) {
+            self.logMessage('Getting charger statistics, previous calendar month');
             new EaseeCharger(self.charger.tokens).getLastMonthChargekWh(self.charger.id)
                 .then(function (lastMonthkWh) {
                     self._updateProperty('measure_charge.last_month', lastMonthkWh);
                 }).catch(reason => {
                     self.logError(reason);
-                    self.error(reason);
                 });
         }
     }
@@ -353,7 +458,7 @@ class ChargerDevice extends Homey.Device {
     //Invoked once upon startup of app, considered static information
     updateChargerSiteInfo() {
         let self = this;
-        self.log('Getting charger site info');
+        self.logMessage('Getting charger site info');
         new EaseeCharger(self.charger.tokens).getSiteInfo(self.charger.id)
             .then(function (site) {
 
@@ -370,7 +475,6 @@ class ChargerDevice extends Homey.Device {
 
             }).catch(reason => {
                 self.logError(reason);
-                self.error(reason);
             });
     }
 
@@ -488,7 +592,7 @@ class ChargerDevice extends Homey.Device {
     }
 
     _initilializeTimers() {
-        this.log('Adding timers');
+        this.logMessage('Adding timers');
         //Update last 30 days kWh every 30 mins
         this.pollIntervals.push(setInterval(() => {
             this.updateChargerStatistics();
@@ -501,20 +605,18 @@ class ChargerDevice extends Homey.Device {
 
         //Check that stream is running, if not start new
         this.pollIntervals.push(setInterval(() => {
-            if (this.charger.stream.disconnected()) {
-                //Lets start a new connection, after making sure previous is killed
-                this.log('SignalR stram is disconnected');
-                this.stopSignalRStream();
-                sleep(2000).then(() => {
-                    this.startSignalRStream();
-                });
-            }
+            this.monitorSignalRStream();
+        }, 120 * 1000));
+
+        //Update debug info every minute with last 10 messages
+        this.pollIntervals.push(setInterval(() => {
+            this.updateDebugMessages();
         }, 60 * 1000));
     }
 
     _deleteTimers() {
         //Kill interval object(s)
-        this.log('Removing timers');
+        this.logMessage('Removing timers');
         this.pollIntervals.forEach(timer => {
             clearInterval(timer);
         });
@@ -541,7 +643,7 @@ class ChargerDevice extends Homey.Device {
                 this.setCapabilityValue(key, value);
             }
         } else {
-            this.log(`Trying to set value for a missing capability: '${key}'`);
+            this.logMessage(`Trying to set value for a missing capability: '${key}'`);
         }
     }
 
@@ -556,7 +658,7 @@ class ChargerDevice extends Homey.Device {
     }
 
     onRenamed(name) {
-        this.log(`Renaming Easee charger from '${this.charger.name}' to '${name}'`);
+        this.logMessage(`Renaming Easee charger from '${this.charger.name}' to '${name}'`);
         this.charger.name = name;
     }
 
@@ -564,12 +666,12 @@ class ChargerDevice extends Homey.Device {
         let fieldsChanged = false;
 
         if (changedKeysArr.indexOf("showLast30daysStats") > -1) {
-            this.log('showLast30daysStats changed to:', newSettings.showLast30daysStats);
+            this.logMessage('showLast30daysStats changed to:', newSettings.showLast30daysStats);
             this.showLast30daysStats = newSettings.showLast30daysStats;
             fieldsChanged = true;
         }
         if (changedKeysArr.indexOf("showLastMonthStats") > -1) {
-            this.log('showLastMonthStats changed to:', newSettings.showLastMonthStats);
+            this.logMessage('showLastMonthStats changed to:', newSettings.showLastMonthStats);
             this.showLastMonthStats = newSettings.showLastMonthStats;
             fieldsChanged = true;
         }

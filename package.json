@@ -8,8 +8,8 @@
   },
   "dependencies": {
     "@microsoft/signalr": "^5.0.3",
-    "async-mutex": "^0.3.0",
-    "events": "^3.2.0",
+    "async-mutex": "^0.3.1",
+    "events": "^3.3.0",
     "http.min": "^2.1.0"
   },
   "scripts": {
