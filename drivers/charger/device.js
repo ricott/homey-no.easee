@@ -123,8 +123,10 @@ class ChargerDevice extends Homey.Device {
     }
 
     updateDebugMessages() {
-        this.setSettings({ streamMessages: this.getLoggedStreamMessages(),
-                            log: this.getLogMessages() })
+        this.setSettings({
+            streamMessages: this.getLoggedStreamMessages(),
+            log: this.getLogMessages()
+        })
             .catch(err => {
                 this.error('Failed to update debug messages', err);
             });
@@ -137,25 +139,41 @@ class ChargerDevice extends Homey.Device {
             chargerId: this.charger.id
         };
         this.charger.stream = new EaseeStream(options);
-        this.charger.stream.open();
+        this.charger.stream.open()
+        return Promise.resolve(true);
     }
 
     stopSignalRStream() {
         this.logMessage(`Closing SignalR stream, for charger '${this.charger.id}'`);
-        this.charger.stream.close();
+        return this.charger.stream.close()
+            .then(() => {
+                return Promise.resolve(true);
+            }).catch(reason => {
+                return Promise.reject(reason);
+            });
     }
 
     monitorSignalRStream() {
+        let self = this;
         //Stream disconnected or no message in last one hour        
-        if ((new Date().getTime() - this.charger.lastStreamMessageTimestamp.getTime()) > (1000 * 3600) ||
-            this.charger.stream.disconnected()) {
-
+        if ((new Date().getTime() - self.charger.lastStreamMessageTimestamp.getTime()) > (1000 * 1800)) {
+        //if ((new Date().getTime() - self.charger.lastStreamMessageTimestamp.getTime()) > (1000 * 60)) {
             //Lets start a new connection, after making sure previous is killed
-            this.logMessage(`SignalR stream is disconnected or idle, for charger '${this.charger.id}'`);
-            this.stopSignalRStream();
-            sleep(3000).then(() => {
-                this.startSignalRStream();
-            });
+            self.logMessage(`SignalR stream is idle, for charger '${self.charger.id}'`);
+
+            self.stopSignalRStream()
+                .then(() => {
+                    self.startSignalRStream()
+                        .then(() => {
+                            self._initializeEventListeners();
+                        }).catch(reason => {
+                            self.logError(`Failed to open SignalR stream, for charger '${this.charger.id}'`);
+                            self.logError(reason);
+                        });
+                }).catch(reason => {
+                    self.logError(`Failed to close SignalR stream, for charger '${this.charger.id}'`);
+                    self.logError(reason);
+                });
         }
     }
 
@@ -420,14 +438,16 @@ class ChargerDevice extends Homey.Device {
 
     refreshAccessToken() {
         let self = this;
-        self.getDriver().getTokens(self.getUsername(), self.getPassword())
+        return self.getDriver().getTokens(self.getUsername(), self.getPassword())
             .then(function (tokens) {
                 if (self.charger.tokens.accessToken != tokens.accessToken) {
                     self.logMessage('Renewed access token');
                 }
                 self.charger.tokens = tokens;
+                return Promise.resolve(true);
             }).catch(reason => {
                 self.logError(reason);
+                return Promise.reject(reason);
             });
     }
 
@@ -650,7 +670,10 @@ class ChargerDevice extends Homey.Device {
     onDeleted() {
         this.log(`Deleting Easee charger '${this.getName()}' from Homey.`);
         this._deleteTimers();
-        this.stopSignalRStream();
+        this.stopSignalRStream()
+            .catch(reason => {
+                this.log('Failed to stop SignalR stream', reason);
+            });
 
         Homey.ManagerSettings.unset(`${this.charger.id}.username`);
         Homey.ManagerSettings.unset(`${this.charger.id}.password`);
