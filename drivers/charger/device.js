@@ -5,6 +5,7 @@ var EaseeCharger = require('../../lib/easee.js');
 var EaseeCharger = require('../../lib/easee.js');
 const enums = require('../../lib/enums.js');
 const crypto = require('crypto');
+const {debounce} = require('throttle-debounce');
 const EaseeStream = require('../../lib/easeeStream.js');
 const algorithm = 'aes-256-cbc';
 
@@ -43,6 +44,13 @@ class ChargerDevice extends Homey.Device {
         this.showLastMonthStats = this.getSettings().showLastMonthStats;
 
         this.setupCapabilities();
+
+        //Status seems to bounce, lets debounce it
+        //If status is kept for less than 60 seconds, ignore it
+        this.updateStatus = debounce(60000, (status) => {
+            this.logMessage(`Setting charger status '${status}'`);
+            this._updateProperty('charger_status', status);
+        });
 
         this.registerCapabilityListener('button.organize', async () => {
             //Delete all capabilities and then add them in right order
@@ -87,93 +95,41 @@ class ChargerDevice extends Homey.Device {
                 self.startSignalRStream();
 
                 self._initilializeTimers();
-                self._initializeEventListeners();
             }).catch(reason => {
                 self.logMessage(reason);
             });
     }
 
-    logStreamMessage(message) {
-        let now = new Date().toISOString();
-        if (this.charger.streamMessages.length > 9) {
-            //Remove oldest entry
-            this.charger.streamMessages.shift();
-        }
-        //Add new entry
-        this.charger.streamMessages.push(now + '\n' + message + '\n');
-    }
-
-    logMessage(message) {
-        this.log(message);
-        let now = new Date().toISOString();
-        if (this.charger.log.length > 49) {
-            //Remove oldest entry
-            this.charger.log.shift();
-        }
-        //Add new entry
-        this.charger.log.push(now + ' ' + message + '\n');
-    }
-
-    getLoggedStreamMessages() {
-        return this.charger.streamMessages.toString();
-    }
-
-    getLogMessages() {
-        return this.charger.log.toString();
-    }
-
-    updateDebugMessages() {
-        this.setSettings({
-            streamMessages: this.getLoggedStreamMessages(),
-            log: this.getLogMessages()
-        })
-            .catch(err => {
-                this.error('Failed to update debug messages', err);
-            });
-    }
-
     startSignalRStream() {
-        this.logMessage(`Creating and opening SignalR stream, for charger '${this.charger.id}'`);
+        this.logMessage(`Opening SignalR stream, for charger '${this.charger.id}'`);
         let options = {
             accessToken: this.charger.tokens.accessToken,
             chargerId: this.charger.id
         };
         this.charger.stream = new EaseeStream(options);
-        this.charger.stream.open()
-        return Promise.resolve(true);
+        //Initialize event listeners for the newly created charge stream
+        this._initializeEventListeners();
+        this.charger.stream.open();
     }
 
     stopSignalRStream() {
         this.logMessage(`Closing SignalR stream, for charger '${this.charger.id}'`);
-        return this.charger.stream.close()
-            .then(() => {
-                return Promise.resolve(true);
-            }).catch(reason => {
-                return Promise.reject(reason);
-            });
+        this.charger.stream.close();
     }
 
     monitorSignalRStream() {
         let self = this;
         //Stream disconnected or no message in last one hour        
-        if ((new Date().getTime() - self.charger.lastStreamMessageTimestamp.getTime()) > (1000 * 1800)) {
-        //if ((new Date().getTime() - self.charger.lastStreamMessageTimestamp.getTime()) > (1000 * 60)) {
+        if ((new Date().getTime() - self.charger.lastStreamMessageTimestamp.getTime()) > (1000 * 3600)) {
+            //if ((new Date().getTime() - self.charger.lastStreamMessageTimestamp.getTime()) > (1000 * 60)) {
             //Lets start a new connection, after making sure previous is killed
             self.logMessage(`SignalR stream is idle, for charger '${self.charger.id}'`);
 
-            self.stopSignalRStream()
-                .then(() => {
-                    self.startSignalRStream()
-                        .then(() => {
-                            self._initializeEventListeners();
-                        }).catch(reason => {
-                            self.logError(`Failed to open SignalR stream, for charger '${this.charger.id}'`);
-                            self.logError(reason);
-                        });
-                }).catch(reason => {
-                    self.logError(`Failed to close SignalR stream, for charger '${this.charger.id}'`);
-                    self.logError(reason);
-                });
+            this.stopSignalRStream();
+            //Sleep to make sure the old connection is killed properly
+            sleep(5000).then(() => {
+                this.startSignalRStream();
+            });
         }
     }
 
@@ -305,7 +261,8 @@ class ChargerDevice extends Homey.Device {
                     //Status
                     property = 'charger_status';
                     value = enums.decodeChargerMode(data.value);
-                    self._updateProperty(property, value);
+                    self.logMessage(`Debouncing charger status '${value}'`);
+                    self.updateStatus(value);
                     break;
                 case 'TotalPower':
                     //Power
@@ -454,7 +411,7 @@ class ChargerDevice extends Homey.Device {
     //Info not part of streaming API, refreshed once every 30 mins
     updateChargerStatistics() {
         let self = this;
-        if (self.hasCapability('measure_charge')) {
+        if (self.showLast30daysStats) {
             self.logMessage('Getting charger statistics, last 30 days');
             new EaseeCharger(self.charger.tokens).getLast30DaysChargekWh(self.charger.id)
                 .then(function (last30DayskWh) {
@@ -464,7 +421,7 @@ class ChargerDevice extends Homey.Device {
                 });
         }
 
-        if (self.hasCapability('measure_charge.last_month')) {
+        if (self.showLastMonthStats) {
             self.logMessage('Getting charger statistics, previous calendar month');
             new EaseeCharger(self.charger.tokens).getLastMonthChargekWh(self.charger.id)
                 .then(function (lastMonthkWh) {
@@ -670,10 +627,8 @@ class ChargerDevice extends Homey.Device {
     onDeleted() {
         this.log(`Deleting Easee charger '${this.getName()}' from Homey.`);
         this._deleteTimers();
-        this.stopSignalRStream()
-            .catch(reason => {
-                this.log('Failed to stop SignalR stream', reason);
-            });
+        this.stopSignalRStream();
+        this.updateStatus.cancel();
 
         Homey.ManagerSettings.unset(`${this.charger.id}.username`);
         Homey.ManagerSettings.unset(`${this.charger.id}.password`);
@@ -702,6 +657,45 @@ class ChargerDevice extends Homey.Device {
         if (fieldsChanged) {
             this.setupCapabilities();
         }
+    }
+
+    logStreamMessage(message) {
+        let now = new Date().toISOString();
+        if (this.charger.streamMessages.length > 9) {
+            //Remove oldest entry
+            this.charger.streamMessages.shift();
+        }
+        //Add new entry
+        this.charger.streamMessages.push(now + '\n' + message + '\n');
+    }
+
+    logMessage(message) {
+        this.log(message);
+        let now = new Date().toISOString();
+        if (this.charger.log.length > 49) {
+            //Remove oldest entry
+            this.charger.log.shift();
+        }
+        //Add new entry
+        this.charger.log.push(now + ' ' + message + '\n');
+    }
+
+    getLoggedStreamMessages() {
+        return this.charger.streamMessages.toString();
+    }
+
+    getLogMessages() {
+        return this.charger.log.toString();
+    }
+
+    updateDebugMessages() {
+        this.setSettings({
+            streamMessages: this.getLoggedStreamMessages(),
+            log: this.getLogMessages()
+        })
+            .catch(err => {
+                this.error('Failed to update debug messages', err);
+            });
     }
 }
 

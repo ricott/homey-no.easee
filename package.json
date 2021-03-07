@@ -10,7 +10,8 @@
     "@microsoft/signalr": "^5.0.3",
     "async-mutex": "^0.3.1",
     "events": "^3.3.0",
-    "http.min": "^2.1.0"
+    "http.min": "^2.1.0",
+    "throttle-debounce": "^3.0.1"
   },
   "scripts": {
     "test": "mocha"
