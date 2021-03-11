@@ -1,15 +1,19 @@
 {
+    "1.0.5": {
+        "en": "Swedish language added",
+        "sv": "Appen är översatt till Svenska"
+    },
     "1.0.4": {
-        "en": "Stability imporvements for the Easee streaming API."
+        "en": "Major rewrite of the app to use the Easee streaming API. New capabilities and actions added."
     },
     "1.0.3": {
-        "en": "Stability imporvements for the Easee streaming API."
+        "en": "Major rewrite of the app to use the Easee streaming API. New capabilities and actions added."
     },
     "1.0.2": {
-        "en": "Stability imporvements for the Easee streaming API."
+        "en": "Major rewrite of the app to use the Easee streaming API. New capabilities and actions added."
     },
     "1.0.1": {
-        "en": "Stability imporvements for the Easee streaming API."
+        "en": "Major rewrite of the app to use the Easee streaming API. New capabilities and actions added."
     },
     "1.0.0": {
         "en": "Major rewrite of the app to use the Easee streaming API. New capabilities and actions added."
