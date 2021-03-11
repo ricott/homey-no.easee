@@ -1,6 +1,7 @@
 'use strict';
 
 const Homey = require('homey');
+const dateFormat = require("dateformat");
 var EaseeCharger = require('../../lib/easee.js');
 var EaseeCharger = require('../../lib/easee.js');
 const enums = require('../../lib/enums.js');
@@ -660,24 +661,22 @@ class ChargerDevice extends Homey.Device {
     }
 
     logStreamMessage(message) {
-        let now = new Date().toISOString();
         if (this.charger.streamMessages.length > 9) {
             //Remove oldest entry
             this.charger.streamMessages.shift();
         }
         //Add new entry
-        this.charger.streamMessages.push(now + '\n' + message + '\n');
+        this.charger.streamMessages.push(dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss') + '\n' + message + '\n');
     }
 
     logMessage(message) {
         this.log(message);
-        let now = new Date().toISOString();
         if (this.charger.log.length > 49) {
             //Remove oldest entry
             this.charger.log.shift();
         }
         //Add new entry
-        this.charger.log.push(now + ' ' + message + '\n');
+        this.charger.log.push(dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss') + ' ' + message + '\n');
     }
 
     getLoggedStreamMessages() {
