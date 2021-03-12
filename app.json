@@ -679,8 +679,8 @@
             "name": "chargerState",
             "type": "dropdown",
             "title": {
-              "en": "Charger state",
-              "sv": "Laddarens tillstånd"
+              "en": "State",
+              "sv": "Tillstånd"
             },
             "values": [
               {
