@@ -1,6 +1,6 @@
 {
   "id": "no.easee",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "brandColor": "#323232",
   "compatibility": ">=3.0.0",
   "sdk": 2,
@@ -22,8 +22,8 @@
     ]
   },
   "description": {
-    "en": "Control your Easee charger",
-    "sv": "Styr din Easee laddare"
+    "en": "Small. Smart. Full of power.",
+    "sv": "Liten. Smart. Full av kraft."
   },
   "author": {
     "name": "Richard Barkestam",

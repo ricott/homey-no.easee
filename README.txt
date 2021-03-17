@@ -1,19 +1,3 @@
-This Homey app allows you to monitor and control your Easee charger using Easee cloud. 
+Start and stop charging your car on a schedule, or based on other conditions you model in a flow. Take action when your car starts charging, or send a notification if no car is connected to remind you to connect your car. Disable your charger if you leave your home for a longer period. Access statistics for the last charge session, last month or for the lifetime of the charger.
 
-Triggers
-- Charger status changed
-
-Conditions
-- Charger status
-
-Actions
-- Control charger (Start/Stop/Pause/Resume)
-- Toggle charger action (Start/Stop/Pause/Resume)
-- Set dynamic circuit current (amps)
-- Set dynamic circuit current, per phase (amps)
-- Set charger state (Enabled/Disabled)
-- Set Charger idle current state
-- Set permanent cable lock
-- Set Charger led strip brightness
-
-For more information about the app and the possibility to get support please visit the forum link in section below.
+For more information about the app and the possibility to get support please visit the forum link in the section below.
