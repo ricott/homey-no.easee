@@ -1,3 +1,3 @@
-Start and stop charging your car on a schedule, or based on other conditions you model in a flow. Take action when your car starts charging, or send a notification if no car is connected to remind you to connect your car. Disable your charger if you leave your home for a longer period. Access statistics for the last charge session, last month or for the lifetime of the charger.
+Start and stop charging your car on a schedule, or based on other conditions you model in a flow. Take action when your car starts charging, or send a notification if no car is connected at a certain time to remind you to plug in your car. Disable your charger if you leave your home for a longer period. Access statistics for the last charge session, last month or for the lifetime of the charger.
 
 For more information about the app and the possibility to get support please visit the forum link in the section below.
