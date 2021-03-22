@@ -1,6 +1,6 @@
 {
   "id": "no.easee",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "brandColor": "#323232",
   "compatibility": ">=3.0.0",
   "sdk": 2,
@@ -392,6 +392,7 @@
           "id": "login_credentials",
           "template": "login_credentials",
           "options": {
+            "logo": "../../../assets/images/logo.png",
             "usernameLabel": {
               "en": "Phone number",
               "sv": "Mobilnummer"
@@ -425,6 +426,10 @@
           "en": "Charger status changed",
           "sv": "Laddarens status ändrades"
         },
+        "titleFormatted": {
+          "en": "[[device]] status changed to [[status]]",
+          "sv": "[[device]] status ändrades till [[status]]"
+        },
         "args": [
           {
             "name": "device",
@@ -454,6 +459,10 @@
         "title": {
           "en": "Charger status is !{{|not}}",
           "sv": "Laddarens status är !{{|inte}}"
+        },
+        "titleFormatted": {
+          "en": "Charger status is !{{|not}} [[status]]",
+          "sv": "Laddarens status är !{{|inte}} [[status]]"
         },
         "args": [
           {
@@ -520,8 +529,12 @@
       {
         "id": "toggleCharger",
         "title": {
-          "en": "Toggle Charger state",
+          "en": "Toggle charger state",
           "sv": "Växla laddarens funktion"
+        },
+        "titleFormatted": {
+          "en": "Toggle [[device]] state",
+          "sv": "Växla [[device]] function"
         },
         "args": [
           {
@@ -534,8 +547,12 @@
       {
         "id": "chargerControl",
         "title": {
-          "en": "Control Charger",
+          "en": "Control charger",
           "sv": "Styr laddarens funktion"
+        },
+        "titleFormatted": {
+          "en": "Set state to [[chargerAction]]",
+          "sv": "Ändra funtion till [[chargerAction]]"
         },
         "args": [
           {
@@ -586,8 +603,12 @@
       {
         "id": "circuitCurrentControl",
         "title": {
-          "en": "Set dynamic Circuit current",
+          "en": "Set dynamic circuit current",
           "sv": "Sätt dynamisk strömstyrka"
+        },
+        "titleFormatted": {
+          "en": "Set dynamic Circuit current to [[current]]",
+          "sv": "Ändra dynamisk strömstyrka till [[current]]"
         },
         "args": [
           {
@@ -613,8 +634,12 @@
       {
         "id": "circuitCurrentControlPerPhase",
         "title": {
-          "en": "Set dynamic Circuit current, per phase",
+          "en": "Set dynamic circuit current, per phase",
           "sv": "Sätt dynamisk strömstyrka, per fas"
+        },
+        "titleFormatted": {
+          "en": "Set dynamic circuit current to [[current1]], [[current2]] and [[current3]]",
+          "sv": "Ändra dynamisk strömstyrka till [[current1]], [[current2]] och [[current3]]"
         },
         "args": [
           {
@@ -666,8 +691,12 @@
       {
         "id": "chargerState",
         "title": {
-          "en": "Set Charger state",
+          "en": "Set charger state",
           "sv": "Sätt laddarens tillstånd"
+        },
+        "titleFormatted": {
+          "en": "Set charger state to [[chargerState]]",
+          "sv": "Ändra laddarens tillstånd till [[chargerState]]"
         },
         "args": [
           {
@@ -704,8 +733,12 @@
       {
         "id": "enableIdleCurrent",
         "title": {
-          "en": "Set Charger idle current state",
+          "en": "Set charger idle current state",
           "sv": "Erbjud ström när laddning inte är aktiv"
+        },
+        "titleFormatted": {
+          "en": "Set idle current state to [[idleCurrent]]",
+          "sv": "Ändra erbjud ström när laddning inte är aktiv till [[idleCurrent]]"
         },
         "args": [
           {
@@ -745,6 +778,10 @@
           "en": "Set permanent cable lock",
           "sv": "Lås kabel permanent"
         },
+        "titleFormatted": {
+          "en": "Set permanent cable lock to [[lockCable]]",
+          "sv": "Ändra permanent kabellås till [[lockCable]]"
+        },
         "args": [
           {
             "name": "device",
@@ -782,6 +819,10 @@
         "title": {
           "en": "Set Charger led strip brightness",
           "sv": "Sätt ledstripens ljusstyrka"
+        },
+        "titleFormatted": {
+          "en": "Set led strip brightness to [[ledBrightness]]",
+          "sv": "Ändra ledstripens ljusstyrka till [[ledBrightness]]"
         },
         "args": [
           {

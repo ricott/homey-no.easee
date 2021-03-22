@@ -6,7 +6,7 @@ var EaseeCharger = require('../../lib/easee.js');
 var EaseeCharger = require('../../lib/easee.js');
 const enums = require('../../lib/enums.js');
 const crypto = require('crypto');
-const {debounce} = require('throttle-debounce');
+const { debounce } = require('throttle-debounce');
 const EaseeStream = require('../../lib/easeeStream.js');
 const algorithm = 'aes-256-cbc';
 
@@ -33,7 +33,7 @@ class ChargerDevice extends Homey.Device {
             circuitId: 0,
             tokens: null,
             stream: null,
-            lastStreamMessageTimestamp: 0,
+            lastStreamMessageTimestamp: null,
             streamMessages: [],
             log: []
         };
@@ -120,17 +120,21 @@ class ChargerDevice extends Homey.Device {
 
     monitorSignalRStream() {
         let self = this;
-        //Stream disconnected or no message in last one hour        
-        if ((new Date().getTime() - self.charger.lastStreamMessageTimestamp.getTime()) > (1000 * 3600)) {
-            //if ((new Date().getTime() - self.charger.lastStreamMessageTimestamp.getTime()) > (1000 * 60)) {
-            //Lets start a new connection, after making sure previous is killed
-            self.logMessage(`SignalR stream is idle, for charger '${self.charger.id}'`);
+        //If invalid credentials the lastStreamMessageTimestamp is null
+        //if so skip this check
+        if (self.charger.lastStreamMessageTimestamp) {
+            //Stream disconnected or no message in last one hour        
+            if ((new Date().getTime() - self.charger.lastStreamMessageTimestamp.getTime()) > (1000 * 3600)) {
+                //if ((new Date().getTime() - self.charger.lastStreamMessageTimestamp.getTime()) > (1000 * 60)) {
+                //Lets start a new connection, after making sure previous is killed
+                self.logMessage(`SignalR stream is idle, for charger '${self.charger.id}'`);
 
-            this.stopSignalRStream();
-            //Sleep to make sure the old connection is killed properly
-            sleep(5000).then(() => {
-                this.startSignalRStream();
-            });
+                this.stopSignalRStream();
+                //Sleep to make sure the old connection is killed properly
+                sleep(5000).then(() => {
+                    this.startSignalRStream();
+                });
+            }
         }
     }
 
@@ -203,9 +207,8 @@ class ChargerDevice extends Homey.Device {
         self.charger.stream.on('CommandResponse', data => {
             this.log('Command response received:', data);
 
-            let dateTime = new Date().toISOString();
             self.setSettings({
-                commandResponse: dateTime + '\n' + JSON.stringify(data, null, "  ")
+                commandResponse: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss') + '\n' + JSON.stringify(data, null, "  ")
             }).catch(err => {
                 self.error('Failed to update settings', err);
             });
@@ -348,8 +351,7 @@ class ChargerDevice extends Homey.Device {
             }
         }
 
-        let dateTime = new Date().toISOString();
-        this.setSettings({ easee_last_error: dateTime + '\n' + message })
+        this.setSettings({ easee_last_error: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss') + '\n' + message })
             .catch(err => {
                 this.error('Failed to update settings', err);
             });
