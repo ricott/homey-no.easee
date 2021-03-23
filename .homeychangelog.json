@@ -1,6 +1,10 @@
 {
+    "1.0.9": {
+        "en": "Added support for Easee Equalizer",
+        "sv": "Stöd för Easee Equalizer"
+    },
     "1.0.8": {
-        "en": "Easee Equalizer is now supported",
+        "en": "Added support for Easee Equalizer",
         "sv": "Stöd för Easee Equalizer"
     },
     "1.0.7": {

@@ -16,36 +16,52 @@ class EqualizerDriver extends Homey.Driver {
 
   _registerFlows() {
     this.log('Registering flows');
-/*
+
     //Register triggers
     let triggers = [
-      'charger_status_changed'
-      //'charger_current_changed'
+      'phase_load_changed'
     ];
     this._registerFlow('trigger', triggers, Homey.FlowCardTriggerDevice);
-*/
 
-    /*
     //Register conditions
     triggers = [
-      'chargerStatus'
+      'phaseUtilized',
+      'anyPhaseUtilized'
     ];
     this._registerFlow('condition', triggers, Homey.FlowCardCondition);
 
-    this.flowCards['condition.chargerStatus']
+    this.flowCards['condition.phaseUtilized']
       .registerRunListener((args, state, callback) => {
-        this.log('Flow condition.chargerStatus');
-        let status = args.device.getCapabilityValue('charger_status');
-        this.log(`- charger.status: ${status}`);
-        this.log(`- condition.status: '${args.status}'`);
+        this.log(`[${args.device.getName()}] Flow condition.phaseUtilized`);
+        this.log(`[${args.device.getName()}] phase: '${args.phase}'`);
+        this.log(`[${args.device.getName()}] utilization: ${args.utilization}%`);
+        let phaseCurrent = args.device.getCapabilityValue(`measure_current.${args.phase}`);
+        this.log(`[${args.device.getName()}] phase current: ${phaseCurrent}A`);
+        let utilization = (phaseCurrent / args.device.equalizer.mainFuse) * 100;
+        this.log(`[${args.device.getName()}] phase utlization: ${utilization}%`);
 
-        if (status === args.status) {
+        if (utilization >= args.utilization) {
           return true;
         } else {
           return false;
         }
       });
-*/
+
+    this.flowCards['condition.anyPhaseUtilized']
+      .registerRunListener((args, state, callback) => {
+        this.log(`[${args.device.getName()}] Flow condition.anyPhaseUtilized`);
+        this.log(`[${args.device.getName()}] utilization: ${args.utilization}%`);
+        let utilizationL1 = (args.device.getCapabilityValue('measure_current.L1') / args.device.equalizer.mainFuse) * 100;
+        let utilizationL2 = (args.device.getCapabilityValue('measure_current.L2') / args.device.equalizer.mainFuse) * 100;
+        let utilizationL3 = (args.device.getCapabilityValue('measure_current.L3') / args.device.equalizer.mainFuse) * 100;
+        this.log(`[${args.device.getName()}] phase utlization: ${utilizationL1}%, ${utilizationL2}%, ${utilizationL3}%`);
+
+        if (utilizationL1 >= args.utilization || utilizationL2 >= args.utilization || utilizationL3 >= args.utilization) {
+          return true;
+        } else {
+          return false;
+        }
+      });
 
   }
 
@@ -57,13 +73,10 @@ class EqualizerDriver extends Homey.Driver {
   }
 
   triggerFlow(flow, tokens, device) {
-    this.log(`Triggering flow '${flow}' with tokens`, tokens);
+    //this.log(`Triggering flow '${flow}' with tokens`, tokens);
     if (this.flowCards[flow] instanceof Homey.FlowCardTriggerDevice) {
-      this.log('- device trigger for ', device.getName());
       this.flowCards[flow].trigger(device, tokens);
-    }
-    else if (this.flowCards[flow] instanceof Homey.FlowCardTrigger) {
-      this.log('- regular trigger');
+    } else if (this.flowCards[flow] instanceof Homey.FlowCardTrigger) {
       this.flowCards[flow].trigger(tokens);
     }
   }

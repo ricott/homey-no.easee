@@ -15,6 +15,7 @@ class EqualizerDevice extends Homey.Device {
         this.equalizer = {
             id: this.getData().id,
             name: this.getName(),
+            mainFuse: this.getSettings().mainFuse,
             tokens: null,
             stream: null,
             lastStreamMessageTimestamp: null,
@@ -37,7 +38,7 @@ class EqualizerDevice extends Homey.Device {
         self.tokenManager.getTokens(self.getUsername(), self.getPassword())
             .then(function (tokens) {
                 self.equalizer.tokens = tokens;
-                
+
                 self.updateEqualizerSiteInfo();
 
                 //Setup SignalR stream
@@ -200,6 +201,8 @@ class EqualizerDevice extends Homey.Device {
         new Easee(self.equalizer.tokens).getEqualizerSiteInfo(self.equalizer.id)
             .then(function (site) {
 
+                self.equalizer.mainFuse = Math.round(site.ratedCurrent);
+
                 self.setSettings({
                     mainFuse: `${Math.round(site.ratedCurrent)}`,
                     circuitFuse: `${Math.round(site.circuits[0].ratedCurrent)}`,
@@ -323,6 +326,21 @@ class EqualizerDevice extends Homey.Device {
             let oldValue = this.getCapabilityValue(key);
             if (oldValue !== null && oldValue != value) {
                 this.setCapabilityValue(key, value);
+
+                if (key === 'measure_current.L1' ||
+                    key === 'measure_current.L2' ||
+                    key === 'measure_current.L3') {
+
+                    let phase = key.substring(key.indexOf('.') + 1);
+                    let utilization = (value / this.equalizer.mainFuse) * 100;
+                    let tokens = {
+                        phase: phase,
+                        percentageUtilized: parseFloat(utilization.toFixed(2)),
+                        currentUtilized: parseFloat(value.toFixed(2))
+                    }
+                    this.getDriver().triggerFlow('trigger.phase_load_changed', tokens, this);
+                }
+
             } else {
                 this.setCapabilityValue(key, value);
             }
