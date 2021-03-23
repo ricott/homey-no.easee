@@ -1,0 +1,10 @@
+{
+  "title": {
+    "en": "Enabled",
+    "sv": "Aktiverad"
+  },
+  "type": "boolean",
+  "getable": true,
+  "setable": false,
+  "icon": "/assets/enabled.svg"
+}

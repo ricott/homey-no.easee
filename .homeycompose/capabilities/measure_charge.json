@@ -1,0 +1,15 @@
+{
+  "type": "number",
+  "decimals": 2,
+  "title": {
+    "en": "Last 30 days",
+    "sv": "Senaste 30 dagarna"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/last_month_charge.svg",
+  "units": {
+    "en": "kWh"
+  }
+}

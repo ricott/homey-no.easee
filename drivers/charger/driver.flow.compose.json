@@ -1,0 +1,414 @@
+{
+  "triggers": [
+    {
+      "id": "charger_status_changed",
+      "title": {
+        "en": "Charger status changed",
+        "sv": "Laddarens status ändrades"
+      },
+      "titleFormatted": {
+        "en": "[[device]] status changed to [[status]]",
+        "sv": "[[device]] status ändrades till [[status]]"
+      },
+      "args": [],
+      "tokens": [
+        {
+          "name": "status",
+          "type": "string",
+          "title": {
+            "en": "Charger status",
+            "sv": "Laddarens status"
+          },
+          "example": {
+            "en": "Car connected",
+            "sv": "Car connected"
+          }
+        }
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "id": "chargerStatus",
+      "title": {
+        "en": "Charger status is !{{|not}}",
+        "sv": "Laddarens status är !{{|inte}}"
+      },
+      "titleFormatted": {
+        "en": "Charger status is !{{|not}} [[status]]",
+        "sv": "Laddarens status är !{{|inte}} [[status]]"
+      },
+      "args": [
+        {
+          "name": "status",
+          "type": "dropdown",
+          "title": {
+            "en": "Status",
+            "sv": "Status"
+          },
+          "values": [
+            {
+              "id": "Standby",
+              "label": {
+                "en": "Standby",
+                "sv": "Standby"
+              }
+            },
+            {
+              "id": "Paused",
+              "label": {
+                "en": "Paused",
+                "sv": "Paused"
+              }
+            },
+            {
+              "id": "Charging",
+              "label": {
+                "en": "Charging",
+                "sv": "Charging"
+              }
+            },
+            {
+              "id": "Completed",
+              "label": {
+                "en": "Completed",
+                "sv": "Completed"
+              }
+            },
+            {
+              "id": "Error",
+              "label": {
+                "en": "Error",
+                "sv": "Error"
+              }
+            },
+            {
+              "id": "Car connected",
+              "label": {
+                "en": "Car connected",
+                "sv": "Car connected"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "toggleCharger",
+      "title": {
+        "en": "Toggle charger state",
+        "sv": "Växla laddarens funktion"
+      },
+      "titleFormatted": {
+        "en": "Toggle [[device]] state",
+        "sv": "Växla [[device]] function"
+      },
+      "args": []
+    },
+    {
+      "id": "chargerControl",
+      "title": {
+        "en": "Control charger",
+        "sv": "Styr laddarens funktion"
+      },
+      "titleFormatted": {
+        "en": "Set state to [[chargerAction]]",
+        "sv": "Ändra funtion till [[chargerAction]]"
+      },
+      "args": [
+        {
+          "name": "chargerAction",
+          "type": "dropdown",
+          "title": {
+            "en": "Charger action",
+            "sv": "Funktion"
+          },
+          "values": [
+            {
+              "id": "START",
+              "label": {
+                "en": "Start Charging",
+                "sv": "Starta laddning"
+              }
+            },
+            {
+              "id": "STOP",
+              "label": {
+                "en": "Stop Charging",
+                "sv": "Stoppa laddning"
+              }
+            },
+            {
+              "id": "PAUSE",
+              "label": {
+                "en": "Pause Charging",
+                "sv": "Pausa laddning"
+              }
+            },
+            {
+              "id": "RESUME",
+              "label": {
+                "en": "Resume Charging",
+                "sv": "Återuppta laddning"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "circuitCurrentControl",
+      "title": {
+        "en": "Set dynamic circuit current",
+        "sv": "Sätt dynamisk strömstyrka"
+      },
+      "titleFormatted": {
+        "en": "Set dynamic Circuit current to [[current]]",
+        "sv": "Ändra dynamisk strömstyrka till [[current]]"
+      },
+      "args": [
+        {
+          "name": "current",
+          "type": "range",
+          "title": {
+            "en": "Current",
+            "sv": "Ström"
+          },
+          "min": 1,
+          "max": 32,
+          "step": 1,
+          "label": " A",
+          "labelDecimals": 0
+        }
+      ]
+    },
+    {
+      "id": "circuitCurrentControlPerPhase",
+      "title": {
+        "en": "Set dynamic circuit current, per phase",
+        "sv": "Sätt dynamisk strömstyrka, per fas"
+      },
+      "titleFormatted": {
+        "en": "Set dynamic circuit current to [[current1]], [[current2]] and [[current3]]",
+        "sv": "Ändra dynamisk strömstyrka till [[current1]], [[current2]] och [[current3]]"
+      },
+      "args": [
+        {
+          "name": "current1",
+          "type": "range",
+          "title": {
+            "en": "Current P1",
+            "sv": "Ström L1"
+          },
+          "min": 0,
+          "max": 32,
+          "step": 1,
+          "label": " A",
+          "labelDecimals": 0
+        },
+        {
+          "name": "current2",
+          "type": "range",
+          "title": {
+            "en": "Current P2",
+            "sv": "Ström L2"
+          },
+          "min": 0,
+          "max": 32,
+          "step": 1,
+          "label": " A",
+          "labelDecimals": 0
+        },
+        {
+          "name": "current3",
+          "type": "range",
+          "title": {
+            "en": "Current P3",
+            "sv": "Ström L3"
+          },
+          "min": 0,
+          "max": 32,
+          "step": 1,
+          "label": " A",
+          "labelDecimals": 0
+        }
+      ]
+    },
+    {
+      "id": "chargerState",
+      "title": {
+        "en": "Set charger state",
+        "sv": "Ändra laddarens tillstånd"
+      },
+      "titleFormatted": {
+        "en": "Set charger state to [[chargerState]]",
+        "sv": "Ändra laddarens tillstånd till [[chargerState]]"
+      },
+      "args": [
+        {
+          "name": "chargerState",
+          "type": "dropdown",
+          "title": {
+            "en": "State",
+            "sv": "Tillstånd"
+          },
+          "values": [
+            {
+              "id": "true",
+              "label": {
+                "en": "Enabled",
+                "sv": "Aktiverad"
+              }
+            },
+            {
+              "id": "false",
+              "label": {
+                "en": "Disabled",
+                "sv": "Inaktiverad"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "smartCharging",
+      "title": {
+        "en": "Set smart charging",
+        "sv": "Ändra smart laddning"
+      },
+      "titleFormatted": {
+        "en": "Set smart charging to [[option]]",
+        "sv": "Ändra smart laddning till [[option]]"
+      },
+      "args": [
+        {
+          "name": "option",
+          "type": "dropdown",
+          "title": {
+            "en": "Smart charging",
+            "sv": "Smart laddning"
+          },
+          "values": [
+            {
+              "id": "true",
+              "label": {
+                "en": "Yes",
+                "sv": "Ja"
+              }
+            },
+            {
+              "id": "false",
+              "label": {
+                "en": "No",
+                "sv": "Nej"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "enableIdleCurrent",
+      "title": {
+        "en": "Set charger idle current state",
+        "sv": "Erbjud ström när laddning inte är aktiv"
+      },
+      "titleFormatted": {
+        "en": "Set idle current state to [[idleCurrent]]",
+        "sv": "Ändra erbjud ström när laddning inte är aktiv till [[idleCurrent]]"
+      },
+      "args": [
+        {
+          "name": "idleCurrent",
+          "type": "dropdown",
+          "title": {
+            "en": "Idle current",
+            "sv": "Erbjud ström när laddning inte är aktiv"
+          },
+          "values": [
+            {
+              "id": "true",
+              "label": {
+                "en": "Yes",
+                "sv": "Ja"
+              }
+            },
+            {
+              "id": "false",
+              "label": {
+                "en": "No",
+                "sv": "Nej"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lockCablePermanently",
+      "title": {
+        "en": "Set permanent cable lock",
+        "sv": "Lås kabel permanent"
+      },
+      "titleFormatted": {
+        "en": "Set permanent cable lock to [[lockCable]]",
+        "sv": "Ändra permanent kabellås till [[lockCable]]"
+      },
+      "args": [
+        {
+          "name": "lockCable",
+          "type": "dropdown",
+          "title": {
+            "en": "Permanent cable lock",
+            "sv": "Lås kabel permanent"
+          },
+          "values": [
+            {
+              "id": "true",
+              "label": {
+                "en": "Yes",
+                "sv": "Ja"
+              }
+            },
+            {
+              "id": "false",
+              "label": {
+                "en": "No",
+                "sv": "Nej"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ledStripBrightness",
+      "title": {
+        "en": "Set Charger led strip brightness",
+        "sv": "Sätt ledstripens ljusstyrka"
+      },
+      "titleFormatted": {
+        "en": "Set led strip brightness to [[ledBrightness]]",
+        "sv": "Ändra ledstripens ljusstyrka till [[ledBrightness]]"
+      },
+      "args": [
+        {
+          "name": "ledBrightness",
+          "type": "range",
+          "title": {
+            "en": "Brightness",
+            "sv": "Ljusstyrka"
+          },
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "label": " %",
+          "labelDecimals": 0
+        }
+      ]
+    }
+  ]
+}

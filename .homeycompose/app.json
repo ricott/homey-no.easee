@@ -1,0 +1,57 @@
+{
+  "id": "no.easee",
+  "version": "1.0.8",
+  "brandColor": "#323232",
+  "compatibility": ">=3.0.0",
+  "sdk": 2,
+  "name": {
+    "en": "Easee Home",
+    "sv": "Easee Home"
+  },
+  "tags": {
+    "en": [
+      "easee",
+      "charge",
+      "charger",
+      "equalizer"
+    ],
+    "sv": [
+      "easee",
+      "ladda",
+      "laddare",
+      "laddbox",
+      "equalizer"
+    ]
+  },
+  "description": {
+    "en": "Small. Smart. Full of power.",
+    "sv": "Liten. Smart. Full av kraft."
+  },
+  "author": {
+    "name": "Richard Barkestam",
+    "email": "richard@barkestam.se"
+  },
+  "contributing": {
+    "donate": {
+      "paypal": {
+        "username": "RBarkestam",
+        "currency": "EUR"
+      }
+    }
+  },
+  "bugs": {
+    "url": "https://github.com/ricott/homey-no.easee/issues"
+  },
+  "source": "https://github.com/ricott/homey-no.easee",
+  "homeyCommunityTopicId": 31647,
+  "category": [
+    "energy"
+  ],
+  "dependencies": {
+    "net": "*"
+  },
+  "images": {
+    "large": "/assets/images/large.png",
+    "small": "/assets/images/small.png"
+  }
+}

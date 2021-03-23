@@ -1,0 +1,15 @@
+{
+  "type": "number",
+  "decimals": 2,
+  "title": {
+    "en": "Current offered",
+    "sv": "Erbjuden ström"
+  },
+  "units": {
+    "en": "A"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/max_charge.svg"
+}

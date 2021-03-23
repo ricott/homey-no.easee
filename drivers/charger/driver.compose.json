@@ -1,0 +1,310 @@
+{
+  "class": "other",
+  "name": {
+    "en": "Easee Charger",
+    "sv": "Easee Laddbox"
+  },
+  "images": {
+    "large": "/drivers/charger/assets/images/large.png",
+    "small": "/drivers/charger/assets/images/small.png"
+  },
+  "capabilities": [
+    "charger_status",
+    "enabled",
+    "measure_current.offered",
+    "measure_power",
+    "measure_current.p1",
+    "measure_current.p2",
+    "measure_current.p3",
+    "measure_voltage",
+    "meter_power.lastCharge",
+    "meter_power",
+    "measure_charge",
+    "measure_charge.last_month",
+    "button.organize"
+  ],
+  "capabilitiesOptions": {
+    "measure_current.offered": {
+      "title": {
+        "en": "Current allocated",
+        "sv": "Allokerad ström"
+      }
+    },
+    "measure_current.p1": {
+      "title": {
+        "en": "Current P1",
+        "sv": "Ström L1"
+      }
+    },
+    "measure_current.p2": {
+      "title": {
+        "en": "Current P2",
+        "sv": "Ström L2"
+      }
+    },
+    "measure_current.p3": {
+      "title": {
+        "en": "Current P3",
+        "sv": "Ström L3"
+      }
+    },
+    "meter_power.lastCharge": {
+      "title": {
+        "en": "Last charge session",
+        "sv": "Senaste laddsessionen"
+      }
+    },
+    "meter_power": {
+      "title": {
+        "en": "Lifetime",
+        "sv": "Livstid"
+      }
+    },
+    "measure_charge.last_month": {
+      "title": {
+        "en": "Last month",
+        "sv": "Förra månaden"
+      }
+    },
+    "button.organize": {
+      "maintenanceAction": true,
+      "title": {
+        "en": "Reorder capabilities",
+        "sv": "Reorganisera egenskaperna"
+      },
+      "desc": {
+        "en": "Reorder capabilities in the intended order.",
+        "sv": "Flytta egenskaperna till den tänkta ordningen."
+      }
+    }
+  },
+  "settings": [
+    {
+      "type": "group",
+      "label": {
+        "en": "Charger settings",
+        "sv": "Laddarens inställningar"
+      },
+      "children": [
+        {
+          "id": "showLast30daysStats",
+          "type": "checkbox",
+          "label": {
+            "en": "Show capability: Last 30 days",
+            "sv": "Visa egenskapen: Senaste 30 dagarna"
+          },
+          "value": false
+        },
+        {
+          "id": "showLastMonthStats",
+          "type": "checkbox",
+          "label": {
+            "en": "Show capability: Last month",
+            "sv": "Visa egenskapen: Förra månaden"
+          },
+          "value": false
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "label": {
+        "en": "Information",
+        "sv": "Information"
+      },
+      "children": [
+        {
+          "id": "detectedPowerGridType",
+          "type": "label",
+          "label": {
+            "en": "Power grid type",
+            "sv": "Elnätstyp"
+          },
+          "value": ""
+        },
+        {
+          "id": "mainFuse",
+          "type": "label",
+          "label": {
+            "en": "Main fuse (A)",
+            "sv": "Huvudsäkring (A)"
+          },
+          "value": ""
+        },
+        {
+          "id": "circuitFuse",
+          "type": "label",
+          "label": {
+            "en": "Circuit fuse (A)",
+            "sv": "Kretssäkring (A)"
+          },
+          "value": ""
+        },
+        {
+          "id": "offlineChargingMode",
+          "type": "label",
+          "label": {
+            "en": "Allow offline charging",
+            "sv": "Tillåt offline laddning"
+          },
+          "value": ""
+        },
+        {
+          "id": "maxOfflineCurrent",
+          "type": "label",
+          "label": {
+            "en": "Max current when offline (A)",
+            "sv": "Max offline ström (A)"
+          },
+          "value": ""
+        },
+        {
+          "id": "phaseMode",
+          "type": "label",
+          "label": {
+            "en": "Phase mode",
+            "sv": "Fasläge"
+          },
+          "value": ""
+        },
+        {
+          "id": "lockCablePermanently",
+          "type": "label",
+          "label": {
+            "en": "Cable locked permanently",
+            "sv": "Lås kabel permanent"
+          },
+          "value": ""
+        },
+        {
+          "id": "idleCurrent",
+          "type": "label",
+          "label": {
+            "en": "Enable idle current",
+            "sv": "Erbjud ström när laddning inte är aktiv"
+          },
+          "value": ""
+        },
+        {
+          "id": "nodeType",
+          "type": "label",
+          "label": {
+            "en": "Local node type",
+            "sv": "Lokal nodtyp"
+          },
+          "value": ""
+        },
+        {
+          "id": "smartCharging",
+          "type": "label",
+          "label": {
+            "en": "Smart charging",
+            "sv": "Smartladdning"
+          },
+          "value": ""
+        },
+        {
+          "id": "version",
+          "type": "label",
+          "label": {
+            "en": "Firmware version",
+            "sv": "Programvara"
+          },
+          "value": ""
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "label": {
+        "en": "Debug",
+        "sv": "Felsökning"
+      },
+      "children": [
+        {
+          "id": "reasonForNoCurrent",
+          "type": "textarea",
+          "label": {
+            "en": "Reason for no current",
+            "sv": "Anledning till att ingen ström erbjuds"
+          },
+          "value": ""
+        },
+        {
+          "id": "site",
+          "type": "textarea",
+          "label": {
+            "en": "Site info",
+            "sv": "Anläggning"
+          },
+          "value": ""
+        },
+        {
+          "id": "commandResponse",
+          "type": "textarea",
+          "label": {
+            "en": "Last command response",
+            "sv": "Senaste kommandosvaret"
+          },
+          "value": ""
+        },
+        {
+          "id": "easee_last_error",
+          "type": "textarea",
+          "label": {
+            "en": "Last API error",
+            "sv": "Senaste API felet"
+          },
+          "value": ""
+        },
+        {
+          "id": "streamMessages",
+          "type": "textarea",
+          "label": {
+            "en": "Last stream messages",
+            "sv": "Senaste meddelandena"
+          },
+          "value": ""
+        },
+        {
+          "id": "log",
+          "type": "textarea",
+          "label": {
+            "en": "Log",
+            "sv": "Logg"
+          },
+          "value": ""
+        }
+      ]
+    }
+  ],
+  "pair": [
+    {
+      "id": "login_credentials",
+      "template": "login_credentials",
+      "options": {
+        "logo": "../../../assets/images/logo.png",
+        "usernameLabel": {
+          "en": "Phone number",
+          "sv": "Mobilnummer"
+        },
+        "usernamePlaceholder": "+46....",
+        "passwordLabel": {
+          "en": "Password",
+          "sv": "Lösenord"
+        }
+      }
+    },
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "navigation": {
+        "next": "add_devices"
+      }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
+    }
+  ]
+}
