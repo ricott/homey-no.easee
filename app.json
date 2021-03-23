@@ -929,14 +929,6 @@
         {
           "type": "group",
           "label": {
-            "en": "Charger settings",
-            "sv": "Laddarens inställningar"
-          },
-          "children": []
-        },
-        {
-          "type": "group",
-          "label": {
             "en": "Information",
             "sv": "Information"
           },
