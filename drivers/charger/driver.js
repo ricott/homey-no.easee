@@ -1,8 +1,8 @@
 'use strict';
 
 const Homey = require('homey');
-const EaseeCharger = require('../../lib/easee.js');
-const ConnectionManager = require('../../lib/connectionManager.js');
+const Easee = require('../../lib/easee.js');
+const TokenManager = require('../../lib/tokenManager.js');
 
 class ChargerDriver extends Homey.Driver {
 
@@ -11,18 +11,7 @@ class ChargerDriver extends Homey.Driver {
 
     this.flowCards = {};
     this._registerFlows();
-    this.connectionManager = new ConnectionManager();
-  }
-
-  //Creates a new one if none exists
-  //otherwise returns existing tokens
-  getTokens(username, password) {
-    return this.connectionManager.getTokens(username, password)
-      .then(function (tokens) {
-        return Object.freeze(tokens);
-      }).catch(reason => {
-        return Promise.reject(reason);
-      });
+    this.tokenManager = TokenManager;
   }
 
   _registerFlows() {
@@ -43,10 +32,10 @@ class ChargerDriver extends Homey.Driver {
 
     this.flowCards['condition.chargerStatus']
       .registerRunListener((args, state, callback) => {
-        this.log('Flow condition.chargerStatus');
+        this.log(`[${args.device.getName()}] Flow condition.chargerStatus`);
         let status = args.device.getCapabilityValue('charger_status');
-        this.log(`- charger.status: ${status}`);
-        this.log(`- condition.status: '${args.status}'`);
+        this.log(`[${args.device.getName()}] charger.status: ${status}`);
+        this.log(`[${args.device.getName()}] condition.status: '${args.status}'`);
 
         if (status === args.status) {
           return true;
@@ -64,12 +53,13 @@ class ChargerDriver extends Homey.Driver {
       'chargerState',
       'enableIdleCurrent',
       'lockCablePermanently',
-      'ledStripBrightness'
+      'ledStripBrightness',
+      'smartCharging'
     ];
     this._registerFlow('action', triggers, Homey.FlowCardAction);
 
     this.flowCards['action.toggleCharger'].registerRunListener((args, state) => {
-      this.log('----- Charger toggle action triggered');
+      this.log(`[${args.device.getName()}] Charger toggle action triggered`);
 
       return args.device.toggleCharging()
         .then(function (result) {
@@ -80,8 +70,8 @@ class ChargerDriver extends Homey.Driver {
     });
 
     this.flowCards['action.chargerControl'].registerRunListener((args, state) => {
-      this.log('----- Charger status control action triggered');
-      this.log(`Action: '${args.chargerAction}'`);
+      this.log(`[${args.device.getName()}] Charger status control action triggered`);
+      this.log(`[${args.device.getName()}] action: '${args.chargerAction}'`);
 
       let errMsg = `Failed to change status to '${args.chargerAction}'`;
       if (args.chargerAction === 'START') {
@@ -119,13 +109,13 @@ class ChargerDriver extends Homey.Driver {
     });
 
     this.flowCards['action.circuitCurrentControlPerPhase'].registerRunListener((args, state) => {
-      this.log('----- Charger Circuit current control per phase action triggered');
-      this.log(`Current: '${args.current1}/${args.current2}/${args.current3}' amps`);
+      this.log(`[${args.device.getName()}] Charger Circuit current control per phase action triggered`);
+      this.log(`[${args.device.getName()}] current: '${args.current1}/${args.current2}/${args.current3}' amps`);
       //Don't set charge current to higher than max value
       let current1 = Math.min(args.current1, args.device.getSettings().chargerFuse);
       let current2 = Math.min(args.current2, args.device.getSettings().chargerFuse);
       let current3 = Math.min(args.current3, args.device.getSettings().chargerFuse);
-      this.log(`Actual used: '${current1}/${current2}/${current3}' Amps`);
+      this.log(`[${args.device.getName()}] actual used: '${current1}/${current2}/${current3}' Amps`);
 
       return args.device.setDynamicCurrentPerPhase(current1, current2, current3)
         .then(function (result) {
@@ -137,11 +127,11 @@ class ChargerDriver extends Homey.Driver {
     });
 
     this.flowCards['action.circuitCurrentControl'].registerRunListener((args, state) => {
-      this.log('----- Charger Circuit current control action triggered');
-      this.log(`Current: '${args.current}' amps`);
+      this.log(`[${args.device.getName()}] Charger Circuit current control action triggered`);
+      this.log(`[${args.device.getName()}] current: '${args.current}' amps`);
       //Don't set charge current to higher than max value
       let current = Math.min(args.current, args.device.getSettings().chargerFuse);
-      this.log(`Actual used: '${current}' Amps`);
+      this.log(`[${args.device.getName()}] actual used: '${current}' Amps`);
 
       return args.device.setDynamicCurrentPerPhase(current, current, current)
         .then(function (result) {
@@ -152,8 +142,8 @@ class ChargerDriver extends Homey.Driver {
     });
 
     this.flowCards['action.chargerState'].registerRunListener((args, state) => {
-      this.log('----- Charger state control action triggered');
-      this.log(`State: '${args.chargerState}'`);
+      this.log(`[${args.device.getName()}] Charger state control action triggered`);
+      this.log(`[${args.device.getName()}] state: '${args.chargerState}'`);
 
       let errMsg = `Failed to change state to '${args.chargerState}'`;
       let chargerState = (args.chargerState === 'true') ? true : false;
@@ -165,9 +155,23 @@ class ChargerDriver extends Homey.Driver {
         });
     });
 
+    this.flowCards['action.smartCharging'].registerRunListener((args, state) => {
+      this.log(`[${args.device.getName()}] Charger smart charging action triggered`);
+      this.log(`[${args.device.getName()}] smart charging: '${args.option}'`);
+
+      let errMsg = `Failed to change smart charging to '${args.option}'`;
+      let option = (args.option === 'true') ? true : false;
+      return args.device.setSmartCharging(option)
+        .then(function (result) {
+          return Promise.resolve(true);
+        }).catch(reason => {
+          return Promise.reject(errMsg);
+        });
+    });
+
     this.flowCards['action.enableIdleCurrent'].registerRunListener((args, state) => {
-      this.log('----- Charger idle current control action triggered');
-      this.log(`State: '${args.idleCurrent}'`);
+      this.log(`[${args.device.getName()}] Charger idle current control action triggered`);
+      this.log(`[${args.device.getName()}] state: '${args.idleCurrent}'`);
 
       let errMsg = `Failed to change idle current to '${args.idleCurrent}'`;
       let idleCurrent = (args.idleCurrent === 'true') ? true : false;
@@ -180,8 +184,8 @@ class ChargerDriver extends Homey.Driver {
     });
 
     this.flowCards['action.lockCablePermanently'].registerRunListener((args, state) => {
-      this.log('----- Charger lock cable permanently control action triggered');
-      this.log(`State: '${args.lockCable}'`);
+      this.log(`[${args.device.getName()}] Charger lock cable permanently control action triggered`);
+      this.log(`[${args.device.getName()}] state: '${args.lockCable}'`);
 
       let errMsg = `Failed to change lock cable permanently to '${args.lockCable}'`;
       let lockCable = (args.lockCable === 'true') ? true : false;
@@ -194,8 +198,8 @@ class ChargerDriver extends Homey.Driver {
     });
 
     this.flowCards['action.ledStripBrightness'].registerRunListener((args, state) => {
-      this.log('----- Charger led brightness control action triggered');
-      this.log(`Brightness: '${args.ledBrightness}'`);
+      this.log(`[${args.device.getName()}] Charger led brightness control action triggered`);
+      this.log(`[${args.device.getName()}] brightness: '${args.ledBrightness}'`);
 
       let errMsg = `Failed to change brightness to '${args.ledBrightness}'`;
       return args.device.ledStripBrightness(args.ledBrightness)
@@ -217,7 +221,7 @@ class ChargerDriver extends Homey.Driver {
   triggerFlow(flow, tokens, device) {
     this.log(`Triggering flow '${flow}' with tokens`, tokens);
     if (this.flowCards[flow] instanceof Homey.FlowCardTriggerDevice) {
-      this.log('- device trigger for ', device.getName());
+      this.log(`[${device.getName()}] device trigger`);
       this.flowCards[flow].trigger(device, tokens);
     }
     else if (this.flowCards[flow] instanceof Homey.FlowCardTrigger) {
@@ -235,9 +239,9 @@ class ChargerDriver extends Homey.Driver {
         return callback(null, false);
       }
 
-      self.getTokens(data.username, data.password)
+      self.tokenManager.getTokens(data.username, data.password)
         .then(function (tokens) {
-          let easee = new EaseeCharger(tokens);
+          let easee = new Easee(tokens);
           easee.getChargers().then(function (chargers) {
             chargers.forEach(charger => {
               let name = 'charger.name';

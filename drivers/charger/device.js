@@ -3,11 +3,11 @@
 const Homey = require('homey');
 const dateFormat = require("dateformat");
 var EaseeCharger = require('../../lib/easee.js');
-var EaseeCharger = require('../../lib/easee.js');
 const enums = require('../../lib/enums.js');
 const crypto = require('crypto');
 const { debounce } = require('throttle-debounce');
 const EaseeStream = require('../../lib/easeeStream.js');
+const TokenManager = require('../../lib/tokenManager.js');
 const algorithm = 'aes-256-cbc';
 
 const deviceCapabilitesList = ['charger_status',
@@ -43,6 +43,7 @@ class ChargerDevice extends Homey.Device {
         this.pollIntervals = [];
         this.showLast30daysStats = this.getSettings().showLast30daysStats;
         this.showLastMonthStats = this.getSettings().showLastMonthStats;
+        this.tokenManager = TokenManager;
 
         this.setupCapabilities();
 
@@ -86,7 +87,7 @@ class ChargerDevice extends Homey.Device {
         }
 
         let self = this;
-        self.getDriver().getTokens(self.getUsername(), self.getPassword())
+        self.tokenManager.getTokens(self.getUsername(), self.getPassword())
             .then(function (tokens) {
                 self.charger.tokens = tokens;
 
@@ -105,7 +106,8 @@ class ChargerDevice extends Homey.Device {
         this.logMessage(`Opening SignalR stream, for charger '${this.charger.id}'`);
         let options = {
             accessToken: this.charger.tokens.accessToken,
-            chargerId: this.charger.id
+            deviceType: enums.deviceTypes().CHARGER,
+            deviceId: this.charger.id
         };
         this.charger.stream = new EaseeStream(options);
         //Initialize event listeners for the newly created charge stream
@@ -205,7 +207,7 @@ class ChargerDevice extends Homey.Device {
         let self = this;
         self.logMessage('Setting up event listeners');
         self.charger.stream.on('CommandResponse', data => {
-            this.log('Command response received:', data);
+            self.log(`[${self.getName()}] Command response received: `, data);
 
             self.setSettings({
                 commandResponse: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss') + '\n' + JSON.stringify(data, null, "  ")
@@ -398,7 +400,7 @@ class ChargerDevice extends Homey.Device {
 
     refreshAccessToken() {
         let self = this;
-        return self.getDriver().getTokens(self.getUsername(), self.getPassword())
+        return self.tokenManager.getTokens(self.getUsername(), self.getPassword())
             .then(function (tokens) {
                 if (self.charger.tokens.accessToken != tokens.accessToken) {
                     self.logMessage('Renewed access token');
@@ -538,6 +540,17 @@ class ChargerDevice extends Homey.Device {
             });
     }
 
+    setSmartCharging(option) {
+        let self = this;
+        return new EaseeCharger(self.charger.tokens).setSmartCharging(self.charger.id, option)
+            .then(function (result) {
+                return result;
+            }).catch(reason => {
+                self.logError(reason);
+                return Promise.reject(reason);
+            });
+    }    
+
     enableIdleCurrent(state) {
         let self = this;
         return new EaseeCharger(self.charger.tokens).enableIdleCurrent(self.charger.id, state)
@@ -578,7 +591,7 @@ class ChargerDevice extends Homey.Device {
             this.updateChargerStatistics();
         }, 60 * 1000 * 30));
 
-        //Refresh access token, each 15 mins from connectionManager
+        //Refresh access token, each 15 mins from tokenManager
         this.pollIntervals.push(setInterval(() => {
             this.refreshAccessToken();
         }, 60 * 1000 * 15));
@@ -672,7 +685,7 @@ class ChargerDevice extends Homey.Device {
     }
 
     logMessage(message) {
-        this.log(message);
+        this.log(`[${this.getName()}] ${message}`);
         if (this.charger.log.length > 49) {
             //Remove oldest entry
             this.charger.log.shift();

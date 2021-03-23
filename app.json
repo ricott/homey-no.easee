@@ -1,24 +1,26 @@
 {
   "id": "no.easee",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "brandColor": "#323232",
   "compatibility": ">=3.0.0",
   "sdk": 2,
   "name": {
-    "en": "Easee Charger",
-    "sv": "Easee Laddbox"
+    "en": "Easee Home",
+    "sv": "Easee Home"
   },
   "tags": {
     "en": [
       "easee",
       "charge",
-      "charger"
+      "charger",
+      "equalizer"
     ],
     "sv": [
       "easee",
       "ladda",
       "laddare",
-      "laddbox"
+      "laddbox",
+      "equalizer"
     ]
   },
   "description": {
@@ -110,8 +112,8 @@
       "id": "charger",
       "class": "other",
       "name": {
-        "en": "Easee charger",
-        "sv": "Easee laddbox"
+        "en": "Easee Charger",
+        "sv": "Easee Laddbox"
       },
       "images": {
         "large": "/drivers/charger/assets/images/large.png",
@@ -363,6 +365,234 @@
               "label": {
                 "en": "Last API error",
                 "sv": "Senaste API felet"
+              },
+              "value": ""
+            },
+            {
+              "id": "streamMessages",
+              "type": "textarea",
+              "label": {
+                "en": "Last stream messages",
+                "sv": "Senaste meddelandena"
+              },
+              "value": ""
+            },
+            {
+              "id": "log",
+              "type": "textarea",
+              "label": {
+                "en": "Log",
+                "sv": "Logg"
+              },
+              "value": ""
+            }
+          ]
+        }
+      ],
+      "pair": [
+        {
+          "id": "login_credentials",
+          "template": "login_credentials",
+          "options": {
+            "logo": "../../../assets/images/logo.png",
+            "usernameLabel": {
+              "en": "Phone number",
+              "sv": "Mobilnummer"
+            },
+            "usernamePlaceholder": "+46....",
+            "passwordLabel":  {
+              "en": "Password",
+              "sv": "Lösenord"
+            }
+          }
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ]
+    },
+    {
+      "id": "equalizer",
+      "class": "sensor",
+      "name": {
+        "en": "Easee Equalizer",
+        "sv": "Easee Equalizer"
+      },
+      "energy": {
+        "cumulative": true
+      },
+      "images": {
+        "large": "/drivers/equalizer/assets/images/large.png",
+        "small": "/drivers/equalizer/assets/images/small.png"
+      },
+      "capabilities": [
+        "measure_power",
+        "measure_power.surplus",
+        "measure_current.L1",
+        "measure_voltage.L1",
+        "measure_current.L2",
+        "measure_voltage.L2",
+        "measure_current.L3",
+        "measure_voltage.L3",
+        "meter_power",
+        "meter_power.surplus"
+      ],
+      "capabilitiesOptions": {
+        "measure_power": {
+          "title": {
+            "en": "Power import",
+            "sv": "Strömimport"
+          }
+        },
+        "measure_power.surplus": {
+          "title": {
+            "en": "Power export",
+            "sv": "Strömexport"
+          }
+        },
+        "measure_current.L1": {
+          "title": {
+            "en": "L1 current",
+            "sv": "L1 ström"
+          }
+        },
+        "measure_voltage.L1": {
+          "title": {
+            "en": "L1 voltage",
+            "sv": "L1 spänning"
+          }
+        },
+        "measure_current.L2": {
+          "title": {
+            "en": "L2 current",
+            "sv": "L2 ström"
+          }
+        },
+        "measure_voltage.L2": {
+          "title": {
+            "en": "L2 voltage",
+            "sv": "L2 spänning"
+          }
+        },
+        "measure_current.L3": {
+          "title": {
+            "en": "L3 current",
+            "sv": "L3 ström"
+          }
+        },
+        "measure_voltage.L3": {
+          "title": {
+            "en": "L3 voltage",
+            "sv": "L3 spänning"
+          }
+        },
+        "meter_power": {
+          "title": {
+            "en": "Lifetime power import",
+            "sv": "Livstid strömimport"
+          }
+        },
+        "meter_power.surplus": {
+          "title": {
+            "en": "Lifetime power export",
+            "sv": "Livstid strömexport"
+          }
+        }
+      },
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "Charger settings",
+            "sv": "Laddarens inställningar"
+          },
+          "children": [
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Information",
+            "sv": "Information"
+          },
+          "children": [
+            {
+              "id": "mainFuse",
+              "type": "label",
+              "label": {
+                "en": "Main fuse (A)",
+                "sv": "Huvudsäkring (A)"
+              },
+              "value": ""
+            },
+            {
+              "id": "circuitFuse",
+              "type": "label",
+              "label": {
+                "en": "Circuit fuse (A)",
+                "sv": "Kretssäkring (A)"
+              },
+              "value": ""
+            },
+            {
+              "id": "meterid",
+              "type": "label",
+              "label": {
+                "en": "Meter id",
+                "sv": "Meter id"
+              },
+              "value": ""
+            },
+            {
+              "id": "equalizerid",
+              "type": "label",
+              "label": {
+                "en": "Equalizer id",
+                "sv": "Equalizer id"
+              },
+              "value": ""
+            },
+            {
+              "id": "detectedPowerGridType",
+              "type": "label",
+              "label": {
+                "en": "Power grid type",
+                "sv": "Elnätstyp"
+              },
+              "value": ""
+            },
+            {
+              "id": "version",
+              "type": "label",
+              "label": {
+                "en": "Firmware version",
+                "sv": "Programvara"
+              },
+              "value": ""
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Debug",
+            "sv": "Felsökning"
+          },
+          "children": [
+            {
+              "id": "site",
+              "type": "textarea",
+              "label": {
+                "en": "Site info",
+                "sv": "Anläggning"
               },
               "value": ""
             },
@@ -692,7 +922,7 @@
         "id": "chargerState",
         "title": {
           "en": "Set charger state",
-          "sv": "Sätt laddarens tillstånd"
+          "sv": "Ändra laddarens tillstånd"
         },
         "titleFormatted": {
           "en": "Set charger state to [[chargerState]]",
@@ -724,6 +954,48 @@
                 "label": {
                   "en": "Disabled",
                   "sv": "Inaktiverad"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "smartCharging",
+        "title": {
+          "en": "Set smart charging",
+          "sv": "Ändra smart laddning"
+        },
+        "titleFormatted": {
+          "en": "Set smart charging to [[option]]",
+          "sv": "Ändra smart laddning till [[option]]"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=charger"
+          },
+          {
+            "name": "option",
+            "type": "dropdown",
+            "title": {
+              "en": "Smart charging",
+              "sv": "Smart laddning"
+            },
+            "values": [
+              {
+                "id": "true",
+                "label": {
+                  "en": "Yes",
+                  "sv": "Ja"
+                }
+              },
+              {
+                "id": "false",
+                "label": {
+                  "en": "No",
+                  "sv": "Nej"
                 }
               }
             ]
