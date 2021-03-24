@@ -515,6 +515,17 @@ class ChargerDevice extends Homey.Device {
             });
     }
 
+    overrideSchedule() {
+        let self = this;
+        return new EaseeCharger(self.charger.tokens).overrideSchedule(self.charger.id)
+            .then(function (result) {
+                return result;
+            }).catch(reason => {
+                self.logError(reason);
+                return Promise.reject(reason);
+            });
+    }
+
     setDynamicCurrentPerPhase(currentP1, currentP2, currentP3) {
         let self = this;
         return new EaseeCharger(self.charger.tokens)

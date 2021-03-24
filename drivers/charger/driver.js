@@ -54,9 +54,21 @@ class ChargerDriver extends Homey.Driver {
       'enableIdleCurrent',
       'lockCablePermanently',
       'ledStripBrightness',
-      'smartCharging'
+      'smartCharging',
+      'overrideSchedule'
     ];
     this._registerFlow('action', triggers, Homey.FlowCardAction);
+
+    this.flowCards['action.overrideSchedule'].registerRunListener((args, state) => {
+      this.log(`[${args.device.getName()}] Charger override schedule triggered`);
+
+      return args.device.overrideSchedule()
+        .then(function (result) {
+          return Promise.resolve(true);
+        }).catch(reason => {
+          return Promise.reject('Failed to override schedule');
+        });
+    });
 
     this.flowCards['action.toggleCharger'].registerRunListener((args, state) => {
       this.log(`[${args.device.getName()}] Charger toggle action triggered`);

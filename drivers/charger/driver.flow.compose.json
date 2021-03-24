@@ -7,10 +7,9 @@
         "sv": "Laddarens status ändrades"
       },
       "titleFormatted": {
-        "en": "[[device]] status changed to [[status]]",
-        "sv": "[[device]] status ändrades till [[status]]"
+        "en": "Charger status changed to [[status]]",
+        "sv": "Laddarens status ändrades till [[status]]"
       },
-      "args": [],
       "tokens": [
         {
           "name": "status",
@@ -96,16 +95,26 @@
   ],
   "actions": [
     {
-      "id": "toggleCharger",
+      "id": "overrideSchedule",
       "title": {
-        "en": "Toggle charger state",
-        "sv": "Växla laddarens funktion"
+        "en": "Override schedule",
+        "sv": "Ignorera schema"
       },
       "titleFormatted": {
-        "en": "Toggle [[device]] state",
-        "sv": "Växla [[device]] function"
+        "en": "Override schedule",
+        "sv": "Ignorera schema"
+      }
+    },
+    {
+      "id": "toggleCharger",
+      "title": {
+        "en": "Toggle state",
+        "sv": "Växla funktion"
       },
-      "args": []
+      "titleFormatted": {
+        "en": "Toggle state",
+        "sv": "Växla function"
+      }
     },
     {
       "id": "chargerControl",

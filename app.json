@@ -64,16 +64,9 @@
           "sv": "Laddarens status ändrades"
         },
         "titleFormatted": {
-          "en": "[[device]] status changed to [[status]]",
-          "sv": "[[device]] status ändrades till [[status]]"
+          "en": "Charger status changed to [[status]]",
+          "sv": "Laddarens status ändrades till [[status]]"
         },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=charger"
-          }
-        ],
         "tokens": [
           {
             "name": "status",
@@ -86,6 +79,13 @@
               "en": "Car connected",
               "sv": "Car connected"
             }
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
           }
         ]
       },
@@ -324,14 +324,32 @@
     ],
     "actions": [
       {
-        "id": "toggleCharger",
+        "id": "overrideSchedule",
         "title": {
-          "en": "Toggle charger state",
-          "sv": "Växla laddarens funktion"
+          "en": "Override schedule",
+          "sv": "Ignorera schema"
         },
         "titleFormatted": {
-          "en": "Toggle [[device]] state",
-          "sv": "Växla [[device]] function"
+          "en": "Override schedule",
+          "sv": "Ignorera schema"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+          }
+        ]
+      },
+      {
+        "id": "toggleCharger",
+        "title": {
+          "en": "Toggle state",
+          "sv": "Växla funktion"
+        },
+        "titleFormatted": {
+          "en": "Toggle state",
+          "sv": "Växla function"
         },
         "args": [
           {
