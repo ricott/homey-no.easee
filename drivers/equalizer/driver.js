@@ -19,7 +19,8 @@ class EqualizerDriver extends Homey.Driver {
 
     //Register triggers
     let triggers = [
-      'phase_load_changed'
+      'phase_load_changed',
+      'consumption_since_midnight_changed'
     ];
     this._registerFlow('trigger', triggers, Homey.FlowCardTriggerDevice);
 

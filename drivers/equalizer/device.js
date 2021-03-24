@@ -20,10 +20,11 @@ class EqualizerDevice extends Homey.Device {
             stream: null,
             lastStreamMessageTimestamp: null,
             streamMessages: [],
-            log: []
+            log: [],
+            consumptionSinceMidnight: 0
         };
 
-        this.logMessage(`Easee equalizer initiated, '${this.getName()}'`);
+        this.logMessage(`[${this.getName()}] Easee Equalizer initiated`);
 
         this.pollIntervals = [];
         this.tokenManager = TokenManager;
@@ -45,9 +46,51 @@ class EqualizerDevice extends Homey.Device {
                 self.startSignalRStream();
 
                 self._initilializeTimers();
+                self.resetTotalConsumptionAtMidnight();
             }).catch(reason => {
                 self.logMessage(reason);
             });
+    }
+
+    resetTotalConsumptionAtMidnight() {
+        let night = new Date();
+        night.setDate(night.getDate() + 1)
+        night.setHours(0);
+        night.setMinutes(0);
+        night.setSeconds(1);
+        night.setMilliseconds(0);
+        let timeToMidnight = night.getTime() - new Date().getTime();
+
+        setTimeout(() => {
+            this.log(`[${this.getName()}] Resetting total consumption at midnight`);
+            this.resetTotalConsumption();
+            this.resetTotalConsumptionAtMidnight();
+        }, timeToMidnight);
+    }
+
+    resetTotalConsumption() {
+        this.setStoreValue('totalConsumptionAtMidnight', 0);
+    }
+
+    calculateConsumptionSinceMidnight(totalConsumption) {
+        //Check if we have totalConsumption from midnight saved
+        let totalConsumptionAtMidnight = this.getStoreValue('totalConsumptionAtMidnight') || 0;
+        if (totalConsumptionAtMidnight === 0) {
+            this.log(`[${this.getName()}] Total consumption store value is '0', setting it to '${totalConsumption}'`);
+            this.setStoreValue('totalConsumptionAtMidnight', totalConsumption);
+        }
+
+        let consumptionToday = totalConsumption - totalConsumptionAtMidnight;
+        //Lets show only 2 decimals
+        consumptionToday = parseFloat(consumptionToday.toFixed(2));
+        if (this.equalizer.consumptionSinceMidnight != consumptionToday) {
+            //Consumption since midnight changed
+            this.equalizer.consumptionSinceMidnight = consumptionToday;
+            let tokens = {
+                consumptionSinceMidnight: consumptionToday
+            }
+            this.getDriver().triggerFlow('trigger.consumption_since_midnight_changed', tokens, this);
+        }
     }
 
     startSignalRStream() {
@@ -180,6 +223,7 @@ class EqualizerDevice extends Homey.Device {
                     property = 'meter_power';
                     value = data.value;
                     self._updateProperty(property, value);
+                    self.calculateConsumptionSinceMidnight(value);
                     break;
                 case 'CumulativeActivePowerExport':
                     property = 'meter_power.surplus';

@@ -45,6 +45,30 @@
           }
         }
       ]
+    },
+    {
+      "id": "consumption_since_midnight_changed",
+      "title": {
+        "en": "Consumption since midnight changed",
+        "sv": "Förbrukningen sedan midnatt ändrades"
+      },
+      "titleFormatted": {
+        "en": "Consumption since midnight is [[consumptionSinceMidnight]]kWh",
+        "sv": "Förbrukningen sedan midnatt är [[consumptionSinceMidnight]]kWh"
+      },
+      "tokens": [
+        {
+          "name": "consumptionSinceMidnight",
+          "type": "number",
+          "title": {
+            "en": "Consumption (kWh)",
+            "sv": "Förbrukning (kWh)"
+          },
+          "example": {
+            "en": "32.8"
+          }
+        }
+      ]
     }
   ],
   "conditions": [
