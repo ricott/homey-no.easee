@@ -551,16 +551,38 @@ class ChargerDevice extends Homey.Device {
             });
     }
 
-    setSmartCharging(option) {
+    pauseSmartCharging() {
         let self = this;
-        return new EaseeCharger(self.charger.tokens).setSmartCharging(self.charger.id, option)
+        return new EaseeCharger(self.charger.tokens).pauseSmartCharging(self.charger.id)
             .then(function (result) {
                 return result;
             }).catch(reason => {
                 self.logError(reason);
                 return Promise.reject(reason);
             });
-    }    
+    }
+
+    disableSmartCharging() {
+        let self = this;
+        return new EaseeCharger(self.charger.tokens).disableSmartCharging(self.charger.id)
+            .then(function (result) {
+                return result;
+            }).catch(reason => {
+                self.logError(reason);
+                return Promise.reject(reason);
+            });
+    }
+
+    enableSmartCharging() {
+        let self = this;
+        return new EaseeCharger(self.charger.tokens).enableSmartCharging(self.charger.id)
+            .then(function (result) {
+                return result;
+            }).catch(reason => {
+                self.logError(reason);
+                return Promise.reject(reason);
+            });
+    }
 
     enableIdleCurrent(state) {
         let self = this;

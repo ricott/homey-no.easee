@@ -283,41 +283,37 @@
       ]
     },
     {
-      "id": "smartCharging",
+      "id": "disableSmartCharging",
       "title": {
-        "en": "Set smart charging",
-        "sv": "Ändra smart laddning"
+        "en": "Disable smart charging",
+        "sv": "Stäng av smart charging"
       },
       "titleFormatted": {
-        "en": "Set smart charging to [[option]]",
-        "sv": "Ändra smart laddning till [[option]]"
+        "en": "Disable smart charging",
+        "sv": "Stäng av smart charging"
+      }
+    },
+    {
+      "id": "pauseSmartCharging",
+      "title": {
+        "en": "Pause smart charging",
+        "sv": "Pausa smart charging"
       },
-      "args": [
-        {
-          "name": "option",
-          "type": "dropdown",
-          "title": {
-            "en": "Smart charging",
-            "sv": "Smart laddning"
-          },
-          "values": [
-            {
-              "id": "true",
-              "label": {
-                "en": "Yes",
-                "sv": "Ja"
-              }
-            },
-            {
-              "id": "false",
-              "label": {
-                "en": "No",
-                "sv": "Nej"
-              }
-            }
-          ]
-        }
-      ]
+      "titleFormatted": {
+        "en": "Pause smart charging",
+        "sv": "Pausa smart charging"
+      }
+    },
+    {
+      "id": "enableSmartCharging",
+      "title": {
+        "en": "Enable smart charging",
+        "sv": "Sätt på smart charging"
+      },
+      "titleFormatted": {
+        "en": "Enable smart charging",
+        "sv": "Sätt på smart charging"
+      }
     },
     {
       "id": "enableIdleCurrent",

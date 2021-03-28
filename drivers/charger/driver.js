@@ -54,10 +54,48 @@ class ChargerDriver extends Homey.Driver {
       'enableIdleCurrent',
       'lockCablePermanently',
       'ledStripBrightness',
-      'smartCharging',
+      'disableSmartCharging',
+      'pauseSmartCharging',
+      'enableSmartCharging',
       'overrideSchedule'
     ];
     this._registerFlow('action', triggers, Homey.FlowCardAction);
+
+    this.flowCards['action.disableSmartCharging'].registerRunListener((args, state) => {
+      this.log(`[${args.device.getName()}] Charger disable smart charging action triggered`);
+
+      let errMsg = `Failed to disable smart charging`;
+      return args.device.disableSmartCharging()
+        .then(function (result) {
+          return Promise.resolve(true);
+        }).catch(reason => {
+          return Promise.reject(errMsg);
+        });
+    });
+
+    this.flowCards['action.pauseSmartCharging'].registerRunListener((args, state) => {
+      this.log(`[${args.device.getName()}] Charger pause smart charging action triggered`);
+
+      let errMsg = `Failed to pause smart charging`;
+      return args.device.pauseSmartCharging()
+        .then(function (result) {
+          return Promise.resolve(true);
+        }).catch(reason => {
+          return Promise.reject(errMsg);
+        });
+    });
+
+    this.flowCards['action.enableSmartCharging'].registerRunListener((args, state) => {
+      this.log(`[${args.device.getName()}] Charger enable smart charging action triggered`);
+
+      let errMsg = `Failed to enable smart charging`;
+      return args.device.enableSmartCharging()
+        .then(function (result) {
+          return Promise.resolve(true);
+        }).catch(reason => {
+          return Promise.reject(errMsg);
+        });
+    });
 
     this.flowCards['action.overrideSchedule'].registerRunListener((args, state) => {
       this.log(`[${args.device.getName()}] Charger override schedule triggered`);
@@ -160,20 +198,6 @@ class ChargerDriver extends Homey.Driver {
       let errMsg = `Failed to change state to '${args.chargerState}'`;
       let chargerState = (args.chargerState === 'true') ? true : false;
       return args.device.setChargerState(chargerState)
-        .then(function (result) {
-          return Promise.resolve(true);
-        }).catch(reason => {
-          return Promise.reject(errMsg);
-        });
-    });
-
-    this.flowCards['action.smartCharging'].registerRunListener((args, state) => {
-      this.log(`[${args.device.getName()}] Charger smart charging action triggered`);
-      this.log(`[${args.device.getName()}] smart charging: '${args.option}'`);
-
-      let errMsg = `Failed to change smart charging to '${args.option}'`;
-      let option = (args.option === 'true') ? true : false;
-      return args.device.setSmartCharging(option)
         .then(function (result) {
           return Promise.resolve(true);
         }).catch(reason => {
