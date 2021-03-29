@@ -57,7 +57,9 @@ class ChargerDriver extends Homey.Driver {
       'disableSmartCharging',
       'pauseSmartCharging',
       'enableSmartCharging',
-      'overrideSchedule'
+      'overrideSchedule',
+      'deleteSchedule',
+      'createSchedule'
     ];
     this._registerFlow('action', triggers, Homey.FlowCardAction);
 
@@ -98,13 +100,39 @@ class ChargerDriver extends Homey.Driver {
     });
 
     this.flowCards['action.overrideSchedule'].registerRunListener((args, state) => {
-      this.log(`[${args.device.getName()}] Charger override schedule triggered`);
+      this.log(`[${args.device.getName()}] Charger override schedule action triggered`);
 
       return args.device.overrideSchedule()
         .then(function (result) {
           return Promise.resolve(true);
         }).catch(reason => {
           return Promise.reject('Failed to override schedule');
+        });
+    });
+
+    this.flowCards['action.deleteSchedule'].registerRunListener((args, state) => {
+      this.log(`[${args.device.getName()}] Charger delete schedule action triggered`);
+
+      return args.device.deleteSchedule()
+        .then(function (result) {
+          return Promise.resolve(true);
+        }).catch(reason => {
+          return Promise.reject('Failed to delete schedule');
+        });
+    });
+
+    this.flowCards['action.createSchedule'].registerRunListener((args, state) => {
+      this.log(`[${args.device.getName()}] Charger create schedule action triggered`);
+      this.log(`[${args.device.getName()}] startTime: '${args.startTime}'`);
+      this.log(`[${args.device.getName()}] endTime: '${args.endTime}'`);
+      this.log(`[${args.device.getName()}] repeat: '${args.repeat}'`);
+
+      return args.device.createSchedule(args.startTime, args.endTime, args.repeat)
+        .then(function (result) {
+          return Promise.resolve(true);
+        }).catch(reason => {
+          this.log(reason);
+          return Promise.reject('Failed to create schedule');
         });
     });
 

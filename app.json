@@ -342,6 +342,88 @@
         ]
       },
       {
+        "id": "deleteSchedule",
+        "title": {
+          "en": "Delete schedule",
+          "sv": "Ta bort schema"
+        },
+        "titleFormatted": {
+          "en": "Delete schedule",
+          "sv": "Ta bort schema"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+          }
+        ]
+      },
+      {
+        "id": "createSchedule",
+        "title": {
+          "en": "Create schedule",
+          "sv": "Skapa schema"
+        },
+        "titleFormatted": {
+          "en": "Create schedule, charge between [[startTime]] - [[endTime]]. Repeat: [[repeat]]",
+          "sv": "Skapa schema, ladda mellan [[startTime]] - [[endTime]]. Repetera: [[repeat]]"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+          },
+          {
+            "name": "startTime",
+            "type": "time",
+            "title": {
+              "en": "Start time",
+              "sv": "Starttid"
+            },
+            "placeholder": {
+              "en": "01:00"
+            }
+          },
+          {
+            "name": "endTime",
+            "type": "time",
+            "title": {
+              "en": "End time",
+              "sv": "Sluttid"
+            },
+            "placeholder": {
+              "en": "05:00"
+            }
+          },
+          {
+            "name": "repeat",
+            "type": "dropdown",
+            "title": {
+              "en": "Repeat",
+              "sv": "Upprepa"
+            },
+            "values": [
+              {
+                "id": "true",
+                "label": {
+                  "en": "Yes",
+                  "sv": "Ja"
+                }
+              },
+              {
+                "id": "false",
+                "label": {
+                  "en": "No",
+                  "sv": "Nej"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
         "id": "toggleCharger",
         "title": {
           "en": "Toggle state",

@@ -1,7 +1,7 @@
 {
     "1.1.1": {
-        "en": "XXX",
-        "sv": "XXX"
+        "en": "Support for charger schedules",
+        "sv": "Stöd för laddscheman"
     },
     "1.1.0": {
         "en": "Added support for Easee Equalizer",
