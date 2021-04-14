@@ -87,7 +87,7 @@ class ChargerDevice extends Homey.Device {
         }
 
         let self = this;
-        self.tokenManager.getTokens(self.getUsername(), self.getPassword())
+        self.tokenManager.getTokens(self.getUsername(), self.getPassword(), false)
             .then(function (tokens) {
                 self.charger.tokens = tokens;
 
@@ -107,7 +107,8 @@ class ChargerDevice extends Homey.Device {
         let options = {
             accessToken: this.charger.tokens.accessToken,
             deviceType: enums.deviceTypes().CHARGER,
-            deviceId: this.charger.id
+            deviceId: this.charger.id,
+            appVersion: this.getDriver().getAppVersion()
         };
         this.charger.stream = new EaseeStream(options);
         //Initialize event listeners for the newly created charge stream
@@ -125,17 +126,23 @@ class ChargerDevice extends Homey.Device {
         //If invalid credentials the lastStreamMessageTimestamp is null
         //if so skip this check
         if (self.charger.lastStreamMessageTimestamp) {
-            //Stream disconnected or no message in last one hour        
-            if ((new Date().getTime() - self.charger.lastStreamMessageTimestamp.getTime()) > (1000 * 3600)) {
+            //Stream disconnected or no message in last 30 minutes
+            if ((new Date().getTime() - self.charger.lastStreamMessageTimestamp.getTime()) > (1000 * 1800)) {
                 //if ((new Date().getTime() - self.charger.lastStreamMessageTimestamp.getTime()) > (1000 * 60)) {
                 //Lets start a new connection, after making sure previous is killed
                 self.logMessage(`SignalR stream is idle, for charger '${self.charger.id}'`);
 
-                this.stopSignalRStream();
-                //Sleep to make sure the old connection is killed properly
-                sleep(5000).then(() => {
-                    this.startSignalRStream();
-                });
+                //Not unlikely we are here due to access token is invalid, lets refresh it
+                self.refreshAccessToken(true)
+                    .then(() => {
+                        self.stopSignalRStream();
+                        //Sleep to make sure the old connection is killed properly
+                        sleep(5000).then(() => {
+                            self.startSignalRStream();
+                        });
+                    }).catch(reason => {
+                        self.logError(reason);
+                    });
             }
         }
     }
@@ -398,9 +405,9 @@ class ChargerDevice extends Homey.Device {
         return decrypted.toString();
     }
 
-    refreshAccessToken() {
+    refreshAccessToken(force) {
         let self = this;
-        return self.tokenManager.getTokens(self.getUsername(), self.getPassword())
+        return self.tokenManager.getTokens(self.getUsername(), self.getPassword(), force)
             .then(function (tokens) {
                 if (self.charger.tokens.accessToken != tokens.accessToken) {
                     self.logMessage('Renewed access token');
@@ -413,12 +420,20 @@ class ChargerDevice extends Homey.Device {
             });
     }
 
+    createEaseeChargerClient() {
+        let options = {
+            accessToken: this.charger.tokens.accessToken,
+            appVersion: this.getDriver().getAppVersion()
+        };
+        return new EaseeCharger(options);
+    }
+
     //Info not part of streaming API, refreshed once every 30 mins
     updateChargerStatistics() {
         let self = this;
         if (self.showLast30daysStats) {
             self.logMessage('Getting charger statistics, last 30 days');
-            new EaseeCharger(self.charger.tokens).getLast30DaysChargekWh(self.charger.id)
+            self.createEaseeChargerClient().getLast30DaysChargekWh(self.charger.id)
                 .then(function (last30DayskWh) {
                     self._updateProperty('measure_charge', last30DayskWh);
                 }).catch(reason => {
@@ -428,7 +443,7 @@ class ChargerDevice extends Homey.Device {
 
         if (self.showLastMonthStats) {
             self.logMessage('Getting charger statistics, previous calendar month');
-            new EaseeCharger(self.charger.tokens).getLastMonthChargekWh(self.charger.id)
+            self.createEaseeChargerClient().getLastMonthChargekWh(self.charger.id)
                 .then(function (lastMonthkWh) {
                     self._updateProperty('measure_charge.last_month', lastMonthkWh);
                 }).catch(reason => {
@@ -441,7 +456,7 @@ class ChargerDevice extends Homey.Device {
     updateChargerSiteInfo() {
         let self = this;
         self.logMessage('Getting charger site info');
-        new EaseeCharger(self.charger.tokens).getSiteInfo(self.charger.id)
+        self.createEaseeChargerClient().getSiteInfo(self.charger.id)
             .then(function (site) {
 
                 self.charger.circuitId = site.circuits[0].id;
@@ -462,7 +477,7 @@ class ChargerDevice extends Homey.Device {
 
     pauseCharging() {
         let self = this;
-        return new EaseeCharger(self.charger.tokens).pauseCharging(self.charger.id)
+        return self.createEaseeChargerClient().pauseCharging(self.charger.id)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -473,7 +488,7 @@ class ChargerDevice extends Homey.Device {
 
     resumeCharging() {
         let self = this;
-        return new EaseeCharger(self.charger.tokens).resumeCharging(self.charger.id)
+        return self.createEaseeChargerClient().resumeCharging(self.charger.id)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -484,7 +499,7 @@ class ChargerDevice extends Homey.Device {
 
     startCharging() {
         let self = this;
-        return new EaseeCharger(self.charger.tokens).startCharging(self.charger.id)
+        return self.createEaseeChargerClient().startCharging(self.charger.id)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -495,7 +510,7 @@ class ChargerDevice extends Homey.Device {
 
     stopCharging() {
         let self = this;
-        return new EaseeCharger(self.charger.tokens).stopCharging(self.charger.id)
+        return self.createEaseeChargerClient().stopCharging(self.charger.id)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -506,7 +521,7 @@ class ChargerDevice extends Homey.Device {
 
     toggleCharging() {
         let self = this;
-        return new EaseeCharger(self.charger.tokens).toggleCharging(self.charger.id)
+        return self.createEaseeChargerClient().toggleCharging(self.charger.id)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -517,7 +532,7 @@ class ChargerDevice extends Homey.Device {
 
     overrideSchedule() {
         let self = this;
-        return new EaseeCharger(self.charger.tokens).overrideSchedule(self.charger.id)
+        return self.createEaseeChargerClient().overrideSchedule(self.charger.id)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -528,7 +543,7 @@ class ChargerDevice extends Homey.Device {
 
     deleteSchedule() {
         let self = this;
-        return new EaseeCharger(self.charger.tokens).deleteBasicChargePlan(self.charger.id)
+        return self.createEaseeChargerClient().deleteBasicChargePlan(self.charger.id)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -539,7 +554,7 @@ class ChargerDevice extends Homey.Device {
 
     createSchedule(startTime, endTime, repeat) {
         let self = this;
-        return new EaseeCharger(self.charger.tokens).setBasicChargePlan(self.charger.id,
+        return self.createEaseeChargerClient().setBasicChargePlan(self.charger.id,
             startTime, endTime, repeat)
             .then(function (result) {
                 return result;
@@ -551,7 +566,7 @@ class ChargerDevice extends Homey.Device {
 
     setDynamicCurrentPerPhase(currentP1, currentP2, currentP3) {
         let self = this;
-        return new EaseeCharger(self.charger.tokens)
+        return self.createEaseeChargerClient()
             .setDynamicCurrentPerPhase(self.charger.siteId,
                 self.charger.circuitId,
                 currentP1, currentP2, currentP3)
@@ -565,7 +580,7 @@ class ChargerDevice extends Homey.Device {
 
     setChargerState(state) {
         let self = this;
-        return new EaseeCharger(self.charger.tokens).setChargerState(self.charger.id, state)
+        return self.createEaseeChargerClient().setChargerState(self.charger.id, state)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -576,7 +591,7 @@ class ChargerDevice extends Homey.Device {
 
     pauseSmartCharging() {
         let self = this;
-        return new EaseeCharger(self.charger.tokens).pauseSmartCharging(self.charger.id)
+        return self.createEaseeChargerClient().pauseSmartCharging(self.charger.id)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -587,7 +602,7 @@ class ChargerDevice extends Homey.Device {
 
     disableSmartCharging() {
         let self = this;
-        return new EaseeCharger(self.charger.tokens).disableSmartCharging(self.charger.id)
+        return self.createEaseeChargerClient().disableSmartCharging(self.charger.id)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -598,7 +613,7 @@ class ChargerDevice extends Homey.Device {
 
     enableSmartCharging() {
         let self = this;
-        return new EaseeCharger(self.charger.tokens).enableSmartCharging(self.charger.id)
+        return self.createEaseeChargerClient().enableSmartCharging(self.charger.id)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -609,7 +624,7 @@ class ChargerDevice extends Homey.Device {
 
     enableIdleCurrent(state) {
         let self = this;
-        return new EaseeCharger(self.charger.tokens).enableIdleCurrent(self.charger.id, state)
+        return self.createEaseeChargerClient().enableIdleCurrent(self.charger.id, state)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -620,7 +635,7 @@ class ChargerDevice extends Homey.Device {
 
     lockCablePermanently(state) {
         let self = this;
-        return new EaseeCharger(self.charger.tokens).lockCablePermanently(self.charger.id, state)
+        return self.createEaseeChargerClient().lockCablePermanently(self.charger.id, state)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -631,7 +646,7 @@ class ChargerDevice extends Homey.Device {
 
     ledStripBrightness(brightness) {
         let self = this;
-        return new EaseeCharger(self.charger.tokens).ledStripBrightness(self.charger.id, brightness)
+        return self.createEaseeChargerClient().ledStripBrightness(self.charger.id, brightness)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -649,7 +664,7 @@ class ChargerDevice extends Homey.Device {
 
         //Refresh access token, each 15 mins from tokenManager
         this.pollIntervals.push(setInterval(() => {
-            this.refreshAccessToken();
+            this.refreshAccessToken(false);
         }, 60 * 1000 * 15));
 
         //Check that stream is running, if not start new

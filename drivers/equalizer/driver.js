@@ -1,17 +1,31 @@
 'use strict';
 
 const Homey = require('homey');
+const HomeyModule = require('homey');
 const EaseeCharger = require('../../lib/easee.js');
 const TokenManager = require('../../lib/tokenManager.js');
 
 class EqualizerDriver extends Homey.Driver {
 
   onInit() {
-    this.log('Easee Equalizer driver has been initialized');
+    this.updateAppVersion();
+    this.log(`[Easee Home v${this.getAppVersion()}] Equalizer driver has been initialized`);
 
     this.flowCards = {};
     this._registerFlows();
     this.tokenManager = TokenManager;
+  }
+
+  updateAppVersion() {
+    let version = 'unknown';
+    if (HomeyModule && HomeyModule.manifest) {
+      version = HomeyModule.manifest.version || version;
+    }
+    this.appVersion = version;
+  }
+
+  getAppVersion() {
+    return this.appVersion;
   }
 
   _registerFlows() {

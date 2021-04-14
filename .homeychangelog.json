@@ -1,4 +1,8 @@
 {
+    "1.1.2": {
+        "en": "Stability improvements",
+        "sv": "Stabilitetsförbättringar"
+    },
     "1.1.1": {
         "en": "Support for charger schedules",
         "sv": "Stöd för laddscheman"

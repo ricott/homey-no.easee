@@ -98,7 +98,8 @@ class EqualizerDevice extends Homey.Device {
         let options = {
             accessToken: this.equalizer.tokens.accessToken,
             deviceType: enums.deviceTypes().EQUALIZER,
-            deviceId: this.equalizer.id
+            deviceId: this.equalizer.id,
+            appVersion: this.getDriver().getAppVersion()
         };
         this.equalizer.stream = new EaseeStream(options);
         //Initialize event listeners for the newly created device stream
