@@ -40,6 +40,9 @@ class ChargerDevice extends Homey.Device {
 
         this.logMessage(`Easee charger initiated, '${this.getName()}'`);
 
+        //App was restarted, Zero out last error field
+        this.updateSetting('easee_last_error', '');
+
         this.pollIntervals = [];
         this.showLast30daysStats = this.getSettings().showLast30daysStats;
         this.showLastMonthStats = this.getSettings().showLastMonthStats;
@@ -215,12 +218,7 @@ class ChargerDevice extends Homey.Device {
         self.logMessage('Setting up event listeners');
         self.charger.stream.on('CommandResponse', data => {
             self.log(`[${self.getName()}] Command response received: `, data);
-
-            self.setSettings({
-                commandResponse: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss') + '\n' + JSON.stringify(data, null, "  ")
-            }).catch(err => {
-                self.error('Failed to update settings', err);
-            });
+            self.updateSetting('commandResponse', dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss') + '\n' + JSON.stringify(data, null, "  "));
         });
 
         self.charger.stream.on('Observation', data => {
@@ -360,10 +358,7 @@ class ChargerDevice extends Homey.Device {
             }
         }
 
-        this.setSettings({ easee_last_error: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss') + '\n' + message })
-            .catch(err => {
-                this.error('Failed to update settings', err);
-            });
+        this.updateSetting('easee_last_error', dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss') + '\n' + message);
     }
 
     isError(err) {
@@ -461,6 +456,10 @@ class ChargerDevice extends Homey.Device {
 
                 self.charger.circuitId = site.circuits[0].id;
                 self.charger.siteId = site.circuits[0].siteId;
+
+                if (self.charger.circuitId == 0 || self.charger.siteId == 0) {
+                    throw new Error(`Invalid values, found '0'. CircuitId: ${self.charger.circuitId} and SiteId: ${self.charger.siteId}`);
+                }
 
                 self.setSettings({
                     mainFuse: `${Math.round(site.ratedCurrent)}`,
