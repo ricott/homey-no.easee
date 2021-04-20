@@ -1,4 +1,8 @@
 {
+    "1.1.3": {
+        "en": "SiteId and CircuitId added to advanced settings / information",
+        "sv": "Anläggningsid och kretsid tillagda under avancerade inställningar / information"
+    },
     "1.1.2": {
         "en": "Stability improvements",
         "sv": "Stabilitetsförbättringar"

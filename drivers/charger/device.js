@@ -29,8 +29,6 @@ class ChargerDevice extends Homey.Device {
         this.charger = {
             id: this.getData().id,
             name: this.getName(),
-            siteId: 0,
-            circuitId: 0,
             tokens: null,
             stream: null,
             lastStreamMessageTimestamp: null,
@@ -454,17 +452,12 @@ class ChargerDevice extends Homey.Device {
         self.createEaseeChargerClient().getSiteInfo(self.charger.id)
             .then(function (site) {
 
-                self.charger.circuitId = site.circuits[0].id;
-                self.charger.siteId = site.circuits[0].siteId;
-
-                if (self.charger.circuitId == 0 || self.charger.siteId == 0) {
-                    throw new Error(`Invalid values, found '0'. CircuitId: ${self.charger.circuitId} and SiteId: ${self.charger.siteId}`);
-                }
-
                 self.setSettings({
                     mainFuse: `${Math.round(site.ratedCurrent)}`,
                     circuitFuse: `${Math.round(site.circuits[0].ratedCurrent)}`,
-                    site: JSON.stringify(site, null, "  ")
+                    site: JSON.stringify(site, null, "  "),
+                    siteId: `${site.circuits[0].siteId}`,
+                    circuitId: `${site.circuits[0].id}`
                 }).catch(err => {
                     self.error('Failed to update settings', err);
                 });
@@ -566,8 +559,7 @@ class ChargerDevice extends Homey.Device {
     setDynamicCurrentPerPhase(currentP1, currentP2, currentP3) {
         let self = this;
         return self.createEaseeChargerClient()
-            .setDynamicCurrentPerPhase(self.charger.siteId,
-                self.charger.circuitId,
+            .setDynamicCurrentPerPhase(self.getSettings().siteId, self.getSettings().circuitId,
                 currentP1, currentP2, currentP3)
             .then(function (result) {
                 return result;

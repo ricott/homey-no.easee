@@ -114,6 +114,24 @@
       },
       "children": [
         {
+          "id": "siteId",
+          "type": "label",
+          "label": {
+            "en": "Site id",
+            "sv": "Anläggningsid"
+          },
+          "value": ""
+        },
+        {
+          "id": "circuitId",
+          "type": "label",
+          "label": {
+            "en": "Circuit id",
+            "sv": "Kretsid"
+          },
+          "value": ""
+        },
+        {
           "id": "detectedPowerGridType",
           "type": "label",
           "label": {
