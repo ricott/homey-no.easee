@@ -73,7 +73,9 @@ class ChargerDriver extends Homey.Driver {
       'enableSmartCharging',
       'overrideSchedule',
       'deleteSchedule',
-      'createSchedule'
+      'createSchedule',
+      'increaseCircuitCurrent',
+      'decreaseCircuitCurrent'
     ];
     this._registerFlow('action', triggers, Homey.FlowCardAction);
 
@@ -287,6 +289,69 @@ class ChargerDriver extends Homey.Driver {
           return Promise.reject(errMsg);
         });
     });
+
+
+    this.flowCards['action.decreaseCircuitCurrent'].registerRunListener((args, state) => {
+      this.log(`[${args.device.getName()}] Decrease dynamic circuit current action triggered`);
+      //Lets fetch the current dynamic current via API, to make sure we are adjusting the real current
+      return args.device.getDynamicCurrent()
+        .then(dynamicCurrent => {
+          this.log(`[${args.device.getName()}] dynamic current: '${dynamicCurrent.phase1}/${dynamicCurrent.phase2}/${dynamicCurrent.phase3}'`);
+          //A user can have locked current to a single phase for one phase charging, lets skip adjusting phases with 0 current
+          if (dynamicCurrent.phase1 > 0) {
+            dynamicCurrent.phase1 -= 1;
+          }
+          if (dynamicCurrent.phase2 > 0) {
+            dynamicCurrent.phase2 -= 1;
+          }
+          if (dynamicCurrent.phase3 > 0) {
+            dynamicCurrent.phase3 -= 1;
+          }
+          this.log(`[${args.device.getName()}] setting dynamic current: '${dynamicCurrent.phase1}/${dynamicCurrent.phase2}/${dynamicCurrent.phase3}'`);
+
+          return args.device.setDynamicCurrentPerPhase(
+            dynamicCurrent.phase1, dynamicCurrent.phase2, dynamicCurrent.phase3)
+            .then(function (result) {
+              return Promise.resolve(true);
+            }).catch(reason => {
+              return Promise.reject('Failed to decrease dynamic circuit current');
+            });
+        }).catch(reason => {
+          return Promise.reject('Failed to decrease dynamic circuit current');
+        });
+    });
+
+    this.flowCards['action.increaseCircuitCurrent'].registerRunListener((args, state) => {
+      this.log(`[${args.device.getName()}] Increase dynamic circuit current action triggered`);
+      //Lets fetch the current dynamic current via API, to make sure we are adjusting the real current
+      return args.device.getDynamicCurrent()
+        .then(dynamicCurrent => {
+          this.log(`[${args.device.getName()}] dynamic current: '${dynamicCurrent.phase1}/${dynamicCurrent.phase2}/${dynamicCurrent.phase3}'`);
+          //A user can have locked current to a single phase for one phase charging, lets skip adjusting phases with 0 current
+          //Don't set current larger than installed fuse size
+          if (dynamicCurrent.phase1 > 0) {
+            dynamicCurrent.phase1 = Math.min(dynamicCurrent.phase1 += 1, args.device.getSettings().chargerFuse);
+          }
+          if (dynamicCurrent.phase2 > 0) {
+            dynamicCurrent.phase2 = Math.min(dynamicCurrent.phase2 += 1, args.device.getSettings().chargerFuse);
+          }
+          if (dynamicCurrent.phase3 > 0) {
+            dynamicCurrent.phase3 = Math.min(dynamicCurrent.phase3 += 1, args.device.getSettings().chargerFuse);
+          }
+          this.log(`[${args.device.getName()}] setting dynamic current: '${dynamicCurrent.phase1}/${dynamicCurrent.phase2}/${dynamicCurrent.phase3}'`);
+
+          return args.device.setDynamicCurrentPerPhase(
+            dynamicCurrent.phase1, dynamicCurrent.phase2, dynamicCurrent.phase3)
+            .then(function (result) {
+              return Promise.resolve(true);
+            }).catch(reason => {
+              return Promise.reject('Failed to increase dynamic circuit current');
+            });
+        }).catch(reason => {
+          return Promise.reject('Failed to increase dynamic circuit current');
+        });
+    });
+
   }
 
   _registerFlow(type, keys, cls) {

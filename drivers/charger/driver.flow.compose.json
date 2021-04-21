@@ -238,6 +238,28 @@
       ]
     },
     {
+      "id": "increaseCircuitCurrent",
+      "title": {
+        "en": "Increase dynamic circuit current by 1 amp",
+        "sv": "Öka den dynamisk strömstyrkan med 1 amp"
+      },
+      "titleFormatted": {
+        "en": "Increase dynamic circuit current by 1 amp",
+        "sv": "Öka den dynamisk strömstyrkan med 1 amp"
+      }
+    },
+    {
+      "id": "decreaseCircuitCurrent",
+      "title": {
+        "en": "Decrease dynamic circuit current by 1 amp",
+        "sv": "Minska den dynamisk strömstyrkan med 1 amp"
+      },
+      "titleFormatted": {
+        "en": "Decrease dynamic circuit current by 1 amp",
+        "sv": "Minska den dynamisk strömstyrkan med 1 amp"
+      }
+    },
+    {
       "id": "circuitCurrentControl",
       "title": {
         "en": "Set dynamic circuit current",

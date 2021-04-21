@@ -21,7 +21,7 @@ describe('#Charger', function () {
         let tokens = await tokenManager.getTokens(config.credentials.userName, config.credentials.password);
         let easee = new Easee(tokens);
         let chargerConfig = await easee.getChargerConfig(config.charger);
-        console.log(util.inspect(chargerConfig, { showHidden: false, depth: null }));
+        //console.log(util.inspect(chargerConfig, { showHidden: false, depth: null }));
         assert.strictEqual(chargerConfig.isEnabled, true);
     });
 
@@ -29,7 +29,7 @@ describe('#Charger', function () {
         let tokens = await tokenManager.getTokens(config.credentials.userName, config.credentials.password);
         let easee = new Easee(tokens);
         let chargerDetails = await easee.getChargerDetails(config.charger);
-        console.log(util.inspect(chargerDetails, { showHidden: false, depth: null }));
+        //console.log(util.inspect(chargerDetails, { showHidden: false, depth: null }));
         assert.strictEqual(chargerDetails.serialNumber, config.charger);
     });
 
@@ -37,8 +37,16 @@ describe('#Charger', function () {
         let tokens = await tokenManager.getTokens(config.credentials.userName, config.credentials.password);
         let easee = new Easee(tokens);
         let chargerState = await easee.getChargerState(config.charger);
-        console.log(util.inspect(chargerState, { showHidden: false, depth: null }));
+        //console.log(util.inspect(chargerState, { showHidden: false, depth: null }));
         assert.strictEqual((chargerState.voltage > 200), true);
+    });
+
+    it('dynamic current on phase1 should be a number', async () => {
+        let tokens = await tokenManager.getTokens(config.credentials.userName, config.credentials.password);
+        let easee = new Easee(tokens);
+        let dynamicCurrent = await easee.getDynamicCurrent(config.siteId, config.circuitId);
+        console.log(util.inspect(dynamicCurrent, { showHidden: false, depth: null }));
+        assert.strictEqual(!isNaN(dynamicCurrent.phase1), true);
     });
 
 });
@@ -48,7 +56,7 @@ describe('#Charger', function () {
             it('setting dynamic current should not throw an error', async () => {
                 let tokens = await tokenManager.getTokens(config.credentials.userName, config.credentials.password);
                 let easee = new Easee(tokens);
-                let result = await easee.setDynamicCurrent(14652, 724, 15);
+                let result = await easee.setDynamicCurrent(config.siteId, config.circuitId, 15);
                 console.log(result);
                 //assert.strictEqual((isNaN(chargerConsumption) === false), true);
             });
