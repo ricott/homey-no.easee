@@ -29,7 +29,6 @@ class ChargerDevice extends Homey.Device {
         this.charger = {
             id: this.getData().id,
             name: this.getName(),
-            tokens: null,
             stream: null,
             lastStreamMessageTimestamp: null,
             streamMessages: [],
@@ -90,7 +89,7 @@ class ChargerDevice extends Homey.Device {
         let self = this;
         self.tokenManager.getTokens(self.getUsername(), self.getPassword(), false)
             .then(function (tokens) {
-                self.charger.tokens = tokens;
+                self.setToken(tokens);
 
                 self.updateChargerSiteInfo();
                 self.updateChargerStatistics();
@@ -103,10 +102,18 @@ class ChargerDevice extends Homey.Device {
             });
     }
 
+    getToken() {
+        return this.getStoreValue('tokens');
+    }
+
+    setToken(tokens) {
+        this.setStoreValue('tokens', tokens);
+    }
+
     startSignalRStream() {
         this.logMessage(`Opening SignalR stream, for charger '${this.charger.id}'`);
         let options = {
-            accessToken: this.charger.tokens.accessToken,
+            accessToken: this.getToken().accessToken,
             deviceType: enums.deviceTypes().CHARGER,
             deviceId: this.charger.id,
             appVersion: this.driver.getAppVersion()
@@ -402,10 +409,10 @@ class ChargerDevice extends Homey.Device {
         let self = this;
         return self.tokenManager.getTokens(self.getUsername(), self.getPassword(), force)
             .then(function (tokens) {
-                if (self.charger.tokens.accessToken != tokens.accessToken) {
+                if (self.getToken().accessToken != tokens.accessToken) {
                     self.logMessage('Renewed access token');
                 }
-                self.charger.tokens = tokens;
+                self.setToken(tokens);
                 return Promise.resolve(true);
             }).catch(reason => {
                 self.logError(reason);
@@ -415,7 +422,7 @@ class ChargerDevice extends Homey.Device {
 
     createEaseeChargerClient() {
         let options = {
-            accessToken: this.charger.tokens.accessToken,
+            accessToken: this.getToken().accessToken,
             appVersion: this.driver.getAppVersion()
         };
         return new EaseeCharger(options);

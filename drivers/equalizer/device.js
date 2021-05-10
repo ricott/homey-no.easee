@@ -16,7 +16,6 @@ class EqualizerDevice extends Homey.Device {
             id: this.getData().id,
             name: this.getName(),
             mainFuse: this.getSettings().mainFuse,
-            tokens: null,
             stream: null,
             lastStreamMessageTimestamp: null,
             streamMessages: [],
@@ -38,7 +37,7 @@ class EqualizerDevice extends Homey.Device {
         let self = this;
         self.tokenManager.getTokens(self.getUsername(), self.getPassword())
             .then(function (tokens) {
-                self.equalizer.tokens = tokens;
+                self.setToken(tokens);
 
                 self.updateEqualizerSiteInfo();
 
@@ -50,6 +49,14 @@ class EqualizerDevice extends Homey.Device {
             }).catch(reason => {
                 self.logMessage(reason);
             });
+    }
+
+    getToken() {
+        return this.getStoreValue('tokens');
+    }
+
+    setToken(tokens) {
+        this.setStoreValue('tokens', tokens);
     }
 
     resetTotalConsumptionAtMidnight() {
@@ -96,7 +103,7 @@ class EqualizerDevice extends Homey.Device {
     startSignalRStream() {
         this.logMessage(`Opening SignalR stream, for equalizer '${this.equalizer.id}'`);
         let options = {
-            accessToken: this.equalizer.tokens.accessToken,
+            accessToken: this.getToken().accessToken,
             deviceType: enums.deviceTypes().EQUALIZER,
             deviceId: this.equalizer.id,
             appVersion: this.driver.getAppVersion()
@@ -243,7 +250,7 @@ class EqualizerDevice extends Homey.Device {
     updateEqualizerSiteInfo() {
         let self = this;
         self.logMessage('Getting equalizer site info');
-        new Easee(self.equalizer.tokens).getEqualizerSiteInfo(self.equalizer.id)
+        new Easee(self.getToken()).getEqualizerSiteInfo(self.equalizer.id)
             .then(function (site) {
 
                 self.equalizer.mainFuse = Math.round(site.ratedCurrent);
@@ -324,10 +331,10 @@ class EqualizerDevice extends Homey.Device {
         let self = this;
         return self.tokenManager.getTokens(self.getUsername(), self.getPassword())
             .then(function (tokens) {
-                if (self.equalizer.tokens.accessToken != tokens.accessToken) {
+                if (self.getToken().accessToken != tokens.accessToken) {
                     self.logMessage('Renewed access token');
                 }
-                self.equalizer.tokens = tokens;
+                self.setToken(tokens);
                 return Promise.resolve(true);
             }).catch(reason => {
                 self.logError(reason);
