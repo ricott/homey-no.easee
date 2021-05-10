@@ -25,7 +25,7 @@ const deviceCapabilitesList = ['charger_status',
 
 class ChargerDevice extends Homey.Device {
 
-    onInit() {
+    async onInit() {
         this.charger = {
             id: this.getData().id,
             name: this.getName(),
@@ -81,7 +81,7 @@ class ChargerDevice extends Homey.Device {
             return Promise.resolve(true);
         });
 
-        if (!Homey.ManagerSettings.get(`${this.charger.id}.username`)) {
+        if (!this.homey.settings.get(`${this.charger.id}.username`)) {
             //This is a newly added device, lets copy login details to homey settings
             this.logMessage(`Storing credentials for user '${this.getStoreValue('username')}'`);
             this.storeCredentialsEncrypted(this.getStoreValue('username'), this.getStoreValue('password'));
@@ -109,7 +109,7 @@ class ChargerDevice extends Homey.Device {
             accessToken: this.charger.tokens.accessToken,
             deviceType: enums.deviceTypes().CHARGER,
             deviceId: this.charger.id,
-            appVersion: this.getDriver().getAppVersion()
+            appVersion: this.driver.getAppVersion()
         };
         this.charger.stream = new EaseeStream(options);
         //Initialize event listeners for the newly created charge stream
@@ -365,8 +365,8 @@ class ChargerDevice extends Homey.Device {
 
     storeCredentialsEncrypted(plainUser, plainPassword) {
         this.logMessage(`Encrypting credentials for user '${plainUser}'`);
-        Homey.ManagerSettings.set(`${this.charger.id}.username`, this.encryptText(plainUser));
-        Homey.ManagerSettings.set(`${this.charger.id}.password`, this.encryptText(plainPassword));
+        this.homey.settings.set(`${this.charger.id}.username`, this.encryptText(plainUser));
+        this.homey.settings.set(`${this.charger.id}.password`, this.encryptText(plainPassword));
 
         //Remove unencrypted credentials passed from driver
         this.unsetStoreValue('username');
@@ -374,11 +374,11 @@ class ChargerDevice extends Homey.Device {
     }
 
     getUsername() {
-        return this.decryptText(Homey.ManagerSettings.get(`${this.charger.id}.username`));
+        return this.decryptText(this.homey.settings.get(`${this.charger.id}.username`));
     }
 
     getPassword() {
-        return this.decryptText(Homey.ManagerSettings.get(`${this.charger.id}.password`));
+        return this.decryptText(this.homey.settings.get(`${this.charger.id}.password`));
     }
 
     encryptText(text) {
@@ -416,7 +416,7 @@ class ChargerDevice extends Homey.Device {
     createEaseeChargerClient() {
         let options = {
             accessToken: this.charger.tokens.accessToken,
-            appVersion: this.getDriver().getAppVersion()
+            appVersion: this.driver.getAppVersion()
         };
         return new EaseeCharger(options);
     }
@@ -704,7 +704,7 @@ class ChargerDevice extends Homey.Device {
                     let tokens = {
                         status: value
                     }
-                    this.getDriver().triggerFlow('trigger.charger_status_changed', tokens, this);
+                    this.driver.triggerDeviceFlow('charger_status_changed', tokens, this);
                 }
             } else {
                 this.setCapabilityValue(key, value);
@@ -720,8 +720,8 @@ class ChargerDevice extends Homey.Device {
         this.stopSignalRStream();
         this.updateStatus.cancel();
 
-        Homey.ManagerSettings.unset(`${this.charger.id}.username`);
-        Homey.ManagerSettings.unset(`${this.charger.id}.password`);
+        this.homey.settings.unset(`${this.charger.id}.username`);
+        this.homey.settings.unset(`${this.charger.id}.password`);
         this.charger = null;
     }
 
@@ -730,15 +730,15 @@ class ChargerDevice extends Homey.Device {
         this.charger.name = name;
     }
 
-    async onSettings(oldSettings, newSettings, changedKeysArr) {
+    async onSettings({ oldSettings, newSettings, changedKeys }) {
         let fieldsChanged = false;
 
-        if (changedKeysArr.indexOf("showLast30daysStats") > -1) {
+        if (changedKeys.indexOf("showLast30daysStats") > -1) {
             this.logMessage('showLast30daysStats changed to:', newSettings.showLast30daysStats);
             this.showLast30daysStats = newSettings.showLast30daysStats;
             fieldsChanged = true;
         }
-        if (changedKeysArr.indexOf("showLastMonthStats") > -1) {
+        if (changedKeys.indexOf("showLastMonthStats") > -1) {
             this.logMessage('showLastMonthStats changed to:', newSettings.showLastMonthStats);
             this.showLastMonthStats = newSettings.showLastMonthStats;
             fieldsChanged = true;

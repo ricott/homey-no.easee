@@ -11,7 +11,7 @@ const algorithm = 'aes-256-cbc';
 
 class EqualizerDevice extends Homey.Device {
 
-    onInit() {
+    async onInit() {
         this.equalizer = {
             id: this.getData().id,
             name: this.getName(),
@@ -29,7 +29,7 @@ class EqualizerDevice extends Homey.Device {
         this.pollIntervals = [];
         this.tokenManager = TokenManager;
 
-        if (!Homey.ManagerSettings.get(`${this.equalizer.id}.username`)) {
+        if (!this.homey.settings.get(`${this.equalizer.id}.username`)) {
             //This is a newly added device, lets copy login details to homey settings
             this.logMessage(`Storing credentials for user '${this.getStoreValue('username')}'`);
             this.storeCredentialsEncrypted(this.getStoreValue('username'), this.getStoreValue('password'));
@@ -89,7 +89,7 @@ class EqualizerDevice extends Homey.Device {
             let tokens = {
                 consumptionSinceMidnight: consumptionToday
             }
-            this.getDriver().triggerFlow('trigger.consumption_since_midnight_changed', tokens, this);
+            this.driver.triggerDeviceFlow('consumption_since_midnight_changed', tokens, this);
         }
     }
 
@@ -99,7 +99,7 @@ class EqualizerDevice extends Homey.Device {
             accessToken: this.equalizer.tokens.accessToken,
             deviceType: enums.deviceTypes().EQUALIZER,
             deviceId: this.equalizer.id,
-            appVersion: this.getDriver().getAppVersion()
+            appVersion: this.driver.getAppVersion()
         };
         this.equalizer.stream = new EaseeStream(options);
         //Initialize event listeners for the newly created device stream
@@ -287,8 +287,8 @@ class EqualizerDevice extends Homey.Device {
 
     storeCredentialsEncrypted(plainUser, plainPassword) {
         this.logMessage(`Encrypting credentials for user '${plainUser}'`);
-        Homey.ManagerSettings.set(`${this.equalizer.id}.username`, this.encryptText(plainUser));
-        Homey.ManagerSettings.set(`${this.equalizer.id}.password`, this.encryptText(plainPassword));
+        this.homey.settings.set(`${this.equalizer.id}.username`, this.encryptText(plainUser));
+        this.homey.settings.set(`${this.equalizer.id}.password`, this.encryptText(plainPassword));
 
         //Remove unencrypted credentials passed from driver
         this.unsetStoreValue('username');
@@ -296,11 +296,11 @@ class EqualizerDevice extends Homey.Device {
     }
 
     getUsername() {
-        return this.decryptText(Homey.ManagerSettings.get(`${this.equalizer.id}.username`));
+        return this.decryptText(this.homey.settings.get(`${this.equalizer.id}.username`));
     }
 
     getPassword() {
-        return this.decryptText(Homey.ManagerSettings.get(`${this.equalizer.id}.password`));
+        return this.decryptText(this.homey.settings.get(`${this.equalizer.id}.password`));
     }
 
     encryptText(text) {
@@ -383,7 +383,7 @@ class EqualizerDevice extends Homey.Device {
                         percentageUtilized: parseFloat(utilization.toFixed(2)),
                         currentUtilized: parseFloat(value.toFixed(2))
                     }
-                    this.getDriver().triggerFlow('trigger.phase_load_changed', tokens, this);
+                    this.driver.triggerDeviceFlow('phase_load_changed', tokens, this);
                 }
 
             } else {
@@ -399,22 +399,14 @@ class EqualizerDevice extends Homey.Device {
         this._deleteTimers();
         this.stopSignalRStream();
 
-        Homey.ManagerSettings.unset(`${this.equalizer.id}.username`);
-        Homey.ManagerSettings.unset(`${this.equalizer.id}.password`);
+        this.homey.settings.unset(`${this.equalizer.id}.username`);
+        this.homey.settings.unset(`${this.equalizer.id}.password`);
         this.equalizer = null;
     }
 
     onRenamed(name) {
         this.logMessage(`Renaming Easee equalizer from '${this.equalizer.name}' to '${name}'`);
         this.equalizer.name = name;
-    }
-
-    async onSettings(oldSettings, newSettings, changedKeysArr) {
-        let fieldsChanged = false;
-
-        if (fieldsChanged) {
-            this.setupCapabilities();
-        }
     }
 
     logStreamMessage(message) {

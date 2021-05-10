@@ -11,6 +11,7 @@
     "async-mutex": "^0.3.1",
     "dateformat": "^4.5.1",
     "events": "^3.3.0",
+    "homey-log": "^2.0.1",
     "http.min": "^2.1.0",
     "throttle-debounce": "^3.0.1"
   },

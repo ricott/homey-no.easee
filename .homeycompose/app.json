@@ -1,9 +1,9 @@
 {
   "id": "no.easee",
-  "version": "1.1.4",
+  "version": "1.2.0",
   "brandColor": "#323232",
-  "compatibility": ">=3.0.0",
-  "sdk": 2,
+  "compatibility": ">=5.0.0",
+  "sdk": 3,
   "name": {
     "en": "Easee Home",
     "sv": "Easee Home"

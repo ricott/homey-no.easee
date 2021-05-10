@@ -1,10 +1,11 @@
 'use strict';
 
-const Homey = require('homey');
+const { App } = require('homey');
+const { Log } = require('homey-log');
 
-class EaseeApp extends Homey.App {
-	
-	onInit() {
+class EaseeApp extends App {
+	async onInit() {
+		this.homeyLog = new Log({ homey: this.homey });
 		this.log('EaseeApp is running...');
 	}
 }
