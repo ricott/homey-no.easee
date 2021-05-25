@@ -179,9 +179,9 @@ class ChargerDriver extends Homey.Driver {
         this.log(`[${args.device.getName()}] Action 'circuitCurrentControlPerPhase' triggered`);
         this.log(`[${args.device.getName()}] - current: '${args.current1}/${args.current2}/${args.current3}' amps`);
         //Don't set charge current to higher than max value
-        let current1 = Math.min(args.current1, args.device.getSettings().chargerFuse);
-        let current2 = Math.min(args.current2, args.device.getSettings().chargerFuse);
-        let current3 = Math.min(args.current3, args.device.getSettings().chargerFuse);
+        let current1 = Math.min(args.current1, args.device.getSettings().circuitFuse);
+        let current2 = Math.min(args.current2, args.device.getSettings().circuitFuse);
+        let current3 = Math.min(args.current3, args.device.getSettings().circuitFuse);
         this.log(`[${args.device.getName()}] - actual used: '${current1}/${current2}/${current3}' Amps`);
 
         return args.device.setDynamicCurrentPerPhase(current1, current2, current3)
@@ -199,7 +199,7 @@ class ChargerDriver extends Homey.Driver {
         this.log(`[${args.device.getName()}] Action 'circuitCurrentControl' triggered`);
         this.log(`[${args.device.getName()}] - current: '${args.current}' amps`);
         //Don't set charge current to higher than max value
-        let current = Math.min(args.current, args.device.getSettings().chargerFuse);
+        let current = Math.min(args.current, args.device.getSettings().circuitFuse);
         this.log(`[${args.device.getName()}] - actual used: '${current}' Amps`);
 
         return args.device.setDynamicCurrentPerPhase(current, current, current)
@@ -283,13 +283,13 @@ class ChargerDriver extends Homey.Driver {
             this.log(`[${args.device.getName()}] - dynamic current: '${dynamicCurrent.phase1}/${dynamicCurrent.phase2}/${dynamicCurrent.phase3}'`);
             //A user can have locked current to a single phase for one phase charging, lets skip adjusting phases with 0 current
             if (dynamicCurrent.phase1 > 0) {
-              dynamicCurrent.phase1 = Math.min(dynamicCurrent.phase1 -= 1, args.device.getSettings().chargerFuse);
+              dynamicCurrent.phase1 = Math.min(dynamicCurrent.phase1 -= 1, args.device.getSettings().circuitFuse);
             }
             if (dynamicCurrent.phase2 > 0) {
-              dynamicCurrent.phase2 = Math.min(dynamicCurrent.phase2 -= 1, args.device.getSettings().chargerFuse);
+              dynamicCurrent.phase2 = Math.min(dynamicCurrent.phase2 -= 1, args.device.getSettings().circuitFuse);
             }
             if (dynamicCurrent.phase3 > 0) {
-              dynamicCurrent.phase3 = Math.min(dynamicCurrent.phase3 -= 1, args.device.getSettings().chargerFuse);
+              dynamicCurrent.phase3 = Math.min(dynamicCurrent.phase3 -= 1, args.device.getSettings().circuitFuse);
             }
             this.log(`[${args.device.getName()}] - setting dynamic current: '${dynamicCurrent.phase1}/${dynamicCurrent.phase2}/${dynamicCurrent.phase3}'`);
 
@@ -316,13 +316,13 @@ class ChargerDriver extends Homey.Driver {
             //A user can have locked current to a single phase for one phase charging, lets skip adjusting phases with 0 current
             //Don't set current larger than installed fuse size
             if (dynamicCurrent.phase1 > 0) {
-              dynamicCurrent.phase1 = Math.min(dynamicCurrent.phase1 += 1, args.device.getSettings().chargerFuse);
+              dynamicCurrent.phase1 = Math.min(dynamicCurrent.phase1 += 1, args.device.getSettings().circuitFuse);
             }
             if (dynamicCurrent.phase2 > 0) {
-              dynamicCurrent.phase2 = Math.min(dynamicCurrent.phase2 += 1, args.device.getSettings().chargerFuse);
+              dynamicCurrent.phase2 = Math.min(dynamicCurrent.phase2 += 1, args.device.getSettings().circuitFuse);
             }
             if (dynamicCurrent.phase3 > 0) {
-              dynamicCurrent.phase3 = Math.min(dynamicCurrent.phase3 += 1, args.device.getSettings().chargerFuse);
+              dynamicCurrent.phase3 = Math.min(dynamicCurrent.phase3 += 1, args.device.getSettings().circuitFuse);
             }
             this.log(`[${args.device.getName()}] - setting dynamic current: '${dynamicCurrent.phase1}/${dynamicCurrent.phase2}/${dynamicCurrent.phase3}'`);
 

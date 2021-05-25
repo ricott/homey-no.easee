@@ -476,6 +476,7 @@ class ChargerDevice extends Homey.Device {
 
     pauseCharging() {
         let self = this;
+        self.logMessage(`Pausing charge`);
         return self.createEaseeChargerClient().pauseCharging(self.charger.id)
             .then(function (result) {
                 return result;
@@ -487,6 +488,7 @@ class ChargerDevice extends Homey.Device {
 
     resumeCharging() {
         let self = this;
+        self.logMessage(`Resuming charge`);
         return self.createEaseeChargerClient().resumeCharging(self.charger.id)
             .then(function (result) {
                 return result;
@@ -498,6 +500,7 @@ class ChargerDevice extends Homey.Device {
 
     startCharging() {
         let self = this;
+        self.logMessage(`Starting charge`);
         return self.createEaseeChargerClient().startCharging(self.charger.id)
             .then(function (result) {
                 return result;
@@ -509,6 +512,7 @@ class ChargerDevice extends Homey.Device {
 
     stopCharging() {
         let self = this;
+        self.logMessage(`Stopping charge`);
         return self.createEaseeChargerClient().stopCharging(self.charger.id)
             .then(function (result) {
                 return result;
@@ -520,6 +524,7 @@ class ChargerDevice extends Homey.Device {
 
     toggleCharging() {
         let self = this;
+        self.logMessage(`Toggling charge`);
         return self.createEaseeChargerClient().toggleCharging(self.charger.id)
             .then(function (result) {
                 return result;
@@ -531,6 +536,7 @@ class ChargerDevice extends Homey.Device {
 
     overrideSchedule() {
         let self = this;
+        self.logMessage(`Overriding schedule`);
         return self.createEaseeChargerClient().overrideSchedule(self.charger.id)
             .then(function (result) {
                 return result;
@@ -542,6 +548,7 @@ class ChargerDevice extends Homey.Device {
 
     deleteSchedule() {
         let self = this;
+        self.logMessage(`Deleting schedule`);
         return self.createEaseeChargerClient().deleteBasicChargePlan(self.charger.id)
             .then(function (result) {
                 return result;
@@ -553,6 +560,7 @@ class ChargerDevice extends Homey.Device {
 
     createSchedule(startTime, endTime, repeat) {
         let self = this;
+        self.logMessage(`Creating schedule, start '${startTime}', end '${endTime}' and repeat '${repeat}'`);
         return self.createEaseeChargerClient().setBasicChargePlan(self.charger.id,
             startTime, endTime, repeat)
             .then(function (result) {
@@ -577,6 +585,7 @@ class ChargerDevice extends Homey.Device {
 
     setDynamicCurrentPerPhase(currentP1, currentP2, currentP3) {
         let self = this;
+        self.logMessage(`Setting dynamic charge current to '${currentP1}/${currentP2}/${currentP3}'`);
         return self.createEaseeChargerClient()
             .setDynamicCurrentPerPhase(self.getSettings().siteId, self.getSettings().circuitId,
                 currentP1, currentP2, currentP3)
@@ -590,6 +599,7 @@ class ChargerDevice extends Homey.Device {
 
     setChargerState(state) {
         let self = this;
+        self.logMessage(`Setting charger state to '${state}'`);
         return self.createEaseeChargerClient().setChargerState(self.charger.id, state)
             .then(function (result) {
                 return result;
@@ -601,6 +611,7 @@ class ChargerDevice extends Homey.Device {
 
     pauseSmartCharging() {
         let self = this;
+        self.logMessage(`Pausing smart charging`);
         return self.createEaseeChargerClient().pauseSmartCharging(self.charger.id)
             .then(function (result) {
                 return result;
@@ -612,6 +623,7 @@ class ChargerDevice extends Homey.Device {
 
     disableSmartCharging() {
         let self = this;
+        self.logMessage(`Disabling smart charging`);
         return self.createEaseeChargerClient().disableSmartCharging(self.charger.id)
             .then(function (result) {
                 return result;
@@ -623,6 +635,7 @@ class ChargerDevice extends Homey.Device {
 
     enableSmartCharging() {
         let self = this;
+        self.logMessage(`Enabling smart charging`);
         return self.createEaseeChargerClient().enableSmartCharging(self.charger.id)
             .then(function (result) {
                 return result;
@@ -634,6 +647,7 @@ class ChargerDevice extends Homey.Device {
 
     enableIdleCurrent(state) {
         let self = this;
+        self.logMessage(`Setting enable idle current to '${state}'`);
         return self.createEaseeChargerClient().enableIdleCurrent(self.charger.id, state)
             .then(function (result) {
                 return result;
@@ -645,6 +659,7 @@ class ChargerDevice extends Homey.Device {
 
     lockCablePermanently(state) {
         let self = this;
+        self.logMessage(`Setting lock cable permanently to '${state}'`);
         return self.createEaseeChargerClient().lockCablePermanently(self.charger.id, state)
             .then(function (result) {
                 return result;
@@ -656,6 +671,7 @@ class ChargerDevice extends Homey.Device {
 
     ledStripBrightness(brightness) {
         let self = this;
+        self.logMessage(`Setting led strip brightness to '${brightness}'`);
         return self.createEaseeChargerClient().ledStripBrightness(self.charger.id, brightness)
             .then(function (result) {
                 return result;
