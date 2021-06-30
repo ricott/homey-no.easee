@@ -87,7 +87,8 @@ class ChargerDevice extends Homey.Device {
         }
 
         let self = this;
-        self.tokenManager.getTokens(self.getUsername(), self.getPassword(), false)
+        //Force renewal of token, if a user restarts the app a new token should be generated
+        self.tokenManager.getTokens(self.getUsername(), self.getPassword(), true)
             .then(function (tokens) {
                 self.setToken(tokens);
 
@@ -688,10 +689,10 @@ class ChargerDevice extends Homey.Device {
             this.updateChargerStatistics();
         }, 60 * 1000 * 30));
 
-        //Refresh access token, each 15 mins from tokenManager
+        //Refresh access token, each 5 mins from tokenManager
         this.pollIntervals.push(setInterval(() => {
             this.refreshAccessToken(false);
-        }, 60 * 1000 * 15));
+        }, 60 * 1000 * 5));
 
         //Check that stream is running, if not start new
         this.pollIntervals.push(setInterval(() => {

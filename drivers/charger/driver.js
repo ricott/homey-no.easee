@@ -189,7 +189,7 @@ class ChargerDriver extends Homey.Driver {
             return Promise.resolve(true);
           }).catch(reason => {
             this.log(reason);
-            return Promise.reject('Failed to set dynamic Circuit current');
+            return Promise.reject(`Failed to set dynamic Circuit current, reason: ${reason.message}`);
           });
       });
 
@@ -206,7 +206,7 @@ class ChargerDriver extends Homey.Driver {
           .then(function (result) {
             return Promise.resolve(true);
           }).catch(reason => {
-            return Promise.reject('Failed to set dynamic Circuit current');
+            return Promise.reject(`Failed to set dynamic Circuit current, reason: ${reason.message}`);
           });
       });
 

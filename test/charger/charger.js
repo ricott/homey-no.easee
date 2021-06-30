@@ -45,23 +45,23 @@ describe('#Charger', function () {
         let tokens = await tokenManager.getTokens(config.credentials.userName, config.credentials.password);
         let easee = new Easee(tokens);
         let dynamicCurrent = await easee.getDynamicCurrent(config.siteId, config.circuitId);
-        console.log(util.inspect(dynamicCurrent, { showHidden: false, depth: null }));
+        //console.log(util.inspect(dynamicCurrent, { showHidden: false, depth: null }));
         assert.strictEqual(!isNaN(dynamicCurrent.phase1), true);
     });
 
+    /*
+    describe('#setDynamicCurrent', function () {
+        it('setting dynamic current should not throw an error', async () => {
+            let tokens = await tokenManager.getTokens(config.credentials.userName, config.credentials.password);
+            let easee = new Easee(tokens);
+            let result = await easee.setDynamicCurrentPerPhase(config.siteId, config.circuitId, 'NaN', 16, 16);
+            console.log(result);
+            //assert.strictEqual((isNaN(chargerConsumption) === false), true);
+        });
+    });
+    */
 });
 
-    /*
-        describe('#setDynamicCurrent', function () {
-            it('setting dynamic current should not throw an error', async () => {
-                let tokens = await tokenManager.getTokens(config.credentials.userName, config.credentials.password);
-                let easee = new Easee(tokens);
-                let result = await easee.setDynamicCurrent(config.siteId, config.circuitId, 15);
-                console.log(result);
-                //assert.strictEqual((isNaN(chargerConsumption) === false), true);
-            });
-        });
-    */
 
 
 
