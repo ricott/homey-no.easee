@@ -13,15 +13,15 @@ describe('#Smart charging', function () {
     it('xyz', async () => {
         let tokens = await tokenManager.getTokens(config.credentials.userName, config.credentials.password);
         let easee = new Easee(tokens);
-        let result = await easee.setSmartCharging(config.charger, false);
+        let result = await easee.enableSmartCharging(config.charger);
         console.log(util.inspect(result, { showHidden: false, depth: null }));
-        assert.strictEqual(result.device, config.charger);
+        //assert.strictEqual(result.device, config.charger);
     });
 /*
     it('xyz', async () => {
         let tokens = await tokenManager.getTokens(config.credentials.userName, config.credentials.password);
         let easee = new Easee(tokens);
-        let result = await easee.setSmartCharging(config.charger, true);
+        let result = await easee.disableSmartCharging(config.charger);
         console.log(util.inspect(result, { showHidden: false, depth: null }));
         //assert.strictEqual((isNaN(chargerConsumption) === false), true);
     });
