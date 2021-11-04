@@ -11,3 +11,7 @@
 
 #Credentials used for mocha tests
 /test/config.js
+
+node_modules
+
+build

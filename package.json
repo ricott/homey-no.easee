@@ -7,8 +7,8 @@
     "lib": "lib"
   },
   "dependencies": {
-    "@microsoft/signalr": "^5.0.9",
-    "async-mutex": "^0.3.1",
+    "@microsoft/signalr": "^5.0.11",
+    "async-mutex": "^0.3.2",
     "dateformat": "^4.5.1",
     "events": "^3.3.0",
     "homey-log": "^2.0.1",
