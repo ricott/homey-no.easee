@@ -40,7 +40,19 @@ class ChargerDriver extends Homey.Driver {
         });
 
     //Actions
-    let actionName = 'disableSmartCharging';
+    let actionName = 'rebootCharger';
+    this.flowCards[actionName] = this.homey.flow.getActionCard(actionName)
+      .registerRunListener(async (args) => {
+        this.log(`[${args.device.getName()}] Action 'rebootCharger' triggered`);
+        return args.device.rebootCharger()
+          .then(function (result) {
+            return Promise.resolve(true);
+          }).catch(reason => {
+            return Promise.reject('Failed to reboot charger');
+          });
+      });
+
+    actionName = 'disableSmartCharging';
     this.flowCards[actionName] = this.homey.flow.getActionCard(actionName)
       .registerRunListener(async (args) => {
         this.log(`[${args.device.getName()}] Action 'disableSmartCharging' triggered`);

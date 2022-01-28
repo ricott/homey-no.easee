@@ -26,8 +26,6 @@ class ChargerDevice extends Homey.Device {
 
     async onInit() {
         this.charger = {
-            id: this.getData().id,
-            name: this.getName(),
             stream: null,
             lastStreamMessageTimestamp: null,
             streamMessages: [],
@@ -40,8 +38,6 @@ class ChargerDevice extends Homey.Device {
         this.updateSetting('easee_last_error', '');
 
         this.pollIntervals = [];
-        this.showLast30daysStats = this.getSettings().showLast30daysStats;
-        this.showLastMonthStats = this.getSettings().showLastMonthStats;
         this.tokenManager = TokenManager;
 
         this.setupCapabilities();
@@ -67,8 +63,8 @@ class ChargerDevice extends Homey.Device {
                     if (capability != 'measure_charge' && capability != 'measure_charge.last_month') {
                         //All other fields should be added
                         this.addCapabilityHelper(capability);
-                    } else if ((capability === 'measure_charge' && this.showLast30daysStats) ||
-                        (capability === 'measure_charge.last_month' && this.showLastMonthStats)) {
+                    } else if ((capability === 'measure_charge' && this.getSettings().showLast30daysStats) ||
+                        (capability === 'measure_charge.last_month' && this.getSettings().showLastMonthStats)) {
                         //Add if configured to be shown
                         this.logMessage(`Adding capability based on configuration '${capability}'`);
                         this.addCapabilityHelper(capability);
@@ -85,9 +81,9 @@ class ChargerDevice extends Homey.Device {
             await this.refreshAccessToken(true);
             return Promise.resolve(true);
         });
-        
 
-        if (!this.homey.settings.get(`${this.charger.id}.username`)) {
+
+        if (!this.homey.settings.get(`${this.getData().id}.username`)) {
             //This is a newly added device, lets copy login details to homey settings
             this.logMessage(`Storing credentials for user '${this.getStoreValue('username')}'`);
             this.storeCredentialsEncrypted(this.getStoreValue('username'), this.getStoreValue('password'));
@@ -119,11 +115,11 @@ class ChargerDevice extends Homey.Device {
     }
 
     startSignalRStream() {
-        this.logMessage(`Opening SignalR stream, for charger '${this.charger.id}'`);
+        this.logMessage(`Opening SignalR stream, for charger '${this.getData().id}'`);
         let options = {
             accessToken: this.getToken().accessToken,
             deviceType: enums.deviceTypes().CHARGER,
-            deviceId: this.charger.id,
+            deviceId: this.getData().id,
             appVersion: this.driver.getAppVersion()
         };
         this.charger.stream = new EaseeStream(options);
@@ -133,7 +129,7 @@ class ChargerDevice extends Homey.Device {
     }
 
     stopSignalRStream() {
-        this.logMessage(`Closing SignalR stream, for charger '${this.charger.id}'`);
+        this.logMessage(`Closing SignalR stream, for charger '${this.getData().id}'`);
         this.charger.stream.close();
     }
 
@@ -146,7 +142,7 @@ class ChargerDevice extends Homey.Device {
             if ((new Date().getTime() - self.charger.lastStreamMessageTimestamp.getTime()) > (1000 * 1800)) {
                 //if ((new Date().getTime() - self.charger.lastStreamMessageTimestamp.getTime()) > (1000 * 60)) {
                 //Lets start a new connection, after making sure previous is killed
-                self.logMessage(`SignalR stream is idle, for charger '${self.charger.id}'`);
+                self.logMessage(`SignalR stream is idle, for charger '${self.getData().id}'`);
 
                 //Not unlikely we are here due to access token is invalid, lets refresh it
                 self.refreshAccessToken(true)
@@ -205,16 +201,16 @@ class ChargerDevice extends Homey.Device {
         this.addCapabilityHelper('meter_power');
 
         let capability = 'measure_charge';
-        if (!this.hasCapability(capability) && this.showLast30daysStats) {
+        if (!this.hasCapability(capability) && this.getSettings().showLast30daysStats) {
             this.addCapabilityHelper(capability);
-        } else if (this.hasCapability(capability) && !this.showLast30daysStats) {
+        } else if (this.hasCapability(capability) && !this.getSettings().showLast30daysStats) {
             this.removeCapabilityHelper(capability);
         }
 
         capability = 'measure_charge.last_month';
-        if (!this.hasCapability(capability) && this.showLastMonthStats) {
+        if (!this.hasCapability(capability) && this.getSettings().showLastMonthStats) {
             this.addCapabilityHelper(capability);
-        } else if (this.hasCapability(capability) && !this.showLastMonthStats) {
+        } else if (this.hasCapability(capability) && !this.getSettings().showLastMonthStats) {
             this.removeCapabilityHelper(capability);
         }
     }
@@ -382,8 +378,8 @@ class ChargerDevice extends Homey.Device {
 
     storeCredentialsEncrypted(plainUser, plainPassword) {
         this.logMessage(`Encrypting credentials for user '${plainUser}'`);
-        this.homey.settings.set(`${this.charger.id}.username`, this.encryptText(plainUser));
-        this.homey.settings.set(`${this.charger.id}.password`, this.encryptText(plainPassword));
+        this.homey.settings.set(`${this.getData().id}.username`, this.encryptText(plainUser));
+        this.homey.settings.set(`${this.getData().id}.password`, this.encryptText(plainPassword));
 
         //Remove unencrypted credentials passed from driver
         this.unsetStoreValue('username');
@@ -391,11 +387,11 @@ class ChargerDevice extends Homey.Device {
     }
 
     getUsername() {
-        return this.decryptText(this.homey.settings.get(`${this.charger.id}.username`));
+        return this.decryptText(this.homey.settings.get(`${this.getData().id}.username`));
     }
 
     getPassword() {
-        return this.decryptText(this.homey.settings.get(`${this.charger.id}.password`));
+        return this.decryptText(this.homey.settings.get(`${this.getData().id}.password`));
     }
 
     encryptText(text) {
@@ -441,9 +437,9 @@ class ChargerDevice extends Homey.Device {
     //Info not part of streaming API, refreshed once every 30 mins
     updateChargerStatistics() {
         let self = this;
-        if (self.showLast30daysStats) {
+        if (self.getSettings().showLast30daysStats) {
             self.logMessage('Getting charger statistics, last 30 days');
-            self.createEaseeChargerClient().getLast30DaysChargekWh(self.charger.id)
+            self.createEaseeChargerClient().getLast30DaysChargekWh(self.getData().id)
                 .then(function (last30DayskWh) {
                     self._updateProperty('measure_charge', last30DayskWh);
                 }).catch(reason => {
@@ -451,9 +447,9 @@ class ChargerDevice extends Homey.Device {
                 });
         }
 
-        if (self.showLastMonthStats) {
+        if (self.getSettings().showLastMonthStats) {
             self.logMessage('Getting charger statistics, previous calendar month');
-            self.createEaseeChargerClient().getLastMonthChargekWh(self.charger.id)
+            self.createEaseeChargerClient().getLastMonthChargekWh(self.getData().id)
                 .then(function (lastMonthkWh) {
                     self._updateProperty('measure_charge.last_month', lastMonthkWh);
                 }).catch(reason => {
@@ -466,7 +462,7 @@ class ChargerDevice extends Homey.Device {
     updateChargerSiteInfo() {
         let self = this;
         self.logMessage('Getting charger site info');
-        self.createEaseeChargerClient().getSiteInfo(self.charger.id)
+        self.createEaseeChargerClient().getSiteInfo(self.getData().id)
             .then(function (site) {
 
                 self.setSettings({
@@ -484,10 +480,22 @@ class ChargerDevice extends Homey.Device {
             });
     }
 
+    rebootCharger() {
+        let self = this;
+        self.logMessage(`Rebooting charger`);
+        return self.createEaseeChargerClient().rebootCharger(self.getData().id)
+            .then(function (result) {
+                return result;
+            }).catch(reason => {
+                self.logError(reason);
+                return Promise.reject(reason);
+            });
+    }
+
     pauseCharging() {
         let self = this;
         self.logMessage(`Pausing charge`);
-        return self.createEaseeChargerClient().pauseCharging(self.charger.id)
+        return self.createEaseeChargerClient().pauseCharging(self.getData().id)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -499,7 +507,7 @@ class ChargerDevice extends Homey.Device {
     resumeCharging() {
         let self = this;
         self.logMessage(`Resuming charge`);
-        return self.createEaseeChargerClient().resumeCharging(self.charger.id)
+        return self.createEaseeChargerClient().resumeCharging(self.getData().id)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -511,7 +519,7 @@ class ChargerDevice extends Homey.Device {
     startCharging() {
         let self = this;
         self.logMessage(`Starting charge`);
-        return self.createEaseeChargerClient().startCharging(self.charger.id)
+        return self.createEaseeChargerClient().startCharging(self.getData().id)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -523,7 +531,7 @@ class ChargerDevice extends Homey.Device {
     stopCharging() {
         let self = this;
         self.logMessage(`Stopping charge`);
-        return self.createEaseeChargerClient().stopCharging(self.charger.id)
+        return self.createEaseeChargerClient().stopCharging(self.getData().id)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -535,7 +543,7 @@ class ChargerDevice extends Homey.Device {
     toggleCharging() {
         let self = this;
         self.logMessage(`Toggling charge`);
-        return self.createEaseeChargerClient().toggleCharging(self.charger.id)
+        return self.createEaseeChargerClient().toggleCharging(self.getData().id)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -547,7 +555,7 @@ class ChargerDevice extends Homey.Device {
     overrideSchedule() {
         let self = this;
         self.logMessage(`Overriding schedule`);
-        return self.createEaseeChargerClient().overrideSchedule(self.charger.id)
+        return self.createEaseeChargerClient().overrideSchedule(self.getData().id)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -559,7 +567,7 @@ class ChargerDevice extends Homey.Device {
     deleteSchedule() {
         let self = this;
         self.logMessage(`Deleting schedule`);
-        return self.createEaseeChargerClient().deleteBasicChargePlan(self.charger.id)
+        return self.createEaseeChargerClient().deleteBasicChargePlan(self.getData().id)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -571,7 +579,7 @@ class ChargerDevice extends Homey.Device {
     createSchedule(startTime, endTime, repeat) {
         let self = this;
         self.logMessage(`Creating schedule, start '${startTime}', end '${endTime}' and repeat '${repeat}'`);
-        return self.createEaseeChargerClient().setBasicChargePlan(self.charger.id,
+        return self.createEaseeChargerClient().setBasicChargePlan(self.getData().id,
             startTime, endTime, repeat)
             .then(function (result) {
                 return result;
@@ -610,7 +618,7 @@ class ChargerDevice extends Homey.Device {
     setChargerState(state) {
         let self = this;
         self.logMessage(`Setting charger state to '${state}'`);
-        return self.createEaseeChargerClient().setChargerState(self.charger.id, state)
+        return self.createEaseeChargerClient().setChargerState(self.getData().id, state)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -622,7 +630,7 @@ class ChargerDevice extends Homey.Device {
     pauseSmartCharging() {
         let self = this;
         self.logMessage(`Pausing smart charging`);
-        return self.createEaseeChargerClient().pauseSmartCharging(self.charger.id)
+        return self.createEaseeChargerClient().pauseSmartCharging(self.getData().id)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -634,7 +642,7 @@ class ChargerDevice extends Homey.Device {
     disableSmartCharging() {
         let self = this;
         self.logMessage(`Disabling smart charging`);
-        return self.createEaseeChargerClient().disableSmartCharging(self.charger.id)
+        return self.createEaseeChargerClient().disableSmartCharging(self.getData().id)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -646,7 +654,7 @@ class ChargerDevice extends Homey.Device {
     enableSmartCharging() {
         let self = this;
         self.logMessage(`Enabling smart charging`);
-        return self.createEaseeChargerClient().enableSmartCharging(self.charger.id)
+        return self.createEaseeChargerClient().enableSmartCharging(self.getData().id)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -658,7 +666,7 @@ class ChargerDevice extends Homey.Device {
     enableIdleCurrent(state) {
         let self = this;
         self.logMessage(`Setting enable idle current to '${state}'`);
-        return self.createEaseeChargerClient().enableIdleCurrent(self.charger.id, state)
+        return self.createEaseeChargerClient().enableIdleCurrent(self.getData().id, state)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -670,7 +678,7 @@ class ChargerDevice extends Homey.Device {
     lockCablePermanently(state) {
         let self = this;
         self.logMessage(`Setting lock cable permanently to '${state}'`);
-        return self.createEaseeChargerClient().lockCablePermanently(self.charger.id, state)
+        return self.createEaseeChargerClient().lockCablePermanently(self.getData().id, state)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -682,7 +690,7 @@ class ChargerDevice extends Homey.Device {
     ledStripBrightness(brightness) {
         let self = this;
         self.logMessage(`Setting led strip brightness to '${brightness}'`);
-        return self.createEaseeChargerClient().ledStripBrightness(self.charger.id, brightness)
+        return self.createEaseeChargerClient().ledStripBrightness(self.getData().id, brightness)
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -753,14 +761,9 @@ class ChargerDevice extends Homey.Device {
         this.stopSignalRStream();
         this.updateStatus.cancel();
 
-        this.homey.settings.unset(`${this.charger.id}.username`);
-        this.homey.settings.unset(`${this.charger.id}.password`);
+        this.homey.settings.unset(`${this.getData().id}.username`);
+        this.homey.settings.unset(`${this.getData().id}.password`);
         this.charger = null;
-    }
-
-    onRenamed(name) {
-        this.logMessage(`Renaming Easee charger from '${this.charger.name}' to '${name}'`);
-        this.charger.name = name;
     }
 
     async onSettings({ oldSettings, newSettings, changedKeys }) {
@@ -768,12 +771,10 @@ class ChargerDevice extends Homey.Device {
 
         if (changedKeys.indexOf("showLast30daysStats") > -1) {
             this.logMessage('showLast30daysStats changed to:', newSettings.showLast30daysStats);
-            this.showLast30daysStats = newSettings.showLast30daysStats;
             fieldsChanged = true;
         }
         if (changedKeys.indexOf("showLastMonthStats") > -1) {
             this.logMessage('showLastMonthStats changed to:', newSettings.showLastMonthStats);
-            this.showLastMonthStats = newSettings.showLastMonthStats;
             fieldsChanged = true;
         }
 

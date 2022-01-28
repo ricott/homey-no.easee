@@ -12,8 +12,6 @@ class EqualizerDevice extends Homey.Device {
 
     async onInit() {
         this.equalizer = {
-            id: this.getData().id,
-            name: this.getName(),
             mainFuse: this.getSettings().mainFuse,
             stream: null,
             lastStreamMessageTimestamp: null,
@@ -27,7 +25,7 @@ class EqualizerDevice extends Homey.Device {
         this.pollIntervals = [];
         this.tokenManager = TokenManager;
 
-        if (!this.homey.settings.get(`${this.equalizer.id}.username`)) {
+        if (!this.homey.settings.get(`${this.getData().id}.username`)) {
             //This is a newly added device, lets copy login details to homey settings
             this.logMessage(`Storing credentials for user '${this.getStoreValue('username')}'`);
             this.storeCredentialsEncrypted(this.getStoreValue('username'), this.getStoreValue('password'));
@@ -100,11 +98,11 @@ class EqualizerDevice extends Homey.Device {
     }
 
     startSignalRStream() {
-        this.logMessage(`Opening SignalR stream, for equalizer '${this.equalizer.id}'`);
+        this.logMessage(`Opening SignalR stream, for equalizer '${this.getData().id}'`);
         let options = {
             accessToken: this.getToken().accessToken,
             deviceType: enums.deviceTypes().EQUALIZER,
-            deviceId: this.equalizer.id,
+            deviceId: this.getData().id,
             appVersion: this.driver.getAppVersion()
         };
         this.equalizer.stream = new EaseeStream(options);
@@ -114,7 +112,7 @@ class EqualizerDevice extends Homey.Device {
     }
 
     stopSignalRStream() {
-        this.logMessage(`Closing SignalR stream, for equalizer '${this.equalizer.id}'`);
+        this.logMessage(`Closing SignalR stream, for equalizer '${this.getData().id}'`);
         this.equalizer.stream.close();
     }
 
@@ -127,7 +125,7 @@ class EqualizerDevice extends Homey.Device {
             if ((new Date().getTime() - self.equalizer.lastStreamMessageTimestamp.getTime()) > (1000 * 600)) {
                 //if ((new Date().getTime() - self.equalizer.lastStreamMessageTimestamp.getTime()) > (1000 * 60)) {
                 //Lets start a new connection, after making sure previous is killed
-                self.logMessage(`SignalR stream is idle, for equalizer '${self.equalizer.id}'`);
+                self.logMessage(`SignalR stream is idle, for equalizer '${self.getData().id}'`);
 
                 this.stopSignalRStream();
                 //Sleep to make sure the old connection is killed properly
@@ -249,7 +247,7 @@ class EqualizerDevice extends Homey.Device {
     updateEqualizerSiteInfo() {
         let self = this;
         self.logMessage('Getting equalizer site info');
-        new Easee(self.getToken()).getEqualizerSiteInfo(self.equalizer.id)
+        new Easee(self.getToken()).getEqualizerSiteInfo(self.getData().id)
             .then(function (site) {
 
                 self.equalizer.mainFuse = Math.round(site.ratedCurrent);
@@ -294,8 +292,8 @@ class EqualizerDevice extends Homey.Device {
 
     storeCredentialsEncrypted(plainUser, plainPassword) {
         this.logMessage(`Encrypting credentials for user '${plainUser}'`);
-        this.homey.settings.set(`${this.equalizer.id}.username`, this.encryptText(plainUser));
-        this.homey.settings.set(`${this.equalizer.id}.password`, this.encryptText(plainPassword));
+        this.homey.settings.set(`${this.getData().id}.username`, this.encryptText(plainUser));
+        this.homey.settings.set(`${this.getData().id}.password`, this.encryptText(plainPassword));
 
         //Remove unencrypted credentials passed from driver
         this.unsetStoreValue('username');
@@ -303,11 +301,11 @@ class EqualizerDevice extends Homey.Device {
     }
 
     getUsername() {
-        return this.decryptText(this.homey.settings.get(`${this.equalizer.id}.username`));
+        return this.decryptText(this.homey.settings.get(`${this.getData().id}.username`));
     }
 
     getPassword() {
-        return this.decryptText(this.homey.settings.get(`${this.equalizer.id}.password`));
+        return this.decryptText(this.homey.settings.get(`${this.getData().id}.password`));
     }
 
     encryptText(text) {
@@ -406,14 +404,9 @@ class EqualizerDevice extends Homey.Device {
         this._deleteTimers();
         this.stopSignalRStream();
 
-        this.homey.settings.unset(`${this.equalizer.id}.username`);
-        this.homey.settings.unset(`${this.equalizer.id}.password`);
+        this.homey.settings.unset(`${this.getData().id}.username`);
+        this.homey.settings.unset(`${this.getData().id}.password`);
         this.equalizer = null;
-    }
-
-    onRenamed(name) {
-        this.logMessage(`Renaming Easee equalizer from '${this.equalizer.name}' to '${name}'`);
-        this.equalizer.name = name;
     }
 
     logStreamMessage(message) {

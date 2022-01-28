@@ -95,6 +95,17 @@
   ],
   "actions": [
     {
+      "id": "rebootCharger",
+      "title": {
+        "en": "Reboot charger",
+        "sv": "Starta om laddaren"
+      },
+      "titleFormatted": {
+        "en": "Reboot charger",
+        "sv": "Starta om laddaren"
+      }
+    },
+    {
       "id": "overrideSchedule",
       "title": {
         "en": "Override schedule",

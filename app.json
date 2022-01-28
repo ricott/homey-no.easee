@@ -324,6 +324,24 @@
     ],
     "actions": [
       {
+        "id": "rebootCharger",
+        "title": {
+          "en": "Reboot charger",
+          "sv": "Starta om laddaren"
+        },
+        "titleFormatted": {
+          "en": "Reboot charger",
+          "sv": "Starta om laddaren"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+          }
+        ]
+      },
+      {
         "id": "overrideSchedule",
         "title": {
           "en": "Override schedule",
