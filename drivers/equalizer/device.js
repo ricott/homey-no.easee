@@ -1,7 +1,6 @@
 'use strict';
 
 const Homey = require('homey');
-const dateFormat = require("dateformat");
 const enums = require('../../lib/enums.js');
 const crypto = require('crypto');
 var Easee = require('../../lib/easee.js');
@@ -152,9 +151,9 @@ class EqualizerDevice extends Homey.Device {
         self.logMessage('Setting up event listeners');
         self.equalizer.stream.on('CommandResponse', data => {
             self.log(`[${self.getName()}] Command response received: `, data);
-
+            let dateTime = new Date().toISOString();
             self.setSettings({
-                commandResponse: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss') + '\n' + JSON.stringify(data, null, "  ")
+                commandResponse: dateTime + '\n' + JSON.stringify(data, null, "  ")
             }).catch(err => {
                 self.error('Failed to update settings', err);
             });
@@ -282,7 +281,8 @@ class EqualizerDevice extends Homey.Device {
             }
         }
 
-        this.setSettings({ easee_last_error: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss') + '\n' + message })
+        let dateTime = new Date().toISOString();
+        this.setSettings({ easee_last_error: dateTime + '\n' + message })
             .catch(err => {
                 this.error('Failed to update settings', err);
             });
@@ -422,7 +422,8 @@ class EqualizerDevice extends Homey.Device {
             this.equalizer.streamMessages.shift();
         }
         //Add new entry
-        this.equalizer.streamMessages.push(dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss') + '\n' + message + '\n');
+        let dateTime = new Date().toISOString();
+        this.equalizer.streamMessages.push(dateTime + '\n' + message + '\n');
     }
 
     logMessage(message) {
@@ -432,7 +433,8 @@ class EqualizerDevice extends Homey.Device {
             this.equalizer.log.shift();
         }
         //Add new entry
-        this.equalizer.log.push(dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss') + ' ' + message + '\n');
+        let dateTime = new Date().toISOString();
+        this.equalizer.log.push(dateTime + ' ' + message + '\n');
     }
 
     getLoggedStreamMessages() {

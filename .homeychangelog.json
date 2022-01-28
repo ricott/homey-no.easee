@@ -1,4 +1,8 @@
 {
+    "1.2.4": {
+        "en": "New login API call and device repair function",
+        "sv": "Nytt API anrop för inloggning samt ny reparera enhet funktion"
+    },
     "1.2.3": {
         "en": "Upgrade to SDK version 3",
         "sv": "Uppgradering till SDK version 3"

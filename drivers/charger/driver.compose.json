@@ -21,6 +21,7 @@
     "meter_power",
     "measure_charge",
     "measure_charge.last_month",
+    "button.reconnect",
     "button.organize"
   ],
   "capabilitiesOptions": {
@@ -75,6 +76,17 @@
       "desc": {
         "en": "Reorder capabilities in the intended order.",
         "sv": "Flytta egenskaperna till den tänkta ordningen."
+      }
+    },
+    "button.reconnect": {
+      "maintenanceAction": true,
+      "title": {
+        "en": "Reconnect",
+        "sv": "Återskapa uppkoppling"
+      },
+      "desc": {
+        "en": "Reconnect to Easee Cloud API",
+        "sv": "Återskapa uppkoppling till Easee Cloud API"
       }
     }
   },

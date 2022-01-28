@@ -1,7 +1,6 @@
 'use strict';
 
 const Homey = require('homey');
-const dateFormat = require("dateformat");
 var EaseeCharger = require('../../lib/easee.js');
 const enums = require('../../lib/enums.js');
 const crypto = require('crypto');
@@ -79,6 +78,14 @@ class ChargerDevice extends Homey.Device {
 
             return Promise.resolve(true);
         });
+
+        this.registerCapabilityListener('button.reconnect', async () => {
+            this.logMessage(`Reconnect to Easee Cloud API`);
+
+            await this.refreshAccessToken(true);
+            return Promise.resolve(true);
+        });
+        
 
         if (!this.homey.settings.get(`${this.charger.id}.username`)) {
             //This is a newly added device, lets copy login details to homey settings
@@ -190,6 +197,7 @@ class ChargerDevice extends Homey.Device {
 
         this.addCapabilityHelper('enabled');
         this.addCapabilityHelper('button.organize');
+        this.addCapabilityHelper('button.reconnect');
         this.addCapabilityHelper('measure_current.p1');
         this.addCapabilityHelper('measure_current.p2');
         this.addCapabilityHelper('measure_current.p3');
@@ -222,9 +230,10 @@ class ChargerDevice extends Homey.Device {
     _initializeEventListeners() {
         let self = this;
         self.logMessage('Setting up event listeners');
+        let dateTime = new Date().toISOString();
         self.charger.stream.on('CommandResponse', data => {
             self.log(`[${self.getName()}] Command response received: `, data);
-            self.updateSetting('commandResponse', dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss') + '\n' + JSON.stringify(data, null, "  "));
+            self.updateSetting('commandResponse', dateTime + '\n' + JSON.stringify(data, null, "  "));
         });
 
         self.charger.stream.on('Observation', data => {
@@ -363,8 +372,8 @@ class ChargerDevice extends Homey.Device {
                 message = error.toString();
             }
         }
-
-        this.updateSetting('easee_last_error', dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss') + '\n' + message);
+        let dateTime = new Date().toISOString();
+        this.updateSetting('easee_last_error', dateTime + '\n' + message);
     }
 
     isError(err) {
@@ -779,7 +788,8 @@ class ChargerDevice extends Homey.Device {
             this.charger.streamMessages.shift();
         }
         //Add new entry
-        this.charger.streamMessages.push(dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss') + '\n' + message + '\n');
+        let dateTime = new Date().toISOString();
+        this.charger.streamMessages.push(dateTime + '\n' + message + '\n');
     }
 
     logMessage(message) {
@@ -789,7 +799,8 @@ class ChargerDevice extends Homey.Device {
             this.charger.log.shift();
         }
         //Add new entry
-        this.charger.log.push(dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss') + ' ' + message + '\n');
+        let dateTime = new Date().toISOString();
+        this.charger.log.push(dateTime + ' ' + message + '\n');
     }
 
     getLoggedStreamMessages() {

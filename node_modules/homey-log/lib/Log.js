@@ -4,12 +4,19 @@ const HomeyModule = require('homey');
 
 const Raven = require('raven');
 
+const DEFAULT_OPTIONS = {
+  // Start tracking unhandled promise rejections (not enabled by default)
+  captureUnhandledRejections: true,
+};
+
 class Log {
 
   /**
    * Construct a new Log instance.
    * @param {object} homey - `this.homey` instance in
    * your app (e.g. `App#homey`/`Driver#homey`/`Device#homey`).
+   *
+   * @param {object} options - Additional options for Raven
    *
    * @example
    * class MyApp extends Homey.App {
@@ -18,7 +25,7 @@ class Log {
    *   }
    * }
    */
-  constructor({ homey }) {
+  constructor({ homey, options }) {
     this._capturedMessages = [];
     this._capturedExceptions = [];
 
@@ -46,10 +53,7 @@ class Log {
 
     // Init Raven, pass falsy value if raven is not enabled to prevent sending events upstream
     // in debug mode
-    this.init(!disableRaven && HomeyModule.env.HOMEY_LOG_URL, {
-      captureUnhandledRejections: true, // Start tracking unhandled promise rejections (not enabled
-      // by default)
-    });
+    this.init(!disableRaven && HomeyModule.env.HOMEY_LOG_URL, { ...DEFAULT_OPTIONS, ...options });
   }
 
   /**
