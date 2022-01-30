@@ -11,7 +11,7 @@ var tokenManager = TokenManager;
 describe('#Charger', function () {
     it('should return 2 of them', async () => {
         let tokens = await tokenManager.getTokens(config.credentials.userName, config.credentials.password);
-        console.log(tokens);
+        //console.log(tokens);
         let easee = new Easee(tokens);
         let chargers = await easee.getChargers();
         assert.strictEqual(chargers.length, 2);

@@ -1,4 +1,8 @@
 {
+    "1.2.5": {
+        "en": "Added reboot action",
+        "sv": "Ny funktion för att starta om en laddare"
+    },
     "1.2.4": {
         "en": "New login API call and device repair function",
         "sv": "Nytt API anrop för inloggning samt ny reparera enhet funktion"

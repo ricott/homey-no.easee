@@ -63,8 +63,8 @@ class ChargerDevice extends Homey.Device {
                     if (capability != 'measure_charge' && capability != 'measure_charge.last_month') {
                         //All other fields should be added
                         this.addCapabilityHelper(capability);
-                    } else if ((capability === 'measure_charge' && this.getSettings().showLast30daysStats) ||
-                        (capability === 'measure_charge.last_month' && this.getSettings().showLastMonthStats)) {
+                    } else if ((capability === 'measure_charge' && this.getSetting('showLast30daysStats')) ||
+                        (capability === 'measure_charge.last_month' && this.getSetting('showLastMonthStats'))) {
                         //Add if configured to be shown
                         this.logMessage(`Adding capability based on configuration '${capability}'`);
                         this.addCapabilityHelper(capability);
@@ -201,16 +201,16 @@ class ChargerDevice extends Homey.Device {
         this.addCapabilityHelper('meter_power');
 
         let capability = 'measure_charge';
-        if (!this.hasCapability(capability) && this.getSettings().showLast30daysStats) {
+        if (!this.hasCapability(capability) && this.getSetting('showLast30daysStats')) {
             this.addCapabilityHelper(capability);
-        } else if (this.hasCapability(capability) && !this.getSettings().showLast30daysStats) {
+        } else if (this.hasCapability(capability) && !this.getSetting('showLast30daysStats')) {
             this.removeCapabilityHelper(capability);
         }
 
         capability = 'measure_charge.last_month';
-        if (!this.hasCapability(capability) && this.getSettings().showLastMonthStats) {
+        if (!this.hasCapability(capability) && this.getSetting('showLastMonthStats')) {
             this.addCapabilityHelper(capability);
-        } else if (this.hasCapability(capability) && !this.getSettings().showLastMonthStats) {
+        } else if (this.hasCapability(capability) && !this.getSetting('showLastMonthStats')) {
             this.removeCapabilityHelper(capability);
         }
     }
@@ -437,7 +437,7 @@ class ChargerDevice extends Homey.Device {
     //Info not part of streaming API, refreshed once every 30 mins
     updateChargerStatistics() {
         let self = this;
-        if (self.getSettings().showLast30daysStats) {
+        if (self.getSetting('showLast30daysStats')) {
             self.logMessage('Getting charger statistics, last 30 days');
             self.createEaseeChargerClient().getLast30DaysChargekWh(self.getData().id)
                 .then(function (last30DayskWh) {
@@ -447,7 +447,7 @@ class ChargerDevice extends Homey.Device {
                 });
         }
 
-        if (self.getSettings().showLastMonthStats) {
+        if (self.getSetting('showLastMonthStats')) {
             self.logMessage('Getting charger statistics, previous calendar month');
             self.createEaseeChargerClient().getLastMonthChargekWh(self.getData().id)
                 .then(function (lastMonthkWh) {
@@ -592,7 +592,7 @@ class ChargerDevice extends Homey.Device {
     getDynamicCurrent() {
         let self = this;
         return self.createEaseeChargerClient()
-            .getDynamicCurrent(self.getSettings().siteId, self.getSettings().circuitId)
+            .getDynamicCurrent(self.getSetting('siteId'), self.getSetting('circuitId'))
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -605,7 +605,7 @@ class ChargerDevice extends Homey.Device {
         let self = this;
         self.logMessage(`Setting dynamic charge current to '${currentP1}/${currentP2}/${currentP3}'`);
         return self.createEaseeChargerClient()
-            .setDynamicCurrentPerPhase(self.getSettings().siteId, self.getSettings().circuitId,
+            .setDynamicCurrentPerPhase(self.getSetting('siteId'), self.getSetting('circuitId'),
                 currentP1, currentP2, currentP3)
             .then(function (result) {
                 return result;

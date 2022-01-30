@@ -12,7 +12,6 @@ class EqualizerDevice extends Homey.Device {
 
     async onInit() {
         this.equalizer = {
-            mainFuse: this.getSettings().mainFuse,
             stream: null,
             lastStreamMessageTimestamp: null,
             streamMessages: [],
@@ -250,8 +249,6 @@ class EqualizerDevice extends Homey.Device {
         new Easee(self.getToken()).getEqualizerSiteInfo(self.getData().id)
             .then(function (site) {
 
-                self.equalizer.mainFuse = Math.round(site.ratedCurrent);
-
                 self.setSettings({
                     mainFuse: `${Math.round(site.ratedCurrent)}`,
                     circuitFuse: `${Math.round(site.circuits[0].ratedCurrent)}`,
@@ -382,7 +379,8 @@ class EqualizerDevice extends Homey.Device {
                     key === 'measure_current.L3') {
 
                     let phase = key.substring(key.indexOf('.') + 1);
-                    let utilization = (value / this.equalizer.mainFuse) * 100;
+                    const mainFuse = Number(this.getSetting('mainFuse'));
+                    let utilization = (value / mainFuse) * 100;
                     let tokens = {
                         phase: phase,
                         percentageUtilized: parseFloat(utilization.toFixed(2)),
