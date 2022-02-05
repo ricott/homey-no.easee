@@ -143,6 +143,35 @@ class EqualizerDevice extends Homey.Device {
         });
     }
 
+    //Different observations to read depending on grid type
+    updateVoltage(data) {
+        if (this.getSetting('gridType') == 'IT') {
+            switch (data.observation) {
+                case 'voltageL1L2':
+                    this._updateProperty('measure_voltage.L1', data.value);
+                    break;
+                case 'voltageL1L3':
+                    this._updateProperty('measure_voltage.L2', data.value);
+                    break;
+                case 'voltageL2L3':
+                    this._updateProperty('measure_voltage.L3', data.value);
+                    break;
+            }
+        } else {
+            switch (data.observation) {
+                case 'Voltage_N_L1':
+                    this._updateProperty('measure_voltage.L1', data.value);
+                    break;
+                case 'Voltage_N_L2':
+                    this._updateProperty('measure_voltage.L2', data.value);
+                    break;
+                case 'Voltage_N_L3':
+                    this._updateProperty('measure_voltage.L3', data.value);
+                    break;
+            }
+        }
+    }
+
     _initializeEventListeners() {
         let self = this;
         self.logMessage('Setting up event listeners');
@@ -179,8 +208,8 @@ class EqualizerDevice extends Homey.Device {
                     self.updateSetting(property, value);
                     break;
                 case 'GridType':
-                    property = 'detectedPowerGridType';
-                    value = enums.decodePowerGridType(data.value);
+                    property = 'gridType';
+                    value = enums.decodeGridType(data.value);
                     self.updateSetting(property, value);
                     break;
                 case 'ActivePowerImport':
@@ -208,21 +237,6 @@ class EqualizerDevice extends Homey.Device {
                     value = data.value;
                     self._updateProperty(property, value);
                     break;
-                case 'Voltage_N_L1':
-                    property = 'measure_voltage.L1';
-                    value = data.value;
-                    self._updateProperty(property, value);
-                    break;
-                case 'Voltage_N_L2':
-                    property = 'measure_voltage.L2';
-                    value = data.value;
-                    self._updateProperty(property, value);
-                    break;
-                case 'Voltage_N_L3':
-                    property = 'measure_voltage.L3';
-                    value = data.value;
-                    self._updateProperty(property, value);
-                    break;
                 case 'CumulativeActivePowerImport':
                     property = 'meter_power';
                     value = data.value;
@@ -238,7 +252,9 @@ class EqualizerDevice extends Homey.Device {
                     break;
             }
 
-            this.logStreamMessage(`'${property}' : '${value}'`);
+            self.updateVoltage(data);
+
+            self.logStreamMessage(`'${property}' : '${value}'`);
         });
     }
 

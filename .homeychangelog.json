@@ -1,4 +1,12 @@
 {
+    "1.2.7": {
+        "en": "New device icons",
+        "sv": "Nya enhetsikoner"
+    },
+    "1.2.6": {
+        "en": "Equalizer shows voltage for IT grid type",
+        "sv": "Equalizer visar nu spänning för IT nät"
+    },
     "1.2.5": {
         "en": "Added reboot action",
         "sv": "Ny funktion för att starta om en laddare"

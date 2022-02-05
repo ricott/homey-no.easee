@@ -15,7 +15,8 @@
     "throttle-debounce": "^3.0.1"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "postinstall": "modclean -r"
   },
   "repository": {
     "type": "git",
@@ -29,5 +30,8 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/ricott/homey-no.easee/issues"
+  },
+  "devDependencies": {
+    "modclean": "^3.0.0-beta.1"
   }
 }

@@ -130,10 +130,10 @@
           "value": ""
         },
         {
-          "id": "detectedPowerGridType",
+          "id": "gridType",
           "type": "label",
           "label": {
-            "en": "Power grid type",
+            "en": "Grid type",
             "sv": "Elnätstyp"
           },
           "value": ""
