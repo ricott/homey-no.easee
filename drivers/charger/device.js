@@ -223,6 +223,43 @@ class ChargerDevice extends Homey.Device {
         });
     }
 
+    //Different observations to read depending on grid type
+    updateCurrentAndVoltage(data) {
+        const gridType = this.getSetting('detectedPowerGridType');
+        if (gridType === enums.DETECTED_POWER_GRID_TYPE.IT_3_PHASE.key ||
+            gridType === enums.DETECTED_POWER_GRID_TYPE.IT_1_PHASE.key) {
+            switch (data.observation) {
+                case 'inVoltageT2T3':
+                    this._updateProperty('measure_voltage', parseInt(data.value));
+                    break;
+                case 'inCurrentT3':
+                    this._updateProperty('measure_current.p1', data.value);
+                    break;
+                case 'inCurrentT4':
+                    this._updateProperty('measure_current.p2', data.value);
+                    break;
+                case 'inCurrentT5':
+                    this._updateProperty('measure_current.p3', data.value);
+                    break;
+            }
+        } else {
+            switch (data.observation) {
+                case 'InVolt_T2_T3':
+                    this._updateProperty('measure_voltage', parseInt(data.value));
+                    break;
+                case 'InCurrent_T3':
+                    this._updateProperty('measure_current.p1', data.value);
+                    break;
+                case 'InCurrent_T4':
+                    this._updateProperty('measure_current.p2', data.value);
+                    break;
+                case 'InCurrent_T5':
+                    this._updateProperty('measure_current.p3', data.value);
+                    break;
+            }
+        }
+    }
+
     _initializeEventListeners() {
         let self = this;
         self.logMessage('Setting up event listeners');
@@ -237,6 +274,8 @@ class ChargerDevice extends Homey.Device {
             self.charger.lastStreamMessageTimestamp = new Date();
             let property = data.observation;
             let value = data.value;
+
+            self.log(`Property: '${property}', Value: '${value}'`);
 
             switch (data.observation) {
                 case 'SoftwareRelease':
@@ -292,27 +331,6 @@ class ChargerDevice extends Homey.Device {
                     value = Math.round(data.value * 1000);
                     self._updateProperty(property, value);
                     break;
-                case 'InVolt_T2_T3':
-                    //Voltage
-                    property = 'measure_voltage';
-                    value = Math.round(data.value);
-                    self._updateProperty(property, value);
-                    break;
-                case 'InCurrent_T3':
-                    property = 'measure_current.p1';
-                    value = data.value;
-                    self._updateProperty(property, value);
-                    break;
-                case 'InCurrent_T4':
-                    property = 'measure_current.p2';
-                    value = data.value;
-                    self._updateProperty(property, value);
-                    break;
-                case 'InCurrent_T5':
-                    property = 'measure_current.p3';
-                    value = data.value;
-                    self._updateProperty(property, value);
-                    break;
                 case 'OutputCurrent':
                     //Current allocated
                     property = 'measure_current.offered';
@@ -351,7 +369,9 @@ class ChargerDevice extends Homey.Device {
                     break;
             }
 
-            this.logStreamMessage(`'${property}' : '${value}'`);
+            self.updateCurrentAndVoltage(data);
+
+            self.logStreamMessage(`'${property}' : '${value}'`);
         });
     }
 

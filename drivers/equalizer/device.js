@@ -145,28 +145,28 @@ class EqualizerDevice extends Homey.Device {
 
     //Different observations to read depending on grid type
     updateVoltage(data) {
-        if (this.getSetting('gridType') == 'IT') {
+        if (this.getSetting('gridType') === enums.GRID_TYPE.IT.key) {
             switch (data.observation) {
                 case 'voltageL1L2':
-                    this._updateProperty('measure_voltage.L1', data.value);
+                    this._updateProperty('measure_voltage.L1', parseInt(data.value));
                     break;
                 case 'voltageL1L3':
-                    this._updateProperty('measure_voltage.L2', data.value);
+                    this._updateProperty('measure_voltage.L2', parseInt(data.value));
                     break;
                 case 'voltageL2L3':
-                    this._updateProperty('measure_voltage.L3', data.value);
+                    this._updateProperty('measure_voltage.L3', parseInt(data.value));
                     break;
             }
         } else {
             switch (data.observation) {
                 case 'Voltage_N_L1':
-                    this._updateProperty('measure_voltage.L1', data.value);
+                    this._updateProperty('measure_voltage.L1', parseInt(data.value));
                     break;
                 case 'Voltage_N_L2':
-                    this._updateProperty('measure_voltage.L2', data.value);
+                    this._updateProperty('measure_voltage.L2', parseInt(data.value));
                     break;
                 case 'Voltage_N_L3':
-                    this._updateProperty('measure_voltage.L3', data.value);
+                    this._updateProperty('measure_voltage.L3', parseInt(data.value));
                     break;
             }
         }
