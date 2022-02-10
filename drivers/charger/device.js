@@ -223,7 +223,13 @@ class ChargerDevice extends Homey.Device {
         });
     }
 
-    //Different observations to read depending on grid type
+    /*
+        Different observations to read depending on grid type TN or IT
+        For IT grid
+        inCurrentT1=PE, inCurrentT2=L1, inCurrentT3=L2, inCurrentT4=L3, inCurrentT5=<not used>
+        For TN grid
+        inCurrentT1=PE, inCurrentT2=N, inCurrentT3=L1, inCurrentT4=L2, inCurrentT5=L3
+    */
     updateCurrentAndVoltage(data) {
         const gridType = this.getSetting('detectedPowerGridType');
         if (gridType === enums.DETECTED_POWER_GRID_TYPE.IT_3_PHASE.key ||
@@ -232,13 +238,13 @@ class ChargerDevice extends Homey.Device {
                 case 'inVoltageT2T3':
                     this._updateProperty('measure_voltage', parseInt(data.value));
                     break;
-                case 'inCurrentT3':
+                case 'inCurrentT2':
                     this._updateProperty('measure_current.p1', data.value);
                     break;
-                case 'inCurrentT4':
+                case 'inCurrentT3':
                     this._updateProperty('measure_current.p2', data.value);
                     break;
-                case 'inCurrentT5':
+                case 'inCurrentT4':
                     this._updateProperty('measure_current.p3', data.value);
                     break;
             }
