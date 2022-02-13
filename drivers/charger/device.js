@@ -235,16 +235,16 @@ class ChargerDevice extends Homey.Device {
         if (gridType === enums.DETECTED_POWER_GRID_TYPE.IT_3_PHASE.key ||
             gridType === enums.DETECTED_POWER_GRID_TYPE.IT_1_PHASE.key) {
             switch (data.observation) {
-                case 'inVoltageT2T3':
+                case 'InVolt_T2_T3':
                     this._updateProperty('measure_voltage', parseInt(data.value));
                     break;
-                case 'inCurrentT2':
+                case 'InCurrent_T2':
                     this._updateProperty('measure_current.p1', data.value);
                     break;
-                case 'inCurrentT3':
+                case 'InCurrent_T3':
                     this._updateProperty('measure_current.p2', data.value);
                     break;
-                case 'inCurrentT4':
+                case 'InCurrent_T4':
                     this._updateProperty('measure_current.p3', data.value);
                     break;
             }
