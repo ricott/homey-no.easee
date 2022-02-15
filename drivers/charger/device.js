@@ -250,7 +250,7 @@ class ChargerDevice extends Homey.Device {
             }
         } else {
             switch (data.observation) {
-                case 'InVolt_T2_T3':
+                case 'InVolt_T3_T4':
                     this._updateProperty('measure_voltage', parseInt(data.value));
                     break;
                 case 'InCurrent_T3':
