@@ -442,7 +442,7 @@ class ChargerDevice extends Homey.Device {
         return self.tokenManager.getTokens(self.getUsername(), self.getPassword(), force)
             .then(function (tokens) {
                 if (self.getToken().accessToken != tokens.accessToken) {
-                    self.logMessage('Renewed access token');
+                    self.logMessage('We have a new access token from TokenManager');
                 }
                 self.setToken(tokens);
                 return Promise.resolve(true);
