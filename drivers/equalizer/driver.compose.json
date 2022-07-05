@@ -166,15 +166,6 @@
           "value": ""
         },
         {
-          "id": "streamMessages",
-          "type": "textarea",
-          "label": {
-            "en": "Last stream messages",
-            "sv": "Senaste meddelandena"
-          },
-          "value": ""
-        },
-        {
           "id": "log",
           "type": "textarea",
           "label": {

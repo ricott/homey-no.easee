@@ -3,8 +3,7 @@
 const Homey = require('homey');
 const enums = require('../../lib/enums.js');
 const crypto = require('crypto');
-var Easee = require('../../lib/easee.js');
-const EaseeStream = require('../../lib/easeeStream.js');
+const Easee = require('../../lib/Easee.js');
 const TokenManager = require('../../lib/tokenManager.js');
 const algorithm = 'aes-256-cbc';
 
@@ -12,9 +11,6 @@ class EqualizerDevice extends Homey.Device {
 
     async onInit() {
         this.equalizer = {
-            stream: null,
-            lastStreamMessageTimestamp: null,
-            streamMessages: [],
             log: [],
             consumptionSinceMidnight: 0
         };
@@ -36,9 +32,8 @@ class EqualizerDevice extends Homey.Device {
                 self.setToken(tokens);
 
                 self.updateEqualizerSiteInfo();
-
-                //Setup SignalR stream
-                self.startSignalRStream();
+                self.updateEqualizerConfig();
+                self.updateEqualizerState();
 
                 self._initilializeTimers();
                 self.resetTotalConsumptionAtMidnight();
@@ -96,182 +91,88 @@ class EqualizerDevice extends Homey.Device {
         }
     }
 
-    startSignalRStream() {
-        this.logMessage(`Opening SignalR stream, for equalizer '${this.getData().id}'`);
-        let options = {
-            accessToken: this.getToken().accessToken,
-            deviceType: enums.deviceTypes().EQUALIZER,
-            deviceId: this.getData().id,
-            appVersion: this.driver.getAppVersion()
-        };
-        this.equalizer.stream = new EaseeStream(options);
-        //Initialize event listeners for the newly created device stream
-        this._initializeEventListeners();
-        this.equalizer.stream.open();
-    }
-
-    stopSignalRStream() {
-        this.logMessage(`Closing SignalR stream, for equalizer '${this.getData().id}'`);
-        this.equalizer.stream.close();
-    }
-
-    monitorSignalRStream() {
-        let self = this;
-        //If invalid credentials the lastStreamMessageTimestamp is null
-        //if so skip this check
-        if (self.equalizer.lastStreamMessageTimestamp) {
-            //Stream disconnected or no message in last 10 minutes        
-            if ((new Date().getTime() - self.equalizer.lastStreamMessageTimestamp.getTime()) > (1000 * 600)) {
-                //if ((new Date().getTime() - self.equalizer.lastStreamMessageTimestamp.getTime()) > (1000 * 60)) {
-                //Lets start a new connection, after making sure previous is killed
-                self.logMessage(`SignalR stream is idle, for equalizer '${self.getData().id}'`);
-
-                this.stopSignalRStream();
-                //Sleep to make sure the old connection is killed properly
-                sleep(5000).then(() => {
-                    this.startSignalRStream();
-                });
-            }
-        }
-    }
-
     updateSetting(key, value) {
         let obj = {};
-        obj[key] = String(value);
-        this.setSettings(obj).catch(err => {
-            this.error('Failed to update settings', err);
-        });
-    }
-
-    //Different observations to read depending on grid type
-    updateVoltage(data) {
-        if (this.getSetting('gridType') === enums.GRID_TYPE.IT.key) {
-            switch (data.observation) {
-                case 'voltageL1L2':
-                    this._updateProperty('measure_voltage.L1', parseInt(data.value));
-                    break;
-                case 'voltageL1L3':
-                    this._updateProperty('measure_voltage.L2', parseInt(data.value));
-                    break;
-                case 'voltageL2L3':
-                    this._updateProperty('measure_voltage.L3', parseInt(data.value));
-                    break;
-            }
+        if (typeof value === 'string' || value instanceof String) {
+            obj[key] = value;
         } else {
-            switch (data.observation) {
-                case 'Voltage_N_L1':
-                    this._updateProperty('measure_voltage.L1', parseInt(data.value));
-                    break;
-                case 'Voltage_N_L2':
-                    this._updateProperty('measure_voltage.L2', parseInt(data.value));
-                    break;
-                case 'Voltage_N_L3':
-                    this._updateProperty('measure_voltage.L3', parseInt(data.value));
-                    break;
-            }
+            //If not of type string then make it string
+            obj[key] = String(value);
         }
+
+        this.setSettings(obj).catch(err => {
+            this.error(`Failed to update setting '${key}' with value '${value}'`, err);
+        });
     }
 
-    _initializeEventListeners() {
+    createEaseeChargerClient() {
+        let options = {
+            accessToken: this.getToken().accessToken,
+            appVersion: this.driver.getAppVersion()
+        };
+        return new Easee(options);
+    }
+
+    updateEqualizerConfig() {
         let self = this;
-        self.logMessage('Setting up event listeners');
-        self.equalizer.stream.on('CommandResponse', data => {
-            self.log(`[${self.getName()}] Command response received: `, data);
-            let dateTime = new Date().toISOString();
-            self.setSettings({
-                commandResponse: dateTime + '\n' + JSON.stringify(data, null, "  ")
-            }).catch(err => {
-                self.error('Failed to update settings', err);
+        self.logMessage('Getting equalizer config info');
+        self.createEaseeChargerClient().getEqualizerConfig(self.getData().id)
+            .then(function (config) {
+
+                self.updateSetting('meterid', config.meterId);
+                self.updateSetting('equalizerid', config.equalizerId);
+                self.updateSetting('gridType', enums.decodeGridType(config.gridType));
+
+            }).catch(reason => {
+                self.logError(reason);
             });
-        });
+    }
 
-        self.equalizer.stream.on('Observation', data => {
-            //Keep timestamp from last message received
-            self.equalizer.lastStreamMessageTimestamp = new Date();
-            let property = data.observation;
-            let value = data.value;
+    updateEqualizerState() {
+        let self = this;
+        self.logMessage('Getting equalizer state info');
+        self.createEaseeChargerClient().getEqualizerState(self.getData().id)
+            .then(function (state) {
 
-            switch (data.observation) {
-                case 'SoftwareRelease':
-                    property = 'version';
-                    value = data.value;
-                    self.updateSetting(property, value);
-                    break;
-                case 'MeterID':
-                    property = 'meterid';
-                    value = data.value;
-                    self.updateSetting(property, value);
-                    break;
-                case 'EqualizerID':
-                    property = 'equalizerid';
-                    value = data.value;
-                    self.updateSetting(property, value);
-                    break;
-                case 'GridType':
-                    property = 'gridType';
-                    value = enums.decodeGridType(data.value);
-                    self.updateSetting(property, value);
-                    break;
-                case 'ActivePowerImport':
-                    property = 'measure_power';
-                    value = Math.round(data.value * 1000);
-                    self._updateProperty(property, value);
-                    break;
-                case 'ActivePowerExport':
-                    property = 'measure_power.surplus';
-                    value = Math.round(data.value * 1000);
-                    self._updateProperty(property, value);
-                    break;
-                case 'Current_L1':
-                    property = 'measure_current.L1';
-                    value = data.value;
-                    self._updateProperty(property, value);
-                    break;
-                case 'Current_L2':
-                    property = 'measure_current.L2';
-                    value = data.value;
-                    self._updateProperty(property, value);
-                    break;
-                case 'Current_L3':
-                    property = 'measure_current.L3';
-                    value = data.value;
-                    self._updateProperty(property, value);
-                    break;
-                case 'CumulativeActivePowerImport':
-                    property = 'meter_power';
-                    value = data.value;
-                    self._updateProperty(property, value);
-                    self.calculateConsumptionSinceMidnight(value);
-                    break;
-                case 'CumulativeActivePowerExport':
-                    property = 'meter_power.surplus';
-                    value = data.value;
-                    self._updateProperty(property, value);
-                    break;
-                default:
-                    break;
-            }
+                self.updateSetting('version', state.softwareRelease);
 
-            self.updateVoltage(data);
+                try {
+                    self._updateProperty('measure_power', Math.round(state.activePowerImport * 1000));
+                    self._updateProperty('measure_power.surplus', Math.round(state.activePowerExport * 1000));
+                    self._updateProperty('meter_power', state.cumulativeActivePowerImport);
+                    self._updateProperty('meter_power.surplus', state.cumulativeActivePowerExport);
+                    self._updateProperty('measure_current.L1', state.currentL1);
+                    self._updateProperty('measure_current.L2', state.currentL2);
+                    self._updateProperty('measure_current.L3', state.currentL3);
+    
+                    if (self.getSetting('gridType') === enums.GRID_TYPE.IT.key) {
+                        self._updateProperty('measure_voltage.L1', parseInt(state.voltageL1L2));
+                        self._updateProperty('measure_voltage.L2', parseInt(state.voltageL1L3));
+                        self._updateProperty('measure_voltage.L3', parseInt(state.voltageL2L3));
+                    } else {
+                        self._updateProperty('measure_voltage.L1', parseInt(state.voltageNL1));
+                        self._updateProperty('measure_voltage.L2', parseInt(state.voltageNL2));
+                        self._updateProperty('measure_voltage.L3', parseInt(state.voltageNL3));
+                    }
+                } catch (error) {
+                    self.logError(error);
+                }
 
-            self.logStreamMessage(`'${property}' : '${value}'`);
-        });
+            }).catch(reason => {
+                self.logError(reason);
+            });
     }
 
     //Invoked once upon startup of app, considered static information
     updateEqualizerSiteInfo() {
         let self = this;
         self.logMessage('Getting equalizer site info');
-        new Easee(self.getToken()).getEqualizerSiteInfo(self.getData().id)
+        self.createEaseeChargerClient().getEqualizerSiteInfo(self.getData().id)
             .then(function (site) {
 
-                self.setSettings({
-                    mainFuse: `${Math.round(site.ratedCurrent)}`,
-                    circuitFuse: `${Math.round(site.circuits[0].ratedCurrent)}`,
-                    site: JSON.stringify(site, null, "  ")
-                }).catch(err => {
-                    self.error('Failed to update settings', err);
-                });
+                self.updateSetting('mainFuse', Math.round(site.ratedCurrent));
+                self.updateSetting('circuitFuse', Math.round(site.circuits[0].ratedCurrent));
+                self.updateSetting('site', JSON.stringify(site, null, "  "));
 
             }).catch(reason => {
                 self.logError(reason);
@@ -355,15 +256,15 @@ class EqualizerDevice extends Homey.Device {
 
     _initilializeTimers() {
         this.logMessage('Adding timers');
-        //Refresh access token, each 15 mins from tokenManager
+        //Refresh state every 30 seconds
+        this.pollIntervals.push(setInterval(() => {
+            this.updateEqualizerState();
+        }, 30 * 1000));
+
+        //Refresh access token, each 5 mins from tokenManager
         this.pollIntervals.push(setInterval(() => {
             this.refreshAccessToken();
-        }, 60 * 1000 * 15));
-
-        //Check that stream is running, if not start new
-        this.pollIntervals.push(setInterval(() => {
-            this.monitorSignalRStream();
-        }, 120 * 1000));
+        }, 60 * 1000 * 5));
 
         //Update debug info every minute with last 10 messages
         this.pollIntervals.push(setInterval(() => {
@@ -416,21 +317,10 @@ class EqualizerDevice extends Homey.Device {
     onDeleted() {
         this.log(`Deleting Easee equalizer '${this.getName()}' from Homey.`);
         this._deleteTimers();
-        this.stopSignalRStream();
 
         this.homey.settings.unset(`${this.getData().id}.username`);
         this.homey.settings.unset(`${this.getData().id}.password`);
         this.equalizer = null;
-    }
-
-    logStreamMessage(message) {
-        if (this.equalizer.streamMessages.length > 9) {
-            //Remove oldest entry
-            this.equalizer.streamMessages.shift();
-        }
-        //Add new entry
-        let dateTime = new Date().toISOString();
-        this.equalizer.streamMessages.push(dateTime + '\n' + message + '\n');
     }
 
     logMessage(message) {
@@ -444,17 +334,12 @@ class EqualizerDevice extends Homey.Device {
         this.equalizer.log.push(dateTime + ' ' + message + '\n');
     }
 
-    getLoggedStreamMessages() {
-        return this.equalizer.streamMessages.toString();
-    }
-
     getLogMessages() {
         return this.equalizer.log.toString();
     }
 
     updateDebugMessages() {
         this.setSettings({
-            streamMessages: this.getLoggedStreamMessages(),
             log: this.getLogMessages()
         })
             .catch(err => {

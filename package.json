@@ -7,17 +7,12 @@
     "lib": "lib"
   },
   "dependencies": {
-    "@microsoft/signalr": "^6.0.3",
     "async-mutex": "^0.3.2",
     "enum": "^3.0.4",
-    "events": "^3.3.0",
-    "homey-log": "^2.1.0",
-    "http.min": "^2.1.0",
-    "throttle-debounce": "^3.0.1"
+    "http.min": "^2.1.0"
   },
   "scripts": {
-    "test": "mocha",
-    "postinstall": "modclean -r"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -28,11 +23,7 @@
     "charger"
   ],
   "author": "Richard Barkestam",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/ricott/homey-no.easee/issues"
-  },
-  "devDependencies": {
-    "modclean": "^3.0.0-beta.1"
   }
 }

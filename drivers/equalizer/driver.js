@@ -1,7 +1,7 @@
 'use strict';
 
 const Homey = require('homey');
-const EaseeCharger = require('../../lib/easee.js');
+const Easee = require('../../lib/Easee.js');
 const TokenManager = require('../../lib/tokenManager.js');
 
 class EqualizerDriver extends Homey.Driver {
@@ -78,7 +78,7 @@ class EqualizerDriver extends Homey.Driver {
 
       return self.tokenManager.getTokens(data.username, data.password)
         .then(function (tokens) {
-          let easee = new EaseeCharger(tokens);
+          let easee = new Easee(tokens);
           return easee.getEqualizers().then(function (equalizers) {
             equalizers.forEach(equalizer => {
               let name = 'charger.name';

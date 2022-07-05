@@ -1125,29 +1125,11 @@
               "value": ""
             },
             {
-              "id": "commandResponse",
-              "type": "textarea",
-              "label": {
-                "en": "Last command response",
-                "sv": "Senaste kommandosvaret"
-              },
-              "value": ""
-            },
-            {
               "id": "easee_last_error",
               "type": "textarea",
               "label": {
                 "en": "Last API error",
                 "sv": "Senaste API felet"
-              },
-              "value": ""
-            },
-            {
-              "id": "streamMessages",
-              "type": "textarea",
-              "label": {
-                "en": "Last stream messages",
-                "sv": "Senaste meddelandena"
               },
               "value": ""
             },
@@ -1358,15 +1340,6 @@
               "label": {
                 "en": "Site info",
                 "sv": "Anläggning"
-              },
-              "value": ""
-            },
-            {
-              "id": "streamMessages",
-              "type": "textarea",
-              "label": {
-                "en": "Last stream messages",
-                "sv": "Senaste meddelandena"
               },
               "value": ""
             },

@@ -1,11 +1,8 @@
 'use strict';
-
 const Homey = require('homey');
-var EaseeCharger = require('../../lib/easee.js');
+const Easee = require('../../lib/Easee.js');
 const enums = require('../../lib/enums.js');
 const crypto = require('crypto');
-const { debounce } = require('throttle-debounce');
-const EaseeStream = require('../../lib/easeeStream.js');
 const TokenManager = require('../../lib/tokenManager.js');
 const algorithm = 'aes-256-cbc';
 
@@ -26,9 +23,6 @@ class ChargerDevice extends Homey.Device {
 
     async onInit() {
         this.charger = {
-            stream: null,
-            lastStreamMessageTimestamp: null,
-            streamMessages: [],
             log: []
         };
 
@@ -41,13 +35,6 @@ class ChargerDevice extends Homey.Device {
         this.tokenManager = TokenManager;
 
         this.setupCapabilities();
-
-        //Status seems to bounce, lets debounce it
-        //If status is kept for less than 60 seconds, ignore it
-        this.updateStatus = debounce(60000, (status) => {
-            this.logMessage(`Setting charger status '${status}'`);
-            this._updateProperty('charger_status', status);
-        });
 
         this.registerCapabilityListener('button.organize', async () => {
             //Delete all capabilities and then add them in right order
@@ -97,9 +84,8 @@ class ChargerDevice extends Homey.Device {
 
                 self.updateChargerSiteInfo();
                 self.updateChargerStatistics();
-                //Setup SignalR stream
-                self.startSignalRStream();
-
+                self.updateChargerConfig();
+                self.updateChargerState();
                 self._initilializeTimers();
             }).catch(reason => {
                 self.logMessage(reason);
@@ -112,51 +98,6 @@ class ChargerDevice extends Homey.Device {
 
     setToken(tokens) {
         this.setStoreValue('tokens', tokens);
-    }
-
-    startSignalRStream() {
-        this.logMessage(`Opening SignalR stream, for charger '${this.getData().id}'`);
-        let options = {
-            accessToken: this.getToken().accessToken,
-            deviceType: enums.deviceTypes().CHARGER,
-            deviceId: this.getData().id,
-            appVersion: this.driver.getAppVersion()
-        };
-        this.charger.stream = new EaseeStream(options);
-        //Initialize event listeners for the newly created charge stream
-        this._initializeEventListeners();
-        this.charger.stream.open();
-    }
-
-    stopSignalRStream() {
-        this.logMessage(`Closing SignalR stream, for charger '${this.getData().id}'`);
-        this.charger.stream.close();
-    }
-
-    monitorSignalRStream() {
-        let self = this;
-        //If invalid credentials the lastStreamMessageTimestamp is null
-        //if so skip this check
-        if (self.charger.lastStreamMessageTimestamp) {
-            //Stream disconnected or no message in last 30 minutes
-            if ((new Date().getTime() - self.charger.lastStreamMessageTimestamp.getTime()) > (1000 * 1800)) {
-                //if ((new Date().getTime() - self.charger.lastStreamMessageTimestamp.getTime()) > (1000 * 60)) {
-                //Lets start a new connection, after making sure previous is killed
-                self.logMessage(`SignalR stream is idle, for charger '${self.getData().id}'`);
-
-                //Not unlikely we are here due to access token is invalid, lets refresh it
-                self.refreshAccessToken(true)
-                    .then(() => {
-                        self.stopSignalRStream();
-                        //Sleep to make sure the old connection is killed properly
-                        sleep(5000).then(() => {
-                            self.startSignalRStream();
-                        });
-                    }).catch(reason => {
-                        self.logError(reason);
-                    });
-            }
-        }
     }
 
     removeCapabilityHelper(capability) {
@@ -217,167 +158,15 @@ class ChargerDevice extends Homey.Device {
 
     updateSetting(key, value) {
         let obj = {};
-        obj[key] = String(value);
-        this.setSettings(obj).catch(err => {
-            this.error('Failed to update settings', err);
-        });
-    }
-
-    /*
-        Different observations to read depending on grid type TN or IT
-        For IT grid
-        inCurrentT1=PE, inCurrentT2=L1, inCurrentT3=L2, inCurrentT4=L3, inCurrentT5=<not used>
-        For TN grid
-        inCurrentT1=PE, inCurrentT2=N, inCurrentT3=L1, inCurrentT4=L2, inCurrentT5=L3
-    */
-    updateCurrentAndVoltage(data) {
-        const gridType = this.getSetting('detectedPowerGridType');
-        if (gridType === enums.DETECTED_POWER_GRID_TYPE.IT_3_PHASE.key ||
-            gridType === enums.DETECTED_POWER_GRID_TYPE.IT_1_PHASE.key) {
-            switch (data.observation) {
-                case 'InVolt_T2_T3':
-                    this._updateProperty('measure_voltage', parseInt(data.value));
-                    break;
-                case 'InCurrent_T2':
-                    this._updateProperty('measure_current.p1', data.value);
-                    break;
-                case 'InCurrent_T3':
-                    this._updateProperty('measure_current.p2', data.value);
-                    break;
-                case 'InCurrent_T4':
-                    this._updateProperty('measure_current.p3', data.value);
-                    break;
-            }
+        if (typeof value === 'string' || value instanceof String) {
+            obj[key] = value;
         } else {
-            switch (data.observation) {
-                case 'InVolt_T3_T4':
-                    this._updateProperty('measure_voltage', parseInt(data.value));
-                    break;
-                case 'InCurrent_T3':
-                    this._updateProperty('measure_current.p1', data.value);
-                    break;
-                case 'InCurrent_T4':
-                    this._updateProperty('measure_current.p2', data.value);
-                    break;
-                case 'InCurrent_T5':
-                    this._updateProperty('measure_current.p3', data.value);
-                    break;
-            }
+            //If not of type string then make it string
+            obj[key] = String(value);
         }
-    }
 
-    _initializeEventListeners() {
-        let self = this;
-        self.logMessage('Setting up event listeners');
-        let dateTime = new Date().toISOString();
-        self.charger.stream.on('CommandResponse', data => {
-            self.log(`[${self.getName()}] Command response received: `, data);
-            self.updateSetting('commandResponse', dateTime + '\n' + JSON.stringify(data, null, "  "));
-        });
-
-        self.charger.stream.on('Observation', data => {
-            //Keep timestamp from last message received
-            self.charger.lastStreamMessageTimestamp = new Date();
-            let property = data.observation;
-            let value = data.value;
-
-            self.log(`Property: '${property}', Value: '${value}'`);
-
-            switch (data.observation) {
-                case 'SoftwareRelease':
-                    property = 'version';
-                    value = data.value;
-                    self.updateSetting(property, value);
-                    break;
-                case 'PhaseMode':
-                    property = 'phaseMode';
-                    value = enums.decodePhaseMode(data.value);
-                    self.updateSetting(property, value);
-                    break;
-                case 'LocalNodeType':
-                    property = 'nodeType';
-                    value = enums.decodeNodeType(data.value);
-                    self.updateSetting(property, value);
-                    break;
-                case 'EnableIdleCurrent':
-                    property = 'idleCurrent';
-                    value = data.value ? 'Yes' : 'No';
-                    self.updateSetting(property, value);
-                    break;
-                case 'MaxCurrentOfflineFallback_P1':
-                    property = 'maxOfflineCurrent';
-                    value = data.value;
-                    self.updateSetting(property, value);
-                    break;
-                case 'DetectedPowerGridType':
-                    property = 'detectedPowerGridType';
-                    value = enums.decodePowerGridType(data.value);
-                    self.updateSetting(property, value);
-                    break;
-                case 'OfflineChargingMode':
-                    property = 'offlineChargingMode';
-                    value = enums.decodeOfflineChargingModeType(data.value);
-                    self.updateSetting(property, value);
-                    break;
-                case 'LockCablePermanently':
-                    property = 'lockCablePermanently';
-                    value = data.value ? 'Yes' : 'No';
-                    self.updateSetting(property, value);
-                    break;
-                case 'ChargerOpMode':
-                    //Status
-                    property = 'charger_status';
-                    value = enums.decodeChargerMode(data.value);
-                    self.logMessage(`Debouncing charger status '${value}'`);
-                    self.updateStatus(value);
-                    break;
-                case 'TotalPower':
-                    //Power
-                    property = 'measure_power';
-                    value = Math.round(data.value * 1000);
-                    self._updateProperty(property, value);
-                    break;
-                case 'OutputCurrent':
-                    //Current allocated
-                    property = 'measure_current.offered';
-                    value = data.value;
-                    self._updateProperty(property, value);
-                    break;
-                case 'SessionEnergy':
-                    //Last charge session kWh
-                    property = 'meter_power.lastCharge';
-                    value = data.value;
-                    self._updateProperty(property, value);
-                    break;
-                case 'LifetimeEnergy':
-                    //Lifetime kWh
-                    property = 'meter_power';
-                    value = data.value;
-                    self._updateProperty(property, value);
-                    break;
-                case 'IsEnabled':
-                    //Enabled
-                    property = 'enabled';
-                    value = data.value;
-                    self._updateProperty(property, value);
-                    break;
-                case 'SmartCharging':
-                    property = 'smartCharging';
-                    value = data.value ? 'Yes' : 'No';
-                    self.updateSetting(property, value);
-                    break;
-                case 'ReasonForNoCurrent':
-                    property = 'reasonForNoCurrent';
-                    value = enums.decodeReasonForNoCurrent(data.value);
-                    self.updateSetting(property, value);
-                    break;
-                default:
-                    break;
-            }
-
-            self.updateCurrentAndVoltage(data);
-
-            self.logStreamMessage(`'${property}' : '${value}'`);
+        this.setSettings(obj).catch(err => {
+            this.error(`Failed to update setting '${key}' with value '${value}'`, err);
         });
     }
 
@@ -457,10 +246,83 @@ class ChargerDevice extends Homey.Device {
             accessToken: this.getToken().accessToken,
             appVersion: this.driver.getAppVersion()
         };
-        return new EaseeCharger(options);
+        return new Easee(options);
     }
 
-    //Info not part of streaming API, refreshed once every 30 mins
+    updateChargerConfig() {
+        let self = this;
+        self.logMessage('Getting charger config info');
+        self.createEaseeChargerClient().getChargerConfig(self.getData().id)
+            .then(function (config) {
+
+                self.updateSetting('idleCurrent', config.enableIdleCurrent ? 'Yes' : 'No');
+                self.updateSetting('lockCablePermanently', config.lockCablePermanently ? 'Yes' : 'No');
+                self.updateSetting('phaseMode', enums.decodePhaseMode(config.phaseMode));
+                self.updateSetting('nodeType', enums.decodeNodeType(config.localNodeType));
+                self.updateSetting('detectedPowerGridType', enums.decodePowerGridType(config.detectedPowerGridType));
+                self.updateSetting('offlineChargingMode', enums.decodeOfflineChargingModeType(config.offlineChargingMode));
+
+                try {
+                    self._updateProperty('enabled', config.isEnabled);
+                } catch (error) {
+                    self.logError(error);
+                }
+
+            }).catch(reason => {
+                self.logError(reason);
+            });
+    }
+
+    updateChargerState() {
+        let self = this;
+        self.logMessage('Getting charger state info');
+        self.createEaseeChargerClient().getChargerState(self.getData().id)
+            .then(function (state) {
+
+                self.updateSetting('version', state.chargerFirmware);
+                self.updateSetting('smartCharging', state.smartCharging ? 'Yes' : 'No');
+                self.updateSetting('maxOfflineCurrent', Math.max(state.offlineMaxCircuitCurrentP1, state.offlineMaxCircuitCurrentP2, state.offlineMaxCircuitCurrentP3));
+                self.updateSetting('reasonForNoCurrent', enums.decodeReasonForNoCurrent(state.reasonForNoCurrent));
+
+                try {
+                    self._updateProperty('meter_power.lastCharge', state.sessionEnergy);
+                    self._updateProperty('meter_power', state.lifetimeEnergy);
+                    self._updateProperty('measure_current.offered', state.outputCurrent);
+                    self._updateProperty('measure_power', Math.round(state.totalPower * 1000));
+                    self._updateProperty('charger_status', enums.decodeChargerMode(state.chargerOpMode));
+                    self._updateProperty('measure_voltage', parseInt(state.voltage));
+                } catch (error) {
+                    self.logError(error);
+                }
+
+                /*
+                    Different observations to read depending on grid type TN or IT
+                    For IT grid
+                    inCurrentT1=PE, inCurrentT2=L1, inCurrentT3=L2, inCurrentT4=L3, inCurrentT5=<not used>
+                    For TN grid
+                    inCurrentT1=PE, inCurrentT2=N, inCurrentT3=L1, inCurrentT4=L2, inCurrentT5=L3
+                */
+                try {
+                    const gridType = self.getSetting('detectedPowerGridType');
+                    if (gridType === enums.DETECTED_POWER_GRID_TYPE.IT_3_PHASE.key ||
+                        gridType === enums.DETECTED_POWER_GRID_TYPE.IT_1_PHASE.key) {
+                        self._updateProperty('measure_current.p1', state.inCurrentT2);
+                        self._updateProperty('measure_current.p2', state.inCurrentT3);
+                        self._updateProperty('measure_current.p3', state.inCurrentT4);
+                    } else {
+                        self._updateProperty('measure_current.p1', state.inCurrentT3);
+                        self._updateProperty('measure_current.p2', state.inCurrentT4);
+                        self._updateProperty('measure_current.p3', state.inCurrentT5);
+                    }
+                } catch (error) {
+                    self.logError(error);
+                }
+
+            }).catch(reason => {
+                self.logError(reason);
+            });
+    }
+
     updateChargerStatistics() {
         let self = this;
         if (self.getSetting('showLast30daysStats')) {
@@ -732,15 +594,20 @@ class ChargerDevice extends Homey.Device {
             this.updateChargerStatistics();
         }, 60 * 1000 * 30));
 
+        //Update config each 10 mins
+        this.pollIntervals.push(setInterval(() => {
+            this.updateChargerConfig();
+        }, 60 * 1000 * 30));
+
+        //Update state each 30s
+        this.pollIntervals.push(setInterval(() => {
+            this.updateChargerState();
+        }, 30 * 1000));
+
         //Refresh access token, each 5 mins from tokenManager
         this.pollIntervals.push(setInterval(() => {
             this.refreshAccessToken(false);
         }, 60 * 1000 * 5));
-
-        //Check that stream is running, if not start new
-        this.pollIntervals.push(setInterval(() => {
-            this.monitorSignalRStream();
-        }, 120 * 1000));
 
         //Update debug info every minute with last 10 messages
         this.pollIntervals.push(setInterval(() => {
@@ -784,8 +651,6 @@ class ChargerDevice extends Homey.Device {
     onDeleted() {
         this.log(`Deleting Easee charger '${this.getName()}' from Homey.`);
         this._deleteTimers();
-        this.stopSignalRStream();
-        this.updateStatus.cancel();
 
         this.homey.settings.unset(`${this.getData().id}.username`);
         this.homey.settings.unset(`${this.getData().id}.password`);
@@ -809,16 +674,6 @@ class ChargerDevice extends Homey.Device {
         }
     }
 
-    logStreamMessage(message) {
-        if (this.charger.streamMessages.length > 9) {
-            //Remove oldest entry
-            this.charger.streamMessages.shift();
-        }
-        //Add new entry
-        let dateTime = new Date().toISOString();
-        this.charger.streamMessages.push(dateTime + '\n' + message + '\n');
-    }
-
     logMessage(message) {
         this.log(`[${this.getName()}] ${message}`);
         if (this.charger.log.length > 49) {
@@ -830,17 +685,12 @@ class ChargerDevice extends Homey.Device {
         this.charger.log.push(dateTime + ' ' + message + '\n');
     }
 
-    getLoggedStreamMessages() {
-        return this.charger.streamMessages.toString();
-    }
-
     getLogMessages() {
         return this.charger.log.toString();
     }
 
     updateDebugMessages() {
         this.setSettings({
-            streamMessages: this.getLoggedStreamMessages(),
             log: this.getLogMessages()
         })
             .catch(err => {

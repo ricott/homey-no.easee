@@ -1,7 +1,7 @@
 'use strict';
 
 const Homey = require('homey');
-const Easee = require('../../lib/easee.js');
+const Easee = require('../../lib/Easee.js');
 const TokenManager = require('../../lib/tokenManager.js');
 
 class ChargerDriver extends Homey.Driver {
@@ -367,7 +367,7 @@ class ChargerDriver extends Homey.Driver {
 
       return self.tokenManager.getTokens(data.username, data.password)
         .then(function (tokens) {
-          let easee = new Easee(tokens);
+          const easee = new Easee(tokens);
           return easee.getChargers().then(function (chargers) {
             chargers.forEach(charger => {
               let name = 'charger.name';
@@ -387,7 +387,6 @@ class ChargerDriver extends Homey.Driver {
               });
             });
 
-            //self.log('Found chargers', devices);
             return true;
 
           }).catch(reason => {
