@@ -184,10 +184,9 @@
       "options": {
         "logo": "../../../assets/images/logo.png",
         "usernameLabel": {
-          "en": "Phone number",
-          "sv": "Mobilnummer"
+            "en": "Phone number or email",
+            "sv": "Mobilnummer eller email"
         },
-        "usernamePlaceholder": "+46....",
         "passwordLabel": {
           "en": "Password",
           "sv": "Lösenord"

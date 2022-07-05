@@ -255,12 +255,16 @@ class ChargerDevice extends Homey.Device {
         self.createEaseeChargerClient().getChargerConfig(self.getData().id)
             .then(function (config) {
 
-                self.updateSetting('idleCurrent', config.enableIdleCurrent ? 'Yes' : 'No');
-                self.updateSetting('lockCablePermanently', config.lockCablePermanently ? 'Yes' : 'No');
-                self.updateSetting('phaseMode', enums.decodePhaseMode(config.phaseMode));
-                self.updateSetting('nodeType', enums.decodeNodeType(config.localNodeType));
-                self.updateSetting('detectedPowerGridType', enums.decodePowerGridType(config.detectedPowerGridType));
-                self.updateSetting('offlineChargingMode', enums.decodeOfflineChargingModeType(config.offlineChargingMode));
+                self.setSettings({
+                    idleCurrent: config.enableIdleCurrent ? 'Yes' : 'No',
+                    lockCablePermanently: config.lockCablePermanently ? 'Yes' : 'No',
+                    phaseMode: enums.decodePhaseMode(config.phaseMode),
+                    nodeType: enums.decodeNodeType(config.localNodeType),
+                    detectedPowerGridType: enums.decodePowerGridType(config.detectedPowerGridType),
+                    offlineChargingMode: enums.decodeOfflineChargingModeType(config.offlineChargingMode)
+                }).catch(err => {
+                    this.error(`Failed to update config settings`, err);
+                });
 
                 try {
                     self._updateProperty('enabled', config.isEnabled);
@@ -279,10 +283,14 @@ class ChargerDevice extends Homey.Device {
         self.createEaseeChargerClient().getChargerState(self.getData().id)
             .then(function (state) {
 
-                self.updateSetting('version', state.chargerFirmware);
-                self.updateSetting('smartCharging', state.smartCharging ? 'Yes' : 'No');
-                self.updateSetting('maxOfflineCurrent', Math.max(state.offlineMaxCircuitCurrentP1, state.offlineMaxCircuitCurrentP2, state.offlineMaxCircuitCurrentP3));
-                self.updateSetting('reasonForNoCurrent', enums.decodeReasonForNoCurrent(state.reasonForNoCurrent));
+                self.setSettings({
+                    version: String(state.chargerFirmware),
+                    smartCharging: state.smartCharging ? 'Yes' : 'No',
+                    maxOfflineCurrent: String(Math.max(state.offlineMaxCircuitCurrentP1, state.offlineMaxCircuitCurrentP2, state.offlineMaxCircuitCurrentP3)),
+                    reasonForNoCurrent: enums.decodeReasonForNoCurrent(state.reasonForNoCurrent)
+                }).catch(err => {
+                    this.error(`Failed to update state settings`, err);
+                });
 
                 try {
                     self._updateProperty('meter_power.lastCharge', state.sessionEnergy);
@@ -356,11 +364,10 @@ class ChargerDevice extends Homey.Device {
                 self.setSettings({
                     mainFuse: `${Math.round(site.ratedCurrent)}`,
                     circuitFuse: `${Math.round(site.circuits[0].ratedCurrent)}`,
-                    site: JSON.stringify(site, null, "  "),
                     siteId: `${site.circuits[0].siteId}`,
                     circuitId: `${site.circuits[0].id}`
                 }).catch(err => {
-                    self.error('Failed to update settings', err);
+                    self.error('Failed to update site settings', err);
                 });
 
             }).catch(reason => {

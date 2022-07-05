@@ -261,15 +261,6 @@
                     "value": ""
                 },
                 {
-                    "id": "site",
-                    "type": "textarea",
-                    "label": {
-                        "en": "Site info",
-                        "sv": "Anläggning"
-                    },
-                    "value": ""
-                },
-                {
                     "id": "easee_last_error",
                     "type": "textarea",
                     "label": {
@@ -297,10 +288,9 @@
             "options": {
                 "logo": "../../../assets/images/logo.png",
                 "usernameLabel": {
-                    "en": "Phone number",
-                    "sv": "Mobilnummer"
+                    "en": "Phone number or email",
+                    "sv": "Mobilnummer eller email"
                 },
-                "usernamePlaceholder": "+46....",
                 "passwordLabel": {
                     "en": "Password",
                     "sv": "Lösenord"

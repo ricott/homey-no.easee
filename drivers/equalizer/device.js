@@ -91,20 +91,6 @@ class EqualizerDevice extends Homey.Device {
         }
     }
 
-    updateSetting(key, value) {
-        let obj = {};
-        if (typeof value === 'string' || value instanceof String) {
-            obj[key] = value;
-        } else {
-            //If not of type string then make it string
-            obj[key] = String(value);
-        }
-
-        this.setSettings(obj).catch(err => {
-            this.error(`Failed to update setting '${key}' with value '${value}'`, err);
-        });
-    }
-
     createEaseeChargerClient() {
         let options = {
             accessToken: this.getToken().accessToken,
@@ -119,9 +105,13 @@ class EqualizerDevice extends Homey.Device {
         self.createEaseeChargerClient().getEqualizerConfig(self.getData().id)
             .then(function (config) {
 
-                self.updateSetting('meterid', config.meterId);
-                self.updateSetting('equalizerid', config.equalizerId);
-                self.updateSetting('gridType', enums.decodeGridType(config.gridType));
+                self.setSettings({
+                    meterid: config.meterId,
+                    equalizerid: config.equalizerId,
+                    gridType: enums.decodeGridType(config.gridType)
+                }).catch(err => {
+                    this.error(`Failed to update config settings`, err);
+                });
 
             }).catch(reason => {
                 self.logError(reason);
@@ -134,7 +124,11 @@ class EqualizerDevice extends Homey.Device {
         self.createEaseeChargerClient().getEqualizerState(self.getData().id)
             .then(function (state) {
 
-                self.updateSetting('version', state.softwareRelease);
+                self.setSettings({
+                    version: String(state.softwareRelease)
+                }).catch(err => {
+                    this.error(`Failed to update state settings`, err);
+                });
 
                 try {
                     self._updateProperty('measure_power', Math.round(state.activePowerImport * 1000));
@@ -170,9 +164,13 @@ class EqualizerDevice extends Homey.Device {
         self.createEaseeChargerClient().getEqualizerSiteInfo(self.getData().id)
             .then(function (site) {
 
-                self.updateSetting('mainFuse', Math.round(site.ratedCurrent));
-                self.updateSetting('circuitFuse', Math.round(site.circuits[0].ratedCurrent));
-                self.updateSetting('site', JSON.stringify(site, null, "  "));
+                self.setSettings({
+                    mainFuse: String(Math.round(site.ratedCurrent)),
+                    circuitFuse: String(Math.round(site.circuits[0].ratedCurrent)),
+                    site: JSON.stringify(site, null, "  ")
+                }).catch(err => {
+                    this.error(`Failed to update site info settings`, err);
+                });
 
             }).catch(reason => {
                 self.logError(reason);
