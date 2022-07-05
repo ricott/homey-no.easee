@@ -166,8 +166,7 @@ class EqualizerDevice extends Homey.Device {
 
                 self.setSettings({
                     mainFuse: String(Math.round(site.ratedCurrent)),
-                    circuitFuse: String(Math.round(site.circuits[0].ratedCurrent)),
-                    site: JSON.stringify(site, null, "  ")
+                    circuitFuse: String(Math.round(site.circuits[0].ratedCurrent))
                 }).catch(err => {
                     this.error(`Failed to update site info settings`, err);
                 });

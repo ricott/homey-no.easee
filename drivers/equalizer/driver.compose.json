@@ -157,15 +157,6 @@
       },
       "children": [
         {
-          "id": "site",
-          "type": "textarea",
-          "label": {
-            "en": "Site info",
-            "sv": "Anläggning"
-          },
-          "value": ""
-        },
-        {
           "id": "log",
           "type": "textarea",
           "label": {
