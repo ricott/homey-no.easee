@@ -475,7 +475,7 @@ class ChargerDevice extends Homey.Device {
         let self = this;
         self.logMessage(`Creating schedule, start '${startTime}', end '${endTime}' and repeat '${repeat}'`);
         return self.createEaseeChargerClient().setBasicChargePlan(self.getData().id,
-            startTime, endTime, repeat)
+            startTime, endTime, repeat, self.homey.clock.getTimezone())
             .then(function (result) {
                 return result;
             }).catch(reason => {

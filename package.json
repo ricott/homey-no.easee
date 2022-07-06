@@ -9,7 +9,8 @@
   "dependencies": {
     "async-mutex": "^0.3.2",
     "enum": "^3.0.4",
-    "http.min": "^2.1.0"
+    "http.min": "^2.1.0",
+    "spacetime": "^7.1.4"
   },
   "scripts": {
     "test": "mocha"

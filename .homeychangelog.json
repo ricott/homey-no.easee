@@ -1,4 +1,8 @@
 {
+    "1.4.1": {
+        "en": "Fixed the charger schedule timezone problem",
+        "sv": "Schemaläggning för laddare använder rätt tidszon"
+    },
     "1.4.0": {
         "en": "Rewrite, removing SignalR",
         "sv": "Omskrivning för att ta bort SignalR"
