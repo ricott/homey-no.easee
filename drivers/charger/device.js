@@ -601,7 +601,7 @@ class ChargerDevice extends Homey.Device {
             this.updateChargerStatistics();
         }, 60 * 1000 * 30));
 
-        //Update config each 10 mins
+        //Update config each 30 mins
         this.pollIntervals.push(setInterval(() => {
             this.updateChargerConfig();
         }, 60 * 1000 * 30));
@@ -610,6 +610,12 @@ class ChargerDevice extends Homey.Device {
         this.pollIntervals.push(setInterval(() => {
             this.updateChargerState();
         }, 30 * 1000));
+
+        //Update once per day for the sake of it
+        //Fragile to only run once upon startup if the Easee API doesnt respond at that time
+        this.pollIntervals.push(setInterval(() => {
+            this.updateChargerSiteInfo();
+        }, 24 * 60 * 60 * 1000));
 
         //Refresh access token, each 5 mins from tokenManager
         this.pollIntervals.push(setInterval(() => {

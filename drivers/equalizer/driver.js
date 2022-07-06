@@ -25,6 +25,9 @@ class EqualizerDriver extends Homey.Driver {
     this.flowCards['consumption_since_midnight_changed'] =
       this.homey.flow.getDeviceTriggerCard('consumption_since_midnight_changed');
 
+    this.flowCards['phase_load_changed'] =
+      this.homey.flow.getDeviceTriggerCard('phase_load_changed');
+
     //Conditions
     this.flowCards['phaseUtilized'] =
       this.homey.flow.getConditionCard('phaseUtilized')

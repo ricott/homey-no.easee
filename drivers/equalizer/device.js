@@ -110,7 +110,7 @@ class EqualizerDevice extends Homey.Device {
                     equalizerid: config.equalizerId,
                     gridType: enums.decodeGridType(config.gridType)
                 }).catch(err => {
-                    this.error(`Failed to update config settings`, err);
+                    self.error(`Failed to update config settings`, err);
                 });
 
             }).catch(reason => {
@@ -127,7 +127,7 @@ class EqualizerDevice extends Homey.Device {
                 self.setSettings({
                     version: String(state.softwareRelease)
                 }).catch(err => {
-                    this.error(`Failed to update state settings`, err);
+                    self.error(`Failed to update state settings`, err);
                 });
 
                 try {
@@ -168,7 +168,7 @@ class EqualizerDevice extends Homey.Device {
                     mainFuse: String(Math.round(site.ratedCurrent)),
                     circuitFuse: String(Math.round(site.circuits[0].ratedCurrent))
                 }).catch(err => {
-                    this.error(`Failed to update site info settings`, err);
+                    self.error(`Failed to update site info settings`, err);
                 });
 
             }).catch(reason => {
@@ -253,10 +253,17 @@ class EqualizerDevice extends Homey.Device {
 
     _initilializeTimers() {
         this.logMessage('Adding timers');
-        //Refresh state every 30 seconds
+        //Refresh state every 15 seconds
         this.pollIntervals.push(setInterval(() => {
             this.updateEqualizerState();
-        }, 30 * 1000));
+        }, 15 * 1000));
+
+        //Update once per day for the sake of it
+        //Fragile to only run once upon startup if the Easee API doesnt respond at that time
+        this.pollIntervals.push(setInterval(() => {
+            this.updateEqualizerSiteInfo();
+            this.updateEqualizerConfig();
+        }, 24 * 60 * 60 * 1000));
 
         //Refresh access token, each 5 mins from tokenManager
         this.pollIntervals.push(setInterval(() => {
@@ -301,6 +308,8 @@ class EqualizerDevice extends Homey.Device {
                         currentUtilized: parseFloat(value.toFixed(2))
                     }
                     this.driver.triggerDeviceFlow('phase_load_changed', tokens, this);
+                } else if (key === 'meter_power') {
+                    this.calculateConsumptionSinceMidnight(value);
                 }
 
             } else {
