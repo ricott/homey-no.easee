@@ -138,7 +138,7 @@ class EqualizerDevice extends Homey.Device {
                     self._updateProperty('measure_current.L1', state.currentL1);
                     self._updateProperty('measure_current.L2', state.currentL2);
                     self._updateProperty('measure_current.L3', state.currentL3);
-    
+
                     if (self.getSetting('gridType') === enums.GRID_TYPE.IT.key) {
                         self._updateProperty('measure_voltage.L1', parseInt(state.voltageL1L2));
                         self._updateProperty('measure_voltage.L2', parseInt(state.voltageL1L3));
@@ -291,29 +291,33 @@ class EqualizerDevice extends Homey.Device {
 
     _updateProperty(key, value) {
         if (this.hasCapability(key)) {
-            let oldValue = this.getCapabilityValue(key);
-            if (oldValue !== null && oldValue != value) {
-                this.setCapabilityValue(key, value);
+            if (typeof value !== 'undefined' && value !== null) {
+                let oldValue = this.getCapabilityValue(key);
+                if (oldValue !== null && oldValue != value) {
+                    this.setCapabilityValue(key, value);
 
-                if (key === 'measure_current.L1' ||
-                    key === 'measure_current.L2' ||
-                    key === 'measure_current.L3') {
+                    if (key === 'measure_current.L1' ||
+                        key === 'measure_current.L2' ||
+                        key === 'measure_current.L3') {
 
-                    let phase = key.substring(key.indexOf('.') + 1);
-                    const mainFuse = Number(this.getSetting('mainFuse'));
-                    let utilization = (value / mainFuse) * 100;
-                    let tokens = {
-                        phase: phase,
-                        percentageUtilized: parseFloat(utilization.toFixed(2)),
-                        currentUtilized: parseFloat(value.toFixed(2))
+                        let phase = key.substring(key.indexOf('.') + 1);
+                        const mainFuse = Number(this.getSetting('mainFuse'));
+                        let utilization = (value / mainFuse) * 100;
+                        let tokens = {
+                            phase: phase,
+                            percentageUtilized: parseFloat(utilization.toFixed(2)),
+                            currentUtilized: parseFloat(value.toFixed(2))
+                        }
+                        this.driver.triggerDeviceFlow('phase_load_changed', tokens, this);
+                    } else if (key === 'meter_power') {
+                        this.calculateConsumptionSinceMidnight(value);
                     }
-                    this.driver.triggerDeviceFlow('phase_load_changed', tokens, this);
-                } else if (key === 'meter_power') {
-                    this.calculateConsumptionSinceMidnight(value);
-                }
 
+                } else {
+                    this.setCapabilityValue(key, value);
+                }
             } else {
-                this.setCapabilityValue(key, value);
+                this.logMessage(`Value for capability '${key}' is 'undefined'`);
             }
         } else {
             this.logMessage(`Trying to set value for a missing capability: '${key}'`);
@@ -347,10 +351,9 @@ class EqualizerDevice extends Homey.Device {
     updateDebugMessages() {
         this.setSettings({
             log: this.getLogMessages()
-        })
-            .catch(err => {
-                this.error('Failed to update debug messages', err);
-            });
+        }).catch(err => {
+            this.error('Failed to update debug messages', err);
+        });
     }
 }
 

@@ -1,4 +1,8 @@
 {
+    "1.4.2": {
+        "en": "Stability improvements",
+        "sv": "Stabilitetsförbättringar"
+    },
     "1.4.1": {
         "en": "Fixed the charger schedule timezone problem",
         "sv": "Schemaläggning för laddare använder rätt tidszon"

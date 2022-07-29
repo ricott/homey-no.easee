@@ -263,7 +263,7 @@ class ChargerDevice extends Homey.Device {
                     detectedPowerGridType: enums.decodePowerGridType(config.detectedPowerGridType),
                     offlineChargingMode: enums.decodeOfflineChargingModeType(config.offlineChargingMode)
                 }).catch(err => {
-                    this.error(`Failed to update config settings`, err);
+                    self.error(`Failed to update config settings`, err);
                 });
 
                 try {
@@ -289,7 +289,7 @@ class ChargerDevice extends Homey.Device {
                     maxOfflineCurrent: String(Math.max(state.offlineMaxCircuitCurrentP1, state.offlineMaxCircuitCurrentP2, state.offlineMaxCircuitCurrentP3)),
                     reasonForNoCurrent: enums.decodeReasonForNoCurrent(state.reasonForNoCurrent)
                 }).catch(err => {
-                    this.error(`Failed to update state settings`, err);
+                    self.error(`Failed to update state settings`, err);
                 });
 
                 try {
@@ -643,21 +643,25 @@ class ChargerDevice extends Homey.Device {
 
     _updateProperty(key, value) {
         if (this.hasCapability(key)) {
-            let oldValue = this.getCapabilityValue(key);
-            if (oldValue !== null && oldValue != value) {
-                this.setCapabilityValue(key, value);
+            if (typeof value !== 'undefined' && value !== null) {
+                let oldValue = this.getCapabilityValue(key);
+                if (oldValue !== null && oldValue != value) {
+                    this.setCapabilityValue(key, value);
 
-                if (key === 'charger_status') {
-                    let tokens = {
-                        status: value
+                    if (key === 'charger_status') {
+                        let tokens = {
+                            status: value
+                        }
+                        this.driver.triggerDeviceFlow('charger_status_changed', tokens, this);
                     }
-                    this.driver.triggerDeviceFlow('charger_status_changed', tokens, this);
+                } else {
+                    this.setCapabilityValue(key, value);
                 }
             } else {
-                this.setCapabilityValue(key, value);
+                this.logMessage(`Value for capability '${key}' is 'undefined'`);
             }
         } else {
-            this.logMessage(`Trying to set value for a missing capability: '${key}'`);
+            this.logMessage(`Trying to set value for a missing capability '${key}'`);
         }
     }
 
@@ -705,10 +709,9 @@ class ChargerDevice extends Homey.Device {
     updateDebugMessages() {
         this.setSettings({
             log: this.getLogMessages()
-        })
-            .catch(err => {
-                this.error('Failed to update debug messages', err);
-            });
+        }).catch(err => {
+            this.error('Failed to update debug messages', err);
+        });
     }
 }
 
