@@ -349,6 +349,25 @@ class ChargerDriver extends Homey.Driver {
             return Promise.reject('Failed to increase dynamic circuit current');
           });
       });
+
+      actionName = 'setChargingPrice';
+      this.flowCards[actionName] = this.homey.flow.getActionCard(actionName)
+        .registerRunListener(async (args) => {
+          this.log(`[${args.device.getName()}] Action 'setChargingPrice' triggered`);
+          this.log(`[${args.device.getName()}] - currency: '${args.currency}'`);
+          this.log(`[${args.device.getName()}] - costPerKWh: '${args.costPerKWh}'`);
+          this.log(`[${args.device.getName()}] - costPerKwhExcludeVat: '${args.costPerKwhExcludeVat}'`);
+          this.log(`[${args.device.getName()}] - vat: '${args.vat}'`);
+
+  
+          return args.device.setChargingPrice(args.currency, args.costPerKWh, args.costPerKwhExcludeVat, args.vat)
+            .then(function (result) {
+              return Promise.resolve(true);
+            }).catch(reason => {
+              this.log(reason);
+              return Promise.reject('Failed to set charging price');
+            });
+        });  
   }
 
   triggerDeviceFlow(flow, tokens, device) {

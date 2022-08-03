@@ -517,6 +517,108 @@
           "labelDecimals": 0
         }
       ]
-    }
+    },
+    {
+        "id": "setChargingPrice",
+        "title": {
+          "en": "Set charging price",
+          "sv": "Uppdatera laddpris"
+        },
+        "titleFormatted": {
+          "en": "Set charging price to [[costPerKWh]] ([[costPerKwhExcludeVat]]/[[vat]]) in [[currency]]",
+          "sv": "Ändra laddpris till [[costPerKWh]] ([[costPerKwhExcludeVat]]/[[vat]]) i [[currency]]"
+        },
+        "args": [
+          {
+            "name": "currency",
+            "type": "dropdown",
+            "title": {
+              "en": "Currency",
+              "sv": "Valuta"
+            },
+            "values": [
+              {
+                "id": "EUR",
+                "label": {
+                  "en": "EUR"
+                }
+              },
+              {
+                "id": "NOK",
+                "label": {
+                  "en": "NOK"
+                }
+              },
+              {
+                "id": "SEK",
+                "label": {
+                  "en": "SEK"
+                }
+              },
+              {
+                "id": "CHF",
+                "label": {
+                  "en": "CHF"
+                }
+              },
+              {
+                "id": "GBP",
+                "label": {
+                  "en": "GBP"
+                }
+              },
+              {
+                "id": "USD",
+                "label": {
+                  "en": "USD"
+                }
+              },
+              {
+                "id": "DKK",
+                "label": {
+                  "en": "DKK"
+                }
+              },
+              {
+                "id": "ISK",
+                "label": {
+                  "en": "ISK"
+                }
+              }    
+            ]
+          },
+          {
+            "name": "costPerKWh",
+            "type": "range",
+            "title": {
+              "en": "Cost per kWh",
+              "sv": "Kostnad per kWh"
+            },
+            "step": 0.01,
+            "labelDecimals": 2
+          },
+          {
+            "name": "costPerKwhExcludeVat",
+            "type": "range",
+            "title": {
+              "en": "Cost per kWh excl. VAT",
+              "sv": "Kostnad per kWh exkl. moms"
+            },
+            "step": 0.01,
+            "labelDecimals": 2
+          },
+          {
+            "name": "vat",
+            "type": "range",
+            "title": {
+              "en": "VAT",
+              "sv": "Moms"
+            },
+            "step": 0.01,
+            "labelDecimals": 2
+          }
+  
+        ]
+      }
   ]
 }
