@@ -858,7 +858,7 @@
         },
         "titleFormatted": {
           "en": "Set charging price to [[costPerKWh]] ([[costPerKwhExcludeVat]]/[[vat]]) in [[currency]]",
-          "sv": "Sätt laddpris till [[costPerKWh]] ([[costPerKwhExcludeVat]]/[[vat]]) i [[currency]]"
+          "sv": "Ändra laddpris till [[costPerKWh]] ([[costPerKwhExcludeVat]]/[[vat]]) i [[currency]]"
         },
         "args": [
           {
