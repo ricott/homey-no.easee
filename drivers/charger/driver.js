@@ -356,11 +356,8 @@ class ChargerDriver extends Homey.Driver {
           this.log(`[${args.device.getName()}] Action 'setChargingPrice' triggered`);
           this.log(`[${args.device.getName()}] - currency: '${args.currency}'`);
           this.log(`[${args.device.getName()}] - costPerKWh: '${args.costPerKWh}'`);
-          this.log(`[${args.device.getName()}] - costPerKwhExcludeVat: '${args.costPerKwhExcludeVat}'`);
-          this.log(`[${args.device.getName()}] - vat: '${args.vat}'`);
-
   
-          return args.device.setChargingPrice(args.currency, args.costPerKWh, args.costPerKwhExcludeVat, args.vat)
+          return args.device.setChargingPrice(args.currency, args.costPerKWh)
             .then(function (result) {
               return Promise.resolve(true);
             }).catch(reason => {

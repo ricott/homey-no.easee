@@ -510,12 +510,11 @@ class ChargerDevice extends Homey.Device {
             });
     }
 
-    setChargingPrice(currency, costPerKWh, costPerKwhExcludeVat, vat) {
+    setChargingPrice(currency, costPerKWh) {
         let self = this;
-        self.logMessage(`Setting charging price to '${costPerKWh}/${costPerKwhExcludeVat}/${vat}' ${currency}`);
+        self.logMessage(`Setting charging price to '${costPerKWh}' ${currency}`);
         return self.createEaseeChargerClient()
-            .setChargingPrice(self.getSetting('siteId'),
-                currency, costPerKWh, costPerKwhExcludeVat, vat)
+            .setChargingPrice(self.getSetting('siteId'), currency, costPerKWh)
             .then(function (result) {
                 return result;
             }).catch(reason => {

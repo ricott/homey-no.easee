@@ -525,8 +525,8 @@
           "sv": "Uppdatera laddpris"
         },
         "titleFormatted": {
-          "en": "Set charging price to [[costPerKWh]] ([[costPerKwhExcludeVat]]/[[vat]]) in [[currency]]",
-          "sv": "Ändra laddpris till [[costPerKWh]] ([[costPerKwhExcludeVat]]/[[vat]]) i [[currency]]"
+          "en": "Set charging price to [[costPerKWh]] in [[currency]]",
+          "sv": "Ändra laddpris till [[costPerKWh]] i [[currency]]"
         },
         "args": [
           {
@@ -589,35 +589,16 @@
           },
           {
             "name": "costPerKWh",
-            "type": "range",
+            "type": "text",
             "title": {
-              "en": "Cost per kWh",
-              "sv": "Kostnad per kWh"
+              "en": "Charging cost",
+              "sv": "Laddkostnad"
             },
-            "step": 0.01,
-            "labelDecimals": 2
-          },
-          {
-            "name": "costPerKwhExcludeVat",
-            "type": "range",
-            "title": {
-              "en": "Cost per kWh excl. VAT",
-              "sv": "Kostnad per kWh exkl. moms"
-            },
-            "step": 0.01,
-            "labelDecimals": 2
-          },
-          {
-            "name": "vat",
-            "type": "range",
-            "title": {
-              "en": "VAT",
-              "sv": "Moms"
-            },
-            "step": 0.01,
-            "labelDecimals": 2
+            "placeholder": {
+                "en": "Per kWh in selected currency",
+                "sv": "Per kWh i vald valuta"
+            }
           }
-  
         ]
       }
   ]
