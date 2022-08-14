@@ -6,7 +6,8 @@ const crypto = require('crypto');
 const TokenManager = require('../../lib/tokenManager.js');
 const algorithm = 'aes-256-cbc';
 
-const deviceCapabilitesList = ['charger_status',
+const deviceCapabilitesList = [
+    'charger_status',
     'enabled',
     'measure_current.offered',
     'measure_power',
@@ -17,7 +18,8 @@ const deviceCapabilitesList = ['charger_status',
     'meter_power.lastCharge',
     'meter_power',
     'measure_charge',
-    'measure_charge.last_month'];
+    'measure_charge.last_month'
+];
 
 class ChargerDevice extends Homey.Device {
 
@@ -510,11 +512,15 @@ class ChargerDevice extends Homey.Device {
             });
     }
 
-    setChargingPrice(currency, costPerKWh) {
+    setChargingPrice(currency, costPerKWh, taxPerKWh) {
         let self = this;
         self.logMessage(`Setting charging price to '${costPerKWh}' ${currency}`);
         return self.createEaseeChargerClient()
-            .setChargingPrice(self.getSetting('siteId'), currency, costPerKWh)
+            .setChargingPrice(
+                self.getSetting('siteId'),
+                currency,
+                costPerKWh,
+                taxPerKWh)
             .then(function (result) {
                 return result;
             }).catch(reason => {
