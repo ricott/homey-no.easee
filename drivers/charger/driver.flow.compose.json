@@ -612,6 +612,32 @@
             }
           }
         ]
-      }
+      },
+      {
+        "id": "setMaxChargerCurrent",
+        "title": {
+            "en": "Set max charger current",
+            "sv": "Sätt laddarens högsta laddström"
+        },
+        "titleFormatted": {
+            "en": "Set max charger current to [[current]]",
+            "sv": "Sätt laddarens högsta laddström till [[current]]"
+          },
+        "args": [
+          {
+            "name": "current",
+            "type": "range",
+            "title": {
+              "en": "Current",
+              "sv": "Ström"
+            },
+            "min": 0,
+            "max": 40,
+            "step": 1,
+            "label": "A",
+            "labelDecimals": 0
+          }
+        ]
+      }  
   ]
 }

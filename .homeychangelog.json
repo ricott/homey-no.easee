@@ -1,4 +1,8 @@
 {
+    "1.4.6": {
+        "en": "Set max charger current",
+        "sv": "Sätt laddarens högsta laddström"
+    },
     "1.4.5": {
         "en": "Set charging price",
         "sv": "Uppdatera laddpris"

@@ -529,6 +529,18 @@ class ChargerDevice extends Homey.Device {
             });
     }
 
+    setMaxChargerCurrent(current) {
+        let self = this;
+        self.logMessage(`Setting charger max current to '${current}'`);
+        return self.createEaseeChargerClient().setMaxChargerCurrent(self.getData().id, current)
+            .then(function (result) {
+                return result;
+            }).catch(reason => {
+                self.logError(reason);
+                return Promise.reject(reason);
+            });
+    }
+
     setChargerState(state) {
         let self = this;
         self.logMessage(`Setting charger state to '${state}'`);

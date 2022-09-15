@@ -7,10 +7,10 @@
     "lib": "lib"
   },
   "dependencies": {
-    "async-mutex": "^0.3.2",
+    "async-mutex": "^0.4.0",
     "enum": "^3.0.4",
     "http.min": "^2.1.0",
-    "spacetime": "^7.1.4"
+    "spacetime": "^7.2.0"
   },
   "scripts": {
     "test": "mocha"
