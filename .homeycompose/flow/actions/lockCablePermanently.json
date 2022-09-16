@@ -1,0 +1,42 @@
+{
+    "id": "lockCablePermanently",
+    "title": {
+        "en": "Set permanent cable lock",
+        "sv": "Lås kabel permanent"
+    },
+    "titleFormatted": {
+        "en": "Set permanent cable lock to [[lockCable]]",
+        "sv": "Ändra permanent kabellås till [[lockCable]]"
+    },
+    "args": [
+        {
+            "name": "lockCable",
+            "type": "dropdown",
+            "title": {
+                "en": "Permanent cable lock",
+                "sv": "Lås kabel permanent"
+            },
+            "values": [
+                {
+                    "id": "true",
+                    "label": {
+                        "en": "Yes",
+                        "sv": "Ja"
+                    }
+                },
+                {
+                    "id": "false",
+                    "label": {
+                        "en": "No",
+                        "sv": "Nej"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+        }
+    ]
+}

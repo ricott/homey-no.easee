@@ -1,0 +1,100 @@
+{
+    "id": "setChargingPrice",
+    "title": {
+        "en": "Set charging price",
+        "sv": "Uppdatera laddpris"
+    },
+    "titleFormatted": {
+        "en": "Set charging price to [[costPerKWh]] incl. [[taxPerKWh]] in [[currency]]",
+        "sv": "Ändra laddpris till [[costPerKWh]] inkl. [[taxPerKWh]] i [[currency]]"
+    },
+    "args": [
+        {
+            "name": "currency",
+            "type": "dropdown",
+            "title": {
+                "en": "Currency",
+                "sv": "Valuta"
+            },
+            "values": [
+                {
+                    "id": "EUR",
+                    "label": {
+                        "en": "EUR"
+                    }
+                },
+                {
+                    "id": "NOK",
+                    "label": {
+                        "en": "NOK"
+                    }
+                },
+                {
+                    "id": "SEK",
+                    "label": {
+                        "en": "SEK"
+                    }
+                },
+                {
+                    "id": "CHF",
+                    "label": {
+                        "en": "CHF"
+                    }
+                },
+                {
+                    "id": "GBP",
+                    "label": {
+                        "en": "GBP"
+                    }
+                },
+                {
+                    "id": "USD",
+                    "label": {
+                        "en": "USD"
+                    }
+                },
+                {
+                    "id": "DKK",
+                    "label": {
+                        "en": "DKK"
+                    }
+                },
+                {
+                    "id": "ISK",
+                    "label": {
+                        "en": "ISK"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "costPerKWh",
+            "type": "text",
+            "title": {
+                "en": "Charging cost",
+                "sv": "Laddkostnad"
+            },
+            "placeholder": {
+                "en": "Per kWh in selected currency",
+                "sv": "Per kWh i vald valuta"
+            }
+        },
+        {
+            "name": "taxPerKWh",
+            "type": "text",
+            "title": {
+                "en": "Tax",
+                "sv": "Skatt"
+            },
+            "placeholder": {
+                "en": "Per kWh in selected currency",
+                "sv": "Per kWh i vald valuta"
+            }
+        },
+        {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+        }
+    ]
+}

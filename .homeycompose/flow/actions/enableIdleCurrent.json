@@ -1,0 +1,42 @@
+{
+    "id": "enableIdleCurrent",
+    "title": {
+        "en": "Set charger idle current state",
+        "sv": "Erbjud ström när laddning inte är aktiv"
+    },
+    "titleFormatted": {
+        "en": "Set idle current state to [[idleCurrent]]",
+        "sv": "Ändra erbjud ström när laddning inte är aktiv till [[idleCurrent]]"
+    },
+    "args": [
+        {
+            "name": "idleCurrent",
+            "type": "dropdown",
+            "title": {
+                "en": "Idle current",
+                "sv": "Erbjud ström när laddning inte är aktiv"
+            },
+            "values": [
+                {
+                    "id": "true",
+                    "label": {
+                        "en": "Yes",
+                        "sv": "Ja"
+                    }
+                },
+                {
+                    "id": "false",
+                    "label": {
+                        "en": "No",
+                        "sv": "Nej"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+        }
+    ]
+}

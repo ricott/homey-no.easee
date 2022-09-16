@@ -1,0 +1,53 @@
+{
+    "id": "phase_load_changed",
+    "title": {
+        "en": "Phase load changed",
+        "sv": "Fasbelastning ändrades"
+    },
+    "titleFormatted": {
+        "en": "Phase [[phase]] is utilized to [[percentageUtilized]]%, and [[currentUtilized]]A",
+        "sv": "Fas [[phase]] är utnyttjad till [[percentageUtilized]]% och [[currentUtilized]]A"
+    },
+    "tokens": [
+        {
+            "name": "phase",
+            "type": "string",
+            "title": {
+                "en": "Phase",
+                "sv": "Fas"
+            },
+            "example": {
+                "en": "L1"
+            }
+        },
+        {
+            "name": "percentageUtilized",
+            "type": "number",
+            "title": {
+                "en": "Utilized (%)",
+                "sv": "Utnyttjad (%)"
+            },
+            "example": {
+                "en": "98"
+            }
+        },
+        {
+            "name": "currentUtilized",
+            "type": "number",
+            "title": {
+                "en": "Utilized (A)",
+                "sv": "Utnyttjad (A)"
+            },
+            "example": {
+                "en": "8"
+            }
+        }
+    ],
+    "args": [
+      {
+        "type": "device",
+        "name": "device",
+        "filter": "driver_id=equalizer"
+      }
+    ]
+}

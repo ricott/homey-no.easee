@@ -1,0 +1,18 @@
+{
+    "id": "deleteSchedule",
+    "title": {
+        "en": "Delete schedule",
+        "sv": "Ta bort schema"
+    },
+    "titleFormatted": {
+        "en": "Delete schedule",
+        "sv": "Ta bort schema"
+    },
+    "args": [
+      {
+        "type": "device",
+        "name": "device",
+        "filter": "driver_id=charger"
+      }
+    ]
+}

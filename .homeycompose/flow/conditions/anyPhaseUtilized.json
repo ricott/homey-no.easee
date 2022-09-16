@@ -1,0 +1,26 @@
+{
+    "id": "anyPhaseUtilized",
+    "title": {
+        "en": "Any phase is utilized !{{above|below}}",
+        "sv": "Någon fas är utnyttjad !{{över|under}}"
+    },
+    "titleFormatted": {
+        "en": "Any phase is utilized !{{above|below}} [[utilization]]%",
+        "sv": "Någon fas är utnyttjad !{{över|under}} [[utilization]]%"
+    },
+    "args": [
+        {
+            "name": "utilization",
+            "type": "number",
+            "title": {
+                "en": "Utilization (%)",
+                "sv": "Utnyttjad (%)"
+            }
+        },
+        {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=equalizer"
+        }
+    ]
+}

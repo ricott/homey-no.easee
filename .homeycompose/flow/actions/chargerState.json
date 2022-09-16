@@ -1,0 +1,42 @@
+{
+    "id": "chargerState",
+    "title": {
+        "en": "Set charger state",
+        "sv": "Ändra laddarens tillstånd"
+    },
+    "titleFormatted": {
+        "en": "Set charger state to [[chargerState]]",
+        "sv": "Ändra laddarens tillstånd till [[chargerState]]"
+    },
+    "args": [
+        {
+            "name": "chargerState",
+            "type": "dropdown",
+            "title": {
+                "en": "State",
+                "sv": "Tillstånd"
+            },
+            "values": [
+                {
+                    "id": "true",
+                    "label": {
+                        "en": "Enabled",
+                        "sv": "Aktiverad"
+                    }
+                },
+                {
+                    "id": "false",
+                    "label": {
+                        "en": "Disabled",
+                        "sv": "Inaktiverad"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+        }
+    ]
+}

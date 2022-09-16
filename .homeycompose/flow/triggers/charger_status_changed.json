@@ -1,0 +1,32 @@
+{
+    "id": "charger_status_changed",
+    "title": {
+        "en": "Charger status changed",
+        "sv": "Laddarens status ändrades"
+    },
+    "titleFormatted": {
+        "en": "Charger status changed to [[status]]",
+        "sv": "Laddarens status ändrades till [[status]]"
+    },
+    "tokens": [
+        {
+            "name": "status",
+            "type": "string",
+            "title": {
+                "en": "Charger status",
+                "sv": "Laddarens status"
+            },
+            "example": {
+                "en": "Car connected",
+                "sv": "Car connected"
+            }
+        }
+    ],
+    "args": [
+      {
+        "type": "device",
+        "name": "device",
+        "filter": "driver_id=charger"
+      }
+    ]
+}

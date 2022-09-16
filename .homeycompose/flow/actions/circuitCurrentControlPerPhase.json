@@ -1,0 +1,57 @@
+{
+    "id": "circuitCurrentControlPerPhase",
+    "title": {
+        "en": "Set dynamic circuit current, per phase",
+        "sv": "Sätt dynamisk strömstyrka, per fas"
+    },
+    "titleFormatted": {
+        "en": "Set dynamic circuit current to [[current1]], [[current2]] and [[current3]]",
+        "sv": "Ändra dynamisk strömstyrka till [[current1]], [[current2]] och [[current3]]"
+    },
+    "args": [
+        {
+            "name": "current1",
+            "type": "range",
+            "title": {
+                "en": "Current P1",
+                "sv": "Ström L1"
+            },
+            "min": 0,
+            "max": 32,
+            "step": 1,
+            "label": " A",
+            "labelDecimals": 0
+        },
+        {
+            "name": "current2",
+            "type": "range",
+            "title": {
+                "en": "Current P2",
+                "sv": "Ström L2"
+            },
+            "min": 0,
+            "max": 32,
+            "step": 1,
+            "label": " A",
+            "labelDecimals": 0
+        },
+        {
+            "name": "current3",
+            "type": "range",
+            "title": {
+                "en": "Current P3",
+                "sv": "Ström L3"
+            },
+            "min": 0,
+            "max": 32,
+            "step": 1,
+            "label": " A",
+            "labelDecimals": 0
+        },
+        {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+        }
+    ]
+}

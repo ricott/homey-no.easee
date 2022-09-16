@@ -1,0 +1,83 @@
+[
+    {
+        "type": "group",
+        "label": {
+            "en": "Information",
+            "sv": "Information"
+        },
+        "children": [
+            {
+                "id": "mainFuse",
+                "type": "label",
+                "label": {
+                    "en": "Main fuse (A)",
+                    "sv": "Huvudsäkring (A)"
+                },
+                "value": ""
+            },
+            {
+                "id": "circuitFuse",
+                "type": "label",
+                "label": {
+                    "en": "Circuit fuse (A)",
+                    "sv": "Kretssäkring (A)"
+                },
+                "value": ""
+            },
+            {
+                "id": "meterid",
+                "type": "label",
+                "label": {
+                    "en": "Meter id",
+                    "sv": "Meter id"
+                },
+                "value": ""
+            },
+            {
+                "id": "equalizerid",
+                "type": "label",
+                "label": {
+                    "en": "Equalizer id",
+                    "sv": "Equalizer id"
+                },
+                "value": ""
+            },
+            {
+                "id": "gridType",
+                "type": "label",
+                "label": {
+                    "en": "Grid type",
+                    "sv": "Elnätstyp"
+                },
+                "value": ""
+            },
+            {
+                "id": "version",
+                "type": "label",
+                "label": {
+                    "en": "Firmware version",
+                    "sv": "Programvara"
+                },
+                "value": ""
+            }
+        ]
+    },
+    {
+        "type": "group",
+        "label": {
+            "en": "Debug",
+            "sv": "Felsökning"
+        },
+        "children": [
+            {
+                "id": "log",
+                "type": "textarea",
+                "label": {
+                    "en": "Log",
+                    "sv": "Logg"
+                },
+                "value": ""
+            }
+        ]
+    }
+]

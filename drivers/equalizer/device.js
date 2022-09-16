@@ -10,6 +10,10 @@ const algorithm = 'aes-256-cbc';
 class EqualizerDevice extends Homey.Device {
 
     async onInit() {
+
+        this._consumption_since_midnight_changed = this.homey.flow.getDeviceTriggerCard('consumption_since_midnight_changed');
+        this._phase_load_changed = this.homey.flow.getDeviceTriggerCard('phase_load_changed');
+
         this.equalizer = {
             log: [],
             consumptionSinceMidnight: 0
@@ -87,7 +91,7 @@ class EqualizerDevice extends Homey.Device {
             let tokens = {
                 consumptionSinceMidnight: consumptionToday
             }
-            this.driver.triggerDeviceFlow('consumption_since_midnight_changed', tokens, this);
+            this._consumption_since_midnight_changed.trigger(this, tokens, {}).catch(error => { this.error(error) });
         }
     }
 
@@ -120,7 +124,7 @@ class EqualizerDevice extends Homey.Device {
 
     updateEqualizerState() {
         let self = this;
-        self.logMessage('Getting equalizer state info');
+        //self.logMessage('Getting equalizer state info');
         self.createEaseeChargerClient().getEqualizerState(self.getData().id)
             .then(function (state) {
 
@@ -308,7 +312,7 @@ class EqualizerDevice extends Homey.Device {
                             percentageUtilized: parseFloat(utilization.toFixed(2)),
                             currentUtilized: parseFloat(value.toFixed(2))
                         }
-                        this.driver.triggerDeviceFlow('phase_load_changed', tokens, this);
+                        this._phase_load_changed.trigger(this, tokens, {}).catch(error => { this.error(error) });
                     } else if (key === 'meter_power') {
                         this.calculateConsumptionSinceMidnight(value);
                     }

@@ -1,0 +1,191 @@
+[
+    {
+        "type": "group",
+        "label": {
+            "en": "Charger settings",
+            "sv": "Laddarens inställningar"
+        },
+        "children": [
+            {
+                "id": "showLast30daysStats",
+                "type": "checkbox",
+                "label": {
+                    "en": "Show capability: Last 30 days",
+                    "sv": "Visa egenskapen: Senaste 30 dagarna"
+                },
+                "value": false
+            },
+            {
+                "id": "showLastMonthStats",
+                "type": "checkbox",
+                "label": {
+                    "en": "Show capability: Last month",
+                    "sv": "Visa egenskapen: Förra månaden"
+                },
+                "value": false
+            }
+        ]
+    },
+    {
+        "type": "group",
+        "label": {
+            "en": "Information",
+            "sv": "Information"
+        },
+        "children": [
+            {
+                "id": "siteId",
+                "type": "label",
+                "label": {
+                    "en": "Site id",
+                    "sv": "Anläggningsid"
+                },
+                "value": ""
+            },
+            {
+                "id": "circuitId",
+                "type": "label",
+                "label": {
+                    "en": "Circuit id",
+                    "sv": "Kretsid"
+                },
+                "value": ""
+            },
+            {
+                "id": "detectedPowerGridType",
+                "type": "label",
+                "label": {
+                    "en": "Power grid type",
+                    "sv": "Elnätstyp"
+                },
+                "value": ""
+            },
+            {
+                "id": "mainFuse",
+                "type": "label",
+                "label": {
+                    "en": "Main fuse (A)",
+                    "sv": "Huvudsäkring (A)"
+                },
+                "value": ""
+            },
+            {
+                "id": "circuitFuse",
+                "type": "label",
+                "label": {
+                    "en": "Circuit fuse (A)",
+                    "sv": "Kretssäkring (A)"
+                },
+                "value": ""
+            },
+            {
+                "id": "offlineChargingMode",
+                "type": "label",
+                "label": {
+                    "en": "Allow offline charging",
+                    "sv": "Tillåt offline laddning"
+                },
+                "value": ""
+            },
+            {
+                "id": "maxOfflineCurrent",
+                "type": "label",
+                "label": {
+                    "en": "Max current when offline (A)",
+                    "sv": "Max offline ström (A)"
+                },
+                "value": ""
+            },
+            {
+                "id": "phaseMode",
+                "type": "label",
+                "label": {
+                    "en": "Phase mode",
+                    "sv": "Fasläge"
+                },
+                "value": ""
+            },
+            {
+                "id": "lockCablePermanently",
+                "type": "label",
+                "label": {
+                    "en": "Cable locked permanently",
+                    "sv": "Lås kabel permanent"
+                },
+                "value": ""
+            },
+            {
+                "id": "idleCurrent",
+                "type": "label",
+                "label": {
+                    "en": "Enable idle current",
+                    "sv": "Erbjud ström när laddning inte är aktiv"
+                },
+                "value": ""
+            },
+            {
+                "id": "nodeType",
+                "type": "label",
+                "label": {
+                    "en": "Local node type",
+                    "sv": "Lokal nodtyp"
+                },
+                "value": ""
+            },
+            {
+                "id": "smartCharging",
+                "type": "label",
+                "label": {
+                    "en": "Smart charging",
+                    "sv": "Smartladdning"
+                },
+                "value": ""
+            },
+            {
+                "id": "version",
+                "type": "label",
+                "label": {
+                    "en": "Firmware version",
+                    "sv": "Programvara"
+                },
+                "value": ""
+            }
+        ]
+    },
+    {
+        "type": "group",
+        "label": {
+            "en": "Debug",
+            "sv": "Felsökning"
+        },
+        "children": [
+            {
+                "id": "reasonForNoCurrent",
+                "type": "textarea",
+                "label": {
+                    "en": "Reason for no current",
+                    "sv": "Anledning till att ingen ström erbjuds"
+                },
+                "value": ""
+            },
+            {
+                "id": "easee_last_error",
+                "type": "textarea",
+                "label": {
+                    "en": "Last API error",
+                    "sv": "Senaste API felet"
+                },
+                "value": ""
+            },
+            {
+                "id": "log",
+                "type": "textarea",
+                "label": {
+                    "en": "Log",
+                    "sv": "Logg"
+                },
+                "value": ""
+            }
+        ]
+    }
+]

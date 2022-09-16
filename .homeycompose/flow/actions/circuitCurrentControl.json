@@ -1,0 +1,31 @@
+{
+    "id": "circuitCurrentControl",
+    "title": {
+        "en": "Set dynamic circuit current",
+        "sv": "Sätt dynamisk strömstyrka"
+    },
+    "titleFormatted": {
+        "en": "Set dynamic Circuit current to [[current]]",
+        "sv": "Ändra dynamisk strömstyrka till [[current]]"
+    },
+    "args": [
+        {
+            "name": "current",
+            "type": "range",
+            "title": {
+                "en": "Current",
+                "sv": "Ström"
+            },
+            "min": 1,
+            "max": 32,
+            "step": 1,
+            "label": " A",
+            "labelDecimals": 0
+        },
+        {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+        }
+    ]
+}

@@ -1,0 +1,70 @@
+{
+    "id": "chargerStatus",
+    "title": {
+        "en": "Charger status is !{{|not}}",
+        "sv": "Laddarens status är !{{|inte}}"
+    },
+    "titleFormatted": {
+        "en": "Charger status is !{{|not}} [[status]]",
+        "sv": "Laddarens status är !{{|inte}} [[status]]"
+    },
+    "args": [
+        {
+            "name": "status",
+            "type": "dropdown",
+            "title": {
+                "en": "Status",
+                "sv": "Status"
+            },
+            "values": [
+                {
+                    "id": "Standby",
+                    "label": {
+                        "en": "Standby",
+                        "sv": "Standby"
+                    }
+                },
+                {
+                    "id": "Paused",
+                    "label": {
+                        "en": "Paused",
+                        "sv": "Paused"
+                    }
+                },
+                {
+                    "id": "Charging",
+                    "label": {
+                        "en": "Charging",
+                        "sv": "Charging"
+                    }
+                },
+                {
+                    "id": "Completed",
+                    "label": {
+                        "en": "Completed",
+                        "sv": "Completed"
+                    }
+                },
+                {
+                    "id": "Error",
+                    "label": {
+                        "en": "Error",
+                        "sv": "Error"
+                    }
+                },
+                {
+                    "id": "Car connected",
+                    "label": {
+                        "en": "Car connected",
+                        "sv": "Car connected"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+        }
+    ]
+}

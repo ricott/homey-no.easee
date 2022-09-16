@@ -24,6 +24,9 @@ const deviceCapabilitesList = [
 class ChargerDevice extends Homey.Device {
 
     async onInit() {
+
+        this._charger_status_changed = this.homey.flow.getDeviceTriggerCard('charger_status_changed');
+
         this.charger = {
             log: []
         };
@@ -281,7 +284,7 @@ class ChargerDevice extends Homey.Device {
 
     updateChargerState() {
         let self = this;
-        self.logMessage('Getting charger state info');
+        //self.logMessage('Getting charger state info');
         self.createEaseeChargerClient().getChargerState(self.getData().id)
             .then(function (state) {
 
@@ -683,7 +686,7 @@ class ChargerDevice extends Homey.Device {
                         let tokens = {
                             status: value
                         }
-                        this.driver.triggerDeviceFlow('charger_status_changed', tokens, this);
+                        this._charger_status_changed.trigger(this, tokens, {}).catch(error => { this.error(error) });
                     }
                 } else {
                     this.setCapabilityValue(key, value);
