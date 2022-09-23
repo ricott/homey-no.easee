@@ -5,8 +5,8 @@
         "sv": "Laddarens status ändrades"
     },
     "titleFormatted": {
-        "en": "Charger status changed to [[status]]",
-        "sv": "Laddarens status ändrades till [[status]]"
+        "en": "Charger status changed",
+        "sv": "Laddarens status ändrades"
     },
     "tokens": [
         {
@@ -28,5 +28,6 @@
         "name": "device",
         "filter": "driver_id=charger"
       }
-    ]
+    ],
+    "deprecated": true
 }

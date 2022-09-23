@@ -3,6 +3,7 @@
 const Homey = require('homey');
 const Easee = require('../../lib/Easee.js');
 const TokenManager = require('../../lib/tokenManager.js');
+const enums = require('../../lib/enums.js');
 
 class ChargerDriver extends Homey.Driver {
 
@@ -18,22 +19,48 @@ class ChargerDriver extends Homey.Driver {
         return this.homey.manifest.version;
     }
 
+    triggerStatusChanged(device, tokens) {
+        //Deprecated trigger uses token
+        this._charger_status_changed.trigger(device, tokens, {}).catch(error => { device.error(error) });
+        //New trigger uses state
+        this._charger_status_changedv2.trigger(device, {}, tokens).catch(error => { device.error(error) });
+    }
+
     _registerFlows() {
         this.log('Registering flows');
+        //Triggers
+        //Deprecated
+        this._charger_status_changed = this.homey.flow.getDeviceTriggerCard('charger_status_changed');
+        //New status changed trigger
+        this._charger_status_changedv2 = this.homey.flow.getDeviceTriggerCard('charger_status_changedv2');
+        this._charger_status_changedv2.registerRunListener(async (args, state) => {
+            this.log(`Comparing '${args.status.name}' with '${state.status}'`);
+            return args.status.name == state.status;
+        });
+        this._charger_status_changedv2.registerArgumentAutocompleteListener('status',
+            async (query, args) => {
+                return enums.getChargerMode();
+            }
+        );
 
         //Conditions
         const chargerStatus = this.homey.flow.getConditionCard('chargerStatus');
         chargerStatus.registerRunListener(async (args, state) => {
             this.log(`[${args.device.getName()}] Condition 'chargerStatus' triggered`);
-            let status = args.device.getCapabilityValue('charger_status');
-            this.log(`[${args.device.getName()}] - current status: ${status}, condition status: '${args.status}`);
+            const status = args.device.getCapabilityValue('charger_status');
+            this.log(`[${args.device.getName()}] - current status: '${status}', condition status: '${args.status.name}'`);
 
-            if (status === args.status) {
+            if (status == args.status.name) {
                 return true;
             } else {
                 return false;
             }
         });
+        chargerStatus.registerArgumentAutocompleteListener('status',
+            async (query, args) => {
+                return enums.getChargerMode();
+            }
+        );
 
         //Actions
         const rebootCharger = this.homey.flow.getActionCard('rebootCharger');

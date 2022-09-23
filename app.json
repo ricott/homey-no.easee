@@ -64,8 +64,8 @@
           "sv": "Laddarens status ändrades"
         },
         "titleFormatted": {
-          "en": "Charger status changed to [[status]]",
-          "sv": "Laddarens status ändrades till [[status]]"
+          "en": "Charger status changed",
+          "sv": "Laddarens status ändrades"
         },
         "tokens": [
           {
@@ -82,6 +82,33 @@
           }
         ],
         "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+          }
+        ],
+        "deprecated": true
+      },
+      {
+        "id": "charger_status_changedv2",
+        "title": {
+          "en": "Charger status changed",
+          "sv": "Laddarens status ändrades"
+        },
+        "titleFormatted": {
+          "en": "Charger status changed to [[status]]",
+          "sv": "Laddarens status ändrades till [[status]]"
+        },
+        "args": [
+          {
+            "name": "status",
+            "type": "autocomplete",
+            "title": {
+              "en": "Charger status",
+              "sv": "Laddarens status"
+            }
+          },
           {
             "type": "device",
             "name": "device",
@@ -214,55 +241,11 @@
         "args": [
           {
             "name": "status",
-            "type": "dropdown",
+            "type": "autocomplete",
             "title": {
               "en": "Status",
               "sv": "Status"
-            },
-            "values": [
-              {
-                "id": "Standby",
-                "label": {
-                  "en": "Standby",
-                  "sv": "Standby"
-                }
-              },
-              {
-                "id": "Paused",
-                "label": {
-                  "en": "Paused",
-                  "sv": "Paused"
-                }
-              },
-              {
-                "id": "Charging",
-                "label": {
-                  "en": "Charging",
-                  "sv": "Charging"
-                }
-              },
-              {
-                "id": "Completed",
-                "label": {
-                  "en": "Completed",
-                  "sv": "Completed"
-                }
-              },
-              {
-                "id": "Error",
-                "label": {
-                  "en": "Error",
-                  "sv": "Error"
-                }
-              },
-              {
-                "id": "Car connected",
-                "label": {
-                  "en": "Car connected",
-                  "sv": "Car connected"
-                }
-              }
-            ]
+            }
           },
           {
             "type": "device",

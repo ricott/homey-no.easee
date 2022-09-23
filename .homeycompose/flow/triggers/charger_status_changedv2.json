@@ -1,20 +1,20 @@
 {
-    "id": "chargerStatus",
+    "id": "charger_status_changedv2",
     "title": {
-        "en": "Charger status is !{{|not}}",
-        "sv": "Laddarens status är !{{|inte}}"
+        "en": "Charger status changed",
+        "sv": "Laddarens status ändrades"
     },
     "titleFormatted": {
-        "en": "Charger status is !{{|not}} [[status]]",
-        "sv": "Laddarens status är !{{|inte}} [[status]]"
+        "en": "Charger status changed to [[status]]",
+        "sv": "Laddarens status ändrades till [[status]]"
     },
     "args": [
         {
             "name": "status",
             "type": "autocomplete",
             "title": {
-                "en": "Status",
-                "sv": "Status"
+                "en": "Charger status",
+                "sv": "Laddarens status"
             }
         },
         {
