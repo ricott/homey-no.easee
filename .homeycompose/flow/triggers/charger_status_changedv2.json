@@ -13,8 +13,8 @@
             "name": "status",
             "type": "autocomplete",
             "title": {
-                "en": "Charger status",
-                "sv": "Laddarens status"
+                "en": "Status",
+                "sv": "Status"
             }
         },
         {
