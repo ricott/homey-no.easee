@@ -20,7 +20,7 @@ class ChargerDriver extends Homey.Driver {
     }
 
     triggerStatusChanged(device, tokens) {
-        //Deprecated trigger uses token
+        //Old trigger uses token
         this._charger_status_changed.trigger(device, tokens, {}).catch(error => { device.error(error) });
         //New trigger uses state
         this._charger_status_changedv2.trigger(device, {}, tokens).catch(error => { device.error(error) });
@@ -29,9 +29,7 @@ class ChargerDriver extends Homey.Driver {
     _registerFlows() {
         this.log('Registering flows');
         //Triggers
-        //Deprecated
         this._charger_status_changed = this.homey.flow.getDeviceTriggerCard('charger_status_changed');
-        //New status changed trigger
         this._charger_status_changedv2 = this.homey.flow.getDeviceTriggerCard('charger_status_changedv2');
         this._charger_status_changedv2.registerRunListener(async (args, state) => {
             this.log(`Comparing '${args.status.name}' with '${state.status}'`);

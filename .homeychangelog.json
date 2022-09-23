@@ -1,4 +1,8 @@
 {
+    "1.4.7": {
+        "en": "New When card for charger status changed",
+        "sv": "Nytt När kort för statusändring av laddare"
+    },
     "1.4.6": {
         "en": "Set max charger current",
         "sv": "Sätt laddarens högsta laddström"
