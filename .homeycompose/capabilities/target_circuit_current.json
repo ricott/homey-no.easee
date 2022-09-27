@@ -1,0 +1,24 @@
+{
+    "title": {
+        "en": "Dynamic circuit current",
+        "sv": "Kretsens dynamiska ström"
+    },
+    "type": "number",
+    "desc": {
+        "en": "Set the dynamic circuit current. The max value is adjusted to the circuit fuse setting.",
+        "sv": "Sätt kretsens dynamiska ström. Maxvärdet sätts till kretsens säkringsstorlek."
+    },
+    "min": 0,
+    "max": 40,
+    "decimals": 0,
+    "step": 1,
+    "units": {
+        "en": "A",
+        "sv": "A"
+    },
+    "setable": true,
+    "getable": true,
+    "insights": true,
+    "uiComponent": "slider",
+    "chartType": "stepLine"
+}

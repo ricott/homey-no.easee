@@ -18,12 +18,17 @@ const deviceCapabilitesList = [
     'meter_power.lastCharge',
     'meter_power',
     'measure_charge',
-    'measure_charge.last_month'
+    'measure_charge.last_month',
+    'onoff',
+    'locked',
+    'target_circuit_current'
 ];
 
 class ChargerDevice extends Homey.Device {
 
     async onInit() {
+        await this.setupCapabilityListeners();
+
         this.charger = {
             log: []
         };
@@ -37,6 +42,49 @@ class ChargerDevice extends Homey.Device {
         this.tokenManager = TokenManager;
 
         this.setupCapabilities();
+
+        if (!this.homey.settings.get(`${this.getData().id}.username`)) {
+            //This is a newly added device, lets copy login details to homey settings
+            this.logMessage(`Storing credentials for user '${this.getStoreValue('username')}'`);
+            this.storeCredentialsEncrypted(this.getStoreValue('username'), this.getStoreValue('password'));
+        }
+
+        let self = this;
+        //Force renewal of token, if a user restarts the app a new token should be generated
+        self.tokenManager.getTokens(self.getUsername(), self.getPassword(), true)
+            .then(function (tokens) {
+                self.setToken(tokens);
+
+                self.updateChargerSiteInfo();
+                self.updateChargerStatistics();
+                self.getChargerConfig();
+                self.getChargerState();
+                self._initilializeTimers();
+            }).catch(reason => {
+                self.logMessage(reason);
+            });
+    }
+
+    async setupCapabilityListeners() {
+        this.registerCapabilityListener("locked", async (value) => {
+            this.logMessage(`Set locked to '${value}'`);
+            await this.createEaseeChargerClient()
+                .setAuthorizationRequired(this.getData().id, value)
+                .catch(this.error);
+        });
+
+        this.registerCapabilityListener("onoff", async (value) => {
+            this.logMessage(`Set onoff to '${value}'`);
+            await this.toggleCharging().catch(this.error);
+        });
+
+        this.registerCapabilityListener("target_circuit_current", async (current) => {
+            this.logMessage(`Set dynamic circuit current to '${current}'`);
+            //Adjust dynamic current to be <= circuit fuse
+            const newCurrent = Math.min(this.getSettings().circuitFuse, current);
+            await this.setDynamicCurrentPerPhase(newCurrent, newCurrent, newCurrent)
+                .catch(this.error);
+        });
 
         this.registerCapabilityListener('button.organize', async () => {
             //Delete all capabilities and then add them in right order
@@ -66,32 +114,9 @@ class ChargerDevice extends Homey.Device {
 
         this.registerCapabilityListener('button.reconnect', async () => {
             this.logMessage(`Reconnect to Easee Cloud API`);
-
             await this.refreshAccessToken(true);
             return Promise.resolve(true);
         });
-
-
-        if (!this.homey.settings.get(`${this.getData().id}.username`)) {
-            //This is a newly added device, lets copy login details to homey settings
-            this.logMessage(`Storing credentials for user '${this.getStoreValue('username')}'`);
-            this.storeCredentialsEncrypted(this.getStoreValue('username'), this.getStoreValue('password'));
-        }
-
-        let self = this;
-        //Force renewal of token, if a user restarts the app a new token should be generated
-        self.tokenManager.getTokens(self.getUsername(), self.getPassword(), true)
-            .then(function (tokens) {
-                self.setToken(tokens);
-
-                self.updateChargerSiteInfo();
-                self.updateChargerStatistics();
-                self.updateChargerConfig();
-                self.updateChargerState();
-                self._initilializeTimers();
-            }).catch(reason => {
-                self.logMessage(reason);
-            });
     }
 
     getToken() {
@@ -251,12 +276,10 @@ class ChargerDevice extends Homey.Device {
         return new Easee(options);
     }
 
-    updateChargerConfig() {
+    getSemiStaticChargerConfig() {
         let self = this;
-        self.logMessage('Getting charger config info');
         self.createEaseeChargerClient().getChargerConfig(self.getData().id)
             .then(function (config) {
-
                 self.setSettings({
                     idleCurrent: config.enableIdleCurrent ? 'Yes' : 'No',
                     lockCablePermanently: config.lockCablePermanently ? 'Yes' : 'No',
@@ -268,8 +291,18 @@ class ChargerDevice extends Homey.Device {
                     self.error(`Failed to update config settings`, err);
                 });
 
+            }).catch(reason => {
+                self.logError(reason);
+            });
+    }
+
+    getDynamicCurrent() {
+        let self = this;
+        self.getDynamicCircuitCurrent()
+            .then(function (current) {
+
                 try {
-                    self._updateProperty('enabled', config.isEnabled);
+                    self._updateProperty('target_circuit_current', Math.max(current.phase1, current.phase2, current.phase3));
                 } catch (error) {
                     self.logError(error);
                 }
@@ -279,9 +312,25 @@ class ChargerDevice extends Homey.Device {
             });
     }
 
-    updateChargerState() {
+    getChargerConfig() {
         let self = this;
-        //self.logMessage('Getting charger state info');
+        self.createEaseeChargerClient().getChargerConfig(self.getData().id)
+            .then(function (config) {
+
+                try {
+                    self._updateProperty('enabled', config.isEnabled);
+                    self._updateProperty('locked', config.authorizationRequired);
+                } catch (error) {
+                    self.logError(error);
+                }
+
+            }).catch(reason => {
+                self.logError(reason);
+            });
+    }
+
+    getChargerState() {
+        let self = this;
         self.createEaseeChargerClient().getChargerState(self.getData().id)
             .then(function (state) {
 
@@ -301,6 +350,13 @@ class ChargerDevice extends Homey.Device {
                     self._updateProperty('measure_power', Math.round(state.totalPower * 1000));
                     self._updateProperty('charger_status', enums.decodeChargerMode(state.chargerOpMode));
                     self._updateProperty('measure_voltage', parseInt(state.voltage));
+
+                    if (enums.decodeChargerMode(state.chargerOpMode) == enums.decodeChargerMode('Charging')) {
+                        self._updateProperty('onoff', true);
+                    } else {
+                        self._updateProperty('onoff', false);
+                    }
+
                 } catch (error) {
                     self.logError(error);
                 }
@@ -356,24 +412,49 @@ class ChargerDevice extends Homey.Device {
         }
     }
 
-    //Invoked once upon startup of app, considered static information
+    //Invoked upon startup of app, considered static information
     updateChargerSiteInfo() {
         let self = this;
         self.logMessage('Getting charger site info');
         self.createEaseeChargerClient().getSiteInfo(self.getData().id)
             .then(function (site) {
 
+                const circuitFuse = Math.round(site.circuits[0].ratedCurrent);
+
                 self.setSettings({
                     mainFuse: `${Math.round(site.ratedCurrent)}`,
-                    circuitFuse: `${Math.round(site.circuits[0].ratedCurrent)}`,
+                    circuitFuse: `${circuitFuse}`,
                     siteId: `${site.circuits[0].siteId}`,
                     circuitId: `${site.circuits[0].id}`
                 }).catch(err => {
                     self.error('Failed to update site settings', err);
                 });
 
+                //Adjust the max value of the target curcuit current slider based on the 
+                //registered curcuit fuse size
+                if (self.getCapabilityOptions('target_circuit_current').max != circuitFuse) {
+                    self.logMessage(`Updating 'target_circuit_current' max value to '${circuitFuse}'`);
+                    self.setCapabilityOptions('target_circuit_current', {
+                        max: circuitFuse,
+                    }).catch(err => {
+                        self.error('Failed to update capability options', err);
+                    });
+                }
+
             }).catch(reason => {
                 self.logError(reason);
+            });
+    }
+
+    pollLifetimeEnergy() {
+        let self = this;
+        //self.logMessage(`Poll lifetime energy`);
+        return self.createEaseeChargerClient().pollLifetimeEnergy(self.getData().id)
+            .then(function (result) {
+                return result;
+            }).catch(reason => {
+                self.logError(reason);
+                //return Promise.reject(reason);
             });
     }
 
@@ -486,10 +567,10 @@ class ChargerDevice extends Homey.Device {
             });
     }
 
-    getDynamicCurrent() {
+    getDynamicCircuitCurrent() {
         let self = this;
         return self.createEaseeChargerClient()
-            .getDynamicCurrent(self.getSetting('siteId'), self.getSetting('circuitId'))
+            .getDynamicCircuitCurrent(self.getSetting('siteId'), self.getSetting('circuitId'))
             .then(function (result) {
                 return result;
             }).catch(reason => {
@@ -632,15 +713,22 @@ class ChargerDevice extends Homey.Device {
             this.updateChargerStatistics();
         }, 60 * 1000 * 30));
 
-        //Update config each 30 mins
+        //Update charger lifetime energy
         this.pollIntervals.push(setInterval(() => {
-            this.updateChargerConfig();
-        }, 60 * 1000 * 30));
+            this.pollLifetimeEnergy();
+        }, 60 * 1000 * 5));
 
-        //Update state each 30s
+        //Update semi static config each 60 mins
         this.pollIntervals.push(setInterval(() => {
-            this.updateChargerState();
-        }, 30 * 1000));
+            this.getSemiStaticChargerConfig();
+        }, 60 * 1000 * 60));
+
+        //Update state each 15s
+        this.pollIntervals.push(setInterval(() => {
+            this.getChargerState();
+            this.getChargerConfig();
+            this.getDynamicCurrent();
+        }, 15 * 1000));
 
         //Update once per day for the sake of it
         //Fragile to only run once upon startup if the Easee API doesnt respond at that time

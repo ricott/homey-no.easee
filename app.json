@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "no.easee",
-  "version": "1.4.7",
+  "version": "1.4.8",
   "brandColor": "#323232",
   "compatibility": ">=5.0.0",
   "sdk": 3,
@@ -989,6 +989,9 @@
         "meter_power",
         "measure_charge",
         "measure_charge.last_month",
+        "onoff",
+        "locked",
+        "target_circuit_current",
         "button.reconnect",
         "button.organize"
       ],
@@ -1033,6 +1036,18 @@
           "title": {
             "en": "Last month",
             "sv": "Förra månaden"
+          }
+        },
+        "locked": {
+          "title": {
+            "en": "Access",
+            "sv": "Access"
+          }
+        },
+        "onoff": {
+          "title": {
+            "en": "Charging",
+            "sv": "Laddar"
           }
         },
         "button.organize": {
@@ -1531,6 +1546,30 @@
       "units": {
         "en": "kWh"
       }
+    },
+    "target_circuit_current": {
+      "title": {
+        "en": "Dynamic circuit current",
+        "sv": "Kretsens dynamiska ström"
+      },
+      "type": "number",
+      "desc": {
+        "en": "Set the dynamic circuit current. The max value is adjusted to the circuit fuse setting.",
+        "sv": "Sätt kretsens dynamiska ström. Maxvärdet sätts till kretsens säkringsstorlek."
+      },
+      "min": 0,
+      "max": 40,
+      "decimals": 0,
+      "step": 1,
+      "units": {
+        "en": "A",
+        "sv": "A"
+      },
+      "setable": true,
+      "getable": true,
+      "insights": true,
+      "uiComponent": "slider",
+      "chartType": "stepLine"
     }
   }
 }

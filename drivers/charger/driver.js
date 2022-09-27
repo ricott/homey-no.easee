@@ -295,7 +295,7 @@ class ChargerDriver extends Homey.Driver {
         decreaseCircuitCurrent.registerRunListener(async (args) => {
             this.log(`[${args.device.getName()}] Action 'decreaseCircuitCurrent' triggered`);
             //Lets fetch the current dynamic current via API, to make sure we are adjusting the real current
-            return args.device.getDynamicCurrent()
+            return args.device.getDynamicCircuitCurrent()
                 .then(dynamicCurrent => {
                     this.log(`[${args.device.getName()}] - dynamic current: '${dynamicCurrent.phase1}/${dynamicCurrent.phase2}/${dynamicCurrent.phase3}'`);
                     //A user can have locked current to a single phase for one phase charging, lets skip adjusting phases with 0 current
@@ -326,7 +326,7 @@ class ChargerDriver extends Homey.Driver {
         increaseCircuitCurrent.registerRunListener(async (args) => {
             this.log(`[${args.device.getName()}] Action 'increaseCircuitCurrent' triggered`);
             //Lets fetch the current dynamic current via API, to make sure we are adjusting the real current
-            return args.device.getDynamicCurrent()
+            return args.device.getDynamicCircuitCurrent()
                 .then(dynamicCurrent => {
                     this.log(`[${args.device.getName()}] - dynamic current: '${dynamicCurrent.phase1}/${dynamicCurrent.phase2}/${dynamicCurrent.phase3}'`);
                     //A user can have locked current to a single phase for one phase charging, lets skip adjusting phases with 0 current

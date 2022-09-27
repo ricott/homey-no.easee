@@ -44,7 +44,7 @@ describe('#Charger', function () {
     it('dynamic current on phase1 should be a number', async () => {
         let tokens = await tokenManager.getTokens(config.credentials.userName, config.credentials.password);
         let easee = new Easee(tokens);
-        let dynamicCurrent = await easee.getDynamicCurrent(config.siteId, config.circuitId);
+        let dynamicCurrent = await easee.getDynamicCircuitCurrent(config.siteId, config.circuitId);
         //console.log(util.inspect(dynamicCurrent, { showHidden: false, depth: null }));
         assert.strictEqual(!isNaN(dynamicCurrent.phase1), true);
     });
