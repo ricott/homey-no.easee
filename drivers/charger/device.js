@@ -168,6 +168,11 @@ class ChargerDevice extends Homey.Device {
         this.addCapabilityHelper('meter_power.lastCharge');
         this.addCapabilityHelper('meter_power');
 
+        //Upgrade device, add new capabilities v1.4.8
+        this.addCapabilityHelper('onoff');
+        this.addCapabilityHelper('locked');
+        this.addCapabilityHelper('target_circuit_current');
+
         let capability = 'measure_charge';
         if (!this.hasCapability(capability) && this.getSetting('showLast30daysStats')) {
             this.addCapabilityHelper(capability);
