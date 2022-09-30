@@ -1,0 +1,37 @@
+{
+    "id": "target_circuit_current_condition",
+    "title": {
+        "en": "Target circuit current is !{{|not}}",
+        "sv": "Kretsens ström är !{{|inte}}"
+    },
+    "titleFormatted": {
+        "en": "Target circuit current is !{{|not}} [[conditionType]] [[current]]",
+        "sv": "Kretsens ström är !{{|inte}} [[conditionType]] [[current]]"
+    },
+    "args": [
+        {
+            "name": "conditionType",
+            "type": "autocomplete",
+            "title": {
+                "en": "Condition",
+                "sv": "Villkor"
+            }
+        },
+        {
+            "name": "current",
+            "type": "number",
+            "title": {
+                "en": "Current (A)",
+                "sv": "Ström (A)"
+            },
+            "min": 0,
+            "max": 40,
+            "step": 1
+        },
+        {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+        }
+    ]
+}

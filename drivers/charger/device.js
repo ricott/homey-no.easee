@@ -301,8 +301,12 @@ class ChargerDevice extends Homey.Device {
         self.getDynamicCircuitCurrent()
             .then(function (current) {
 
+                //Make sure we don't set a value higher than what is allowed
+                let targetCurrent = Math.max(current.phase1, current.phase2, current.phase3);
+                targetCurrent = Math.min(self.getSettings().circuitFuse, targetCurrent);
+
                 try {
-                    self._updateProperty('target_circuit_current', Math.max(current.phase1, current.phase2, current.phase3));
+                    self._updateProperty('target_circuit_current', targetCurrent);
                 } catch (error) {
                     self.logError(error);
                 }
@@ -581,7 +585,7 @@ class ChargerDevice extends Homey.Device {
 
     setDynamicCurrentPerPhase(currentP1, currentP2, currentP3) {
         let self = this;
-        self.logMessage(`Setting dynamic charge current to '${currentP1}/${currentP2}/${currentP3}'`);
+        self.logMessage(`Setting dynamic circuit current to '${currentP1}/${currentP2}/${currentP3}'`);
         return self.createEaseeChargerClient()
             .setDynamicCurrentPerPhase(self.getSetting('siteId'), self.getSetting('circuitId'),
                 currentP1, currentP2, currentP3)

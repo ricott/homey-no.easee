@@ -4,6 +4,7 @@ const Homey = require('homey');
 const Easee = require('../../lib/Easee.js');
 const TokenManager = require('../../lib/tokenManager.js');
 const enums = require('../../lib/enums.js');
+const conditionHandler = require('../../lib/conditionHandler.js');
 
 class ChargerDriver extends Homey.Driver {
 
@@ -29,6 +30,8 @@ class ChargerDriver extends Homey.Driver {
     _registerFlows() {
         this.log('Registering flows');
         //Triggers
+        //This trigger is triggered automatically by homey when capability value changes
+        this.homey.flow.getDeviceTriggerCard('target_circuit_current_changed');
         this._charger_status_changed = this.homey.flow.getDeviceTriggerCard('charger_status_changed');
         this._charger_status_changedv2 = this.homey.flow.getDeviceTriggerCard('charger_status_changedv2');
         this._charger_status_changedv2.registerRunListener(async (args, state) => {
@@ -57,6 +60,19 @@ class ChargerDriver extends Homey.Driver {
         chargerStatus.registerArgumentAutocompleteListener('status',
             async (query, args) => {
                 return enums.getChargerMode();
+            }
+        );
+
+        const target_circuit_current_condition = this.homey.flow.getConditionCard('target_circuit_current_condition');
+        target_circuit_current_condition.registerRunListener(async (args, state) => {
+            //this.log(`[${args.device.getName()}] Condition 'target_circuit_current_condition' triggered`);
+            const current = args.device.getCapabilityValue('target_circuit_current');
+
+            return conditionHandler.evaluateNumericCondition(args.conditionType.id, args.current, current);
+        });
+        target_circuit_current_condition.registerArgumentAutocompleteListener('conditionType',
+            async (query, args) => {
+                return conditionHandler.getNumberConditions();
             }
         );
 
