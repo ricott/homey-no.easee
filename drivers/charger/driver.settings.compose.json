@@ -149,6 +149,15 @@
                     "sv": "Programvara"
                 },
                 "value": ""
+            },
+            {
+                "id": "partner",
+                "type": "label",
+                "label": {
+                    "en": "Partner",
+                    "sv": "Partner"
+                },
+                "value": ""
             }
         ]
     },

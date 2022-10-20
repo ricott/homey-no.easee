@@ -323,6 +323,7 @@ class ChargerDevice extends Homey.Device {
 
     getChargerConfig() {
         let self = this;
+        self.logMessage(`Refreshing enabled and locked state`);
         self.createEaseeChargerClient().getChargerConfig(self.getData().id)
             .then(function (config) {
 
@@ -421,7 +422,7 @@ class ChargerDevice extends Homey.Device {
         }
     }
 
-    //Invoked upon startup of app, considered static information
+    //Invoked upon startup of app, refreshed once per day
     updateChargerSiteInfo() {
         let self = this;
         self.logMessage('Getting charger site info');
@@ -450,6 +451,23 @@ class ChargerDevice extends Homey.Device {
                     });
                 }
 
+            }).catch(reason => {
+                self.logError(reason);
+            });
+
+        self.createEaseeChargerClient().getChargerDetails(self.getData().id)
+            .then(function (details) {
+
+                let partnerName = 'n/a';
+                if (details.partner && details.partner.name) {
+                    partnerName = details.partner.name;
+                }
+
+                self.setSettings({
+                    partner: partnerName
+                }).catch(err => {
+                    self.error('Failed to update partner setting', err);
+                });
             }).catch(reason => {
                 self.logError(reason);
             });
