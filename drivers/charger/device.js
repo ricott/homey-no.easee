@@ -20,7 +20,6 @@ const deviceCapabilitesList = [
     'measure_charge',
     'measure_charge.last_month',
     'onoff',
-    'locked',
     'target_circuit_current'
 ];
 
@@ -57,7 +56,7 @@ class ChargerDevice extends Homey.Device {
 
                 self.updateChargerSiteInfo();
                 self.updateChargerStatistics();
-                self.getChargerConfig();
+                self.getSemiStaticChargerConfig();
                 self.getChargerState();
                 self._initilializeTimers();
             }).catch(reason => {
@@ -66,16 +65,23 @@ class ChargerDevice extends Homey.Device {
     }
 
     async setupCapabilityListeners() {
-        this.registerCapabilityListener("locked", async (value) => {
-            this.logMessage(`Set locked to '${value}'`);
-            await this.createEaseeChargerClient()
-                .setAuthorizationRequired(this.getData().id, value)
-                .catch(this.error);
-        });
-
         this.registerCapabilityListener("onoff", async (value) => {
-            this.logMessage(`Set onoff to '${value}'`);
-            await this.toggleCharging().catch(this.error);
+            if (value) {
+                //Start
+                await this.startCharging()
+                    .catch(reason => {
+                        let defaultMsg = 'Failed to start charging!';
+                        return Promise.reject(new Error(this.createFriendlyErrorMsg(reason, defaultMsg)));
+                    });
+
+            } else {
+                //Stop
+                await this.stopCharging()
+                    .catch(reason => {
+                        let defaultMsg = 'Failed to stop charging!';
+                        return Promise.reject(new Error(this.createFriendlyErrorMsg(reason, defaultMsg)));
+                    });
+            }
         });
 
         this.registerCapabilityListener("target_circuit_current", async (current) => {
@@ -83,7 +89,10 @@ class ChargerDevice extends Homey.Device {
             //Adjust dynamic current to be <= circuit fuse
             const newCurrent = Math.min(this.getSettings().circuitFuse, current);
             await this.setDynamicCurrentPerPhase(newCurrent, newCurrent, newCurrent)
-                .catch(this.error);
+                .catch(reason => {
+                    let defaultMsg = 'Failed to set dynamic circuit current!';
+                    return Promise.reject(new Error(this.createFriendlyErrorMsg(reason, defaultMsg)));
+                });
         });
 
         this.registerCapabilityListener('button.organize', async () => {
@@ -158,6 +167,7 @@ class ChargerDevice extends Homey.Device {
         this.removeCapabilityHelper('connected');
         this.removeCapabilityHelper('current_used');
         this.removeCapabilityHelper('threePhase');
+        this.removeCapabilityHelper('locked');
 
         this.addCapabilityHelper('enabled');
         this.addCapabilityHelper('button.organize');
@@ -170,7 +180,6 @@ class ChargerDevice extends Homey.Device {
 
         //Upgrade device, add new capabilities v1.4.8
         this.addCapabilityHelper('onoff');
-        this.addCapabilityHelper('locked');
         this.addCapabilityHelper('target_circuit_current');
 
         let capability = 'measure_charge';
@@ -221,6 +230,19 @@ class ChargerDevice extends Homey.Device {
 
     isError(err) {
         return (err && err.stack && err.message);
+    }
+
+    createFriendlyErrorMsg(reason, baseMsg) {
+        let errMsg = baseMsg;
+        if (reason.message.startsWith('Access token')) {
+            errMsg = 'Access token expired';
+        } else if (reason.message.startsWith('Easee Cloud')) {
+            errMsg = `${errMsg} ${reason.message}`;
+        } else if (reason.message.indexOf('rate limit') > -1) {
+            errMsg = 'The Easee Cloud API rejected the call due to a rate limit';
+        }
+
+        return errMsg;
     }
 
     storeCredentialsEncrypted(plainUser, plainPassword) {
@@ -276,7 +298,7 @@ class ChargerDevice extends Homey.Device {
     createEaseeChargerClient() {
         let options = {
             accessToken: this.getToken().accessToken,
-            appVersion: this.driver.getAppVersion()
+            appVersion: this.homey.app.getAppVersion()
         };
         return new Easee(options);
     }
@@ -285,6 +307,13 @@ class ChargerDevice extends Homey.Device {
         let self = this;
         self.createEaseeChargerClient().getChargerConfig(self.getData().id)
             .then(function (config) {
+
+                try {
+                    self._updateProperty('enabled', config.isEnabled);
+                } catch (error) {
+                    self.logError(error);
+                }
+
                 self.setSettings({
                     idleCurrent: config.enableIdleCurrent ? 'Yes' : 'No',
                     lockCablePermanently: config.lockCablePermanently ? 'Yes' : 'No',
@@ -317,25 +346,8 @@ class ChargerDevice extends Homey.Device {
                 }
 
             }).catch(reason => {
-                self.logError(reason);
-            });
-    }
-
-    getChargerConfig() {
-        let self = this;
-        self.logMessage(`Refreshing enabled and locked state`);
-        self.createEaseeChargerClient().getChargerConfig(self.getData().id)
-            .then(function (config) {
-
-                try {
-                    self._updateProperty('enabled', config.isEnabled);
-                    self._updateProperty('locked', config.authorizationRequired);
-                } catch (error) {
-                    self.logError(error);
-                }
-
-            }).catch(reason => {
-                self.logError(reason);
+                //Ignore, error is logged in getDynamicCircuitCurrent()
+                //self.logError(reason);
             });
     }
 
@@ -426,9 +438,9 @@ class ChargerDevice extends Homey.Device {
     updateChargerSiteInfo() {
         let self = this;
         self.logMessage('Getting charger site info');
-        self.createEaseeChargerClient().getSiteInfo(self.getData().id)
+        const client = self.createEaseeChargerClient();
+        client.getSiteInfo(self.getData().id)
             .then(function (site) {
-
                 const circuitFuse = Math.round(site.circuits[0].ratedCurrent);
 
                 self.setSettings({
@@ -455,7 +467,7 @@ class ChargerDevice extends Homey.Device {
                 self.logError(reason);
             });
 
-        self.createEaseeChargerClient().getChargerDetails(self.getData().id)
+        client.getChargerDetails(self.getData().id)
             .then(function (details) {
 
                 let partnerName = 'n/a';
@@ -478,7 +490,7 @@ class ChargerDevice extends Homey.Device {
         //self.logMessage(`Poll lifetime energy`);
         return self.createEaseeChargerClient().pollLifetimeEnergy(self.getData().id)
             .then(function (result) {
-                return result;
+                return Promise.resolve(result);
             }).catch(reason => {
                 self.logError(reason);
                 //return Promise.reject(reason);
@@ -490,7 +502,7 @@ class ChargerDevice extends Homey.Device {
         self.logMessage(`Rebooting charger`);
         return self.createEaseeChargerClient().rebootCharger(self.getData().id)
             .then(function (result) {
-                return result;
+                return Promise.resolve(result);
             }).catch(reason => {
                 self.logError(reason);
                 return Promise.reject(reason);
@@ -502,7 +514,7 @@ class ChargerDevice extends Homey.Device {
         self.logMessage(`Pausing charge`);
         return self.createEaseeChargerClient().pauseCharging(self.getData().id)
             .then(function (result) {
-                return result;
+                return Promise.resolve(result);
             }).catch(reason => {
                 self.logError(reason);
                 return Promise.reject(reason);
@@ -514,34 +526,60 @@ class ChargerDevice extends Homey.Device {
         self.logMessage(`Resuming charge`);
         return self.createEaseeChargerClient().resumeCharging(self.getData().id)
             .then(function (result) {
-                return result;
+                return Promise.resolve(result);
             }).catch(reason => {
                 self.logError(reason);
                 return Promise.reject(reason);
             });
     }
 
+    // New start method 2022-10-27
+    // first trigger start charge, if fails then try resume
     startCharging() {
         let self = this;
         self.logMessage(`Starting charge`);
-        return self.createEaseeChargerClient().startCharging(self.getData().id)
+        const client = self.createEaseeChargerClient();
+        const chargerId = self.getData().id;
+
+        return client.startCharging(chargerId)
             .then(function (result) {
-                return result;
+                return Promise.resolve(result);
             }).catch(reason => {
-                self.logError(reason);
-                return Promise.reject(reason);
+                self.logMessage('Failed to start charging, lets try resume');
+                return client.resumeCharging(chargerId)
+                    .then(function (result) {
+                        return Promise.resolve(result);
+                    })
+                    .catch(reason => {
+                        self.logMessage('Failed to resume charging, out of luck');
+                        self.logError(reason);
+                        return Promise.reject(reason);
+                    });
             });
     }
 
+    // New stop method 2022-10-27
+    // first trigger stop charge, if fails then try pause
     stopCharging() {
         let self = this;
         self.logMessage(`Stopping charge`);
-        return self.createEaseeChargerClient().stopCharging(self.getData().id)
+        const client = self.createEaseeChargerClient();
+        const chargerId = self.getData().id;
+
+        return client.stopCharging(chargerId)
             .then(function (result) {
-                return result;
+                return Promise.resolve(result);
             }).catch(reason => {
-                self.logError(reason);
-                return Promise.reject(reason);
+                self.logMessage('Failed to stop charging, lets try pause');
+                return client.pauseCharging(chargerId)
+                    .then(function (result) {
+                        return Promise.resolve(result);
+                    })
+                    .catch(reason => {
+                        self.logMessage('Failed to pause charging, out of luck');
+                        self.logError(reason);
+                        return Promise.reject(reason);
+                    });
             });
     }
 
@@ -550,7 +588,7 @@ class ChargerDevice extends Homey.Device {
         self.logMessage(`Toggling charge`);
         return self.createEaseeChargerClient().toggleCharging(self.getData().id)
             .then(function (result) {
-                return result;
+                return Promise.resolve(result);
             }).catch(reason => {
                 self.logError(reason);
                 return Promise.reject(reason);
@@ -562,7 +600,7 @@ class ChargerDevice extends Homey.Device {
         self.logMessage(`Overriding schedule`);
         return self.createEaseeChargerClient().overrideSchedule(self.getData().id)
             .then(function (result) {
-                return result;
+                return Promise.resolve(result);
             }).catch(reason => {
                 self.logError(reason);
                 return Promise.reject(reason);
@@ -574,7 +612,7 @@ class ChargerDevice extends Homey.Device {
         self.logMessage(`Deleting schedule`);
         return self.createEaseeChargerClient().deleteBasicChargePlan(self.getData().id)
             .then(function (result) {
-                return result;
+                return Promise.resolve(result);
             }).catch(reason => {
                 self.logError(reason);
                 return Promise.reject(reason);
@@ -587,7 +625,7 @@ class ChargerDevice extends Homey.Device {
         return self.createEaseeChargerClient().setBasicChargePlan(self.getData().id,
             startTime, endTime, repeat, self.homey.clock.getTimezone())
             .then(function (result) {
-                return result;
+                return Promise.resolve(result);
             }).catch(reason => {
                 self.logError(reason);
                 return Promise.reject(reason);
@@ -599,7 +637,7 @@ class ChargerDevice extends Homey.Device {
         return self.createEaseeChargerClient()
             .getDynamicCircuitCurrent(self.getSetting('siteId'), self.getSetting('circuitId'))
             .then(function (result) {
-                return result;
+                return Promise.resolve(result);
             }).catch(reason => {
                 self.logError(reason);
                 return Promise.reject(reason);
@@ -613,7 +651,7 @@ class ChargerDevice extends Homey.Device {
             .setDynamicCurrentPerPhase(self.getSetting('siteId'), self.getSetting('circuitId'),
                 currentP1, currentP2, currentP3)
             .then(function (result) {
-                return result;
+                return Promise.resolve(result);
             }).catch(reason => {
                 self.logError(reason);
                 return Promise.reject(reason);
@@ -630,7 +668,7 @@ class ChargerDevice extends Homey.Device {
                 costPerKWh,
                 taxPerKWh)
             .then(function (result) {
-                return result;
+                return Promise.resolve(result);
             }).catch(reason => {
                 self.logError(reason);
                 return Promise.reject(reason);
@@ -642,7 +680,7 @@ class ChargerDevice extends Homey.Device {
         self.logMessage(`Setting charger max current to '${current}'`);
         return self.createEaseeChargerClient().setMaxChargerCurrent(self.getData().id, current)
             .then(function (result) {
-                return result;
+                return Promise.resolve(result);
             }).catch(reason => {
                 self.logError(reason);
                 return Promise.reject(reason);
@@ -654,7 +692,7 @@ class ChargerDevice extends Homey.Device {
         self.logMessage(`Setting charger state to '${state}'`);
         return self.createEaseeChargerClient().setChargerState(self.getData().id, state)
             .then(function (result) {
-                return result;
+                return Promise.resolve(result);
             }).catch(reason => {
                 self.logError(reason);
                 return Promise.reject(reason);
@@ -666,7 +704,7 @@ class ChargerDevice extends Homey.Device {
         self.logMessage(`Pausing smart charging`);
         return self.createEaseeChargerClient().pauseSmartCharging(self.getData().id)
             .then(function (result) {
-                return result;
+                return Promise.resolve(result);
             }).catch(reason => {
                 self.logError(reason);
                 return Promise.reject(reason);
@@ -678,7 +716,7 @@ class ChargerDevice extends Homey.Device {
         self.logMessage(`Disabling smart charging`);
         return self.createEaseeChargerClient().disableSmartCharging(self.getData().id)
             .then(function (result) {
-                return result;
+                return Promise.resolve(result);
             }).catch(reason => {
                 self.logError(reason);
                 return Promise.reject(reason);
@@ -690,7 +728,7 @@ class ChargerDevice extends Homey.Device {
         self.logMessage(`Enabling smart charging`);
         return self.createEaseeChargerClient().enableSmartCharging(self.getData().id)
             .then(function (result) {
-                return result;
+                return Promise.resolve(result);
             }).catch(reason => {
                 self.logError(reason);
                 return Promise.reject(reason);
@@ -702,7 +740,7 @@ class ChargerDevice extends Homey.Device {
         self.logMessage(`Setting enable idle current to '${state}'`);
         return self.createEaseeChargerClient().enableIdleCurrent(self.getData().id, state)
             .then(function (result) {
-                return result;
+                return Promise.resolve(result);
             }).catch(reason => {
                 self.logError(reason);
                 return Promise.reject(reason);
@@ -714,7 +752,7 @@ class ChargerDevice extends Homey.Device {
         self.logMessage(`Setting lock cable permanently to '${state}'`);
         return self.createEaseeChargerClient().lockCablePermanently(self.getData().id, state)
             .then(function (result) {
-                return result;
+                return Promise.resolve(result);
             }).catch(reason => {
                 self.logError(reason);
                 return Promise.reject(reason);
@@ -726,7 +764,7 @@ class ChargerDevice extends Homey.Device {
         self.logMessage(`Setting led strip brightness to '${brightness}'`);
         return self.createEaseeChargerClient().ledStripBrightness(self.getData().id, brightness)
             .then(function (result) {
-                return result;
+                return Promise.resolve(result);
             }).catch(reason => {
                 self.logError(reason);
                 return Promise.reject(reason);
@@ -735,27 +773,26 @@ class ChargerDevice extends Homey.Device {
 
     _initilializeTimers() {
         this.logMessage('Adding timers');
-        //Update last 30 days kWh every 30 mins
+        //Update last 30 days kWh
         this.pollIntervals.push(setInterval(() => {
             this.updateChargerStatistics();
-        }, 60 * 1000 * 30));
+        }, 60 * 1000 * 60));
 
         //Update charger lifetime energy
         this.pollIntervals.push(setInterval(() => {
             this.pollLifetimeEnergy();
-        }, 60 * 1000 * 5));
+        }, 60 * 1000 * 10));
 
-        //Update semi static config each 60 mins
+        //Update semi static config
         this.pollIntervals.push(setInterval(() => {
             this.getSemiStaticChargerConfig();
         }, 60 * 1000 * 60));
 
-        //Update state each 15s
+        //Update state
         this.pollIntervals.push(setInterval(() => {
             this.getChargerState();
-            this.getChargerConfig();
             this.getDynamicCurrent();
-        }, 15 * 1000));
+        }, 30 * 1000));
 
         //Update once per day for the sake of it
         //Fragile to only run once upon startup if the Easee API doesnt respond at that time

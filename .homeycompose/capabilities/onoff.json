@@ -1,0 +1,20 @@
+{
+    "type": "boolean",
+    "title": {
+        "en": "Charging",
+        "sv": "Laddar"
+    },
+    "getable": true,
+    "setable": true,
+    "insights": true,
+    "insightsTitleTrue": {
+        "en": "Charging",
+        "sv": "Laddar"
+    },
+    "insightsTitleFalse": {
+        "en": "Off",
+        "sv": "Av"
+    },
+    "uiComponent": "toggle",
+    "uiQuickAction": false
+}

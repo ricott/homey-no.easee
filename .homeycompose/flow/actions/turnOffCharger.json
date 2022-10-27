@@ -1,0 +1,15 @@
+{
+    "id": "off",
+    "highlight": true,
+    "title": {
+        "en": "Turn off",
+        "sv": "Stäng av"
+    },
+    "args": [
+        {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+        }
+    ]
+}

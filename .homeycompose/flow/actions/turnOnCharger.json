@@ -1,0 +1,15 @@
+{
+    "id": "on",
+    "highlight": true,
+    "title": {
+        "en": "Turn on",
+        "sv": "Aktivera"
+    },
+    "args": [
+        {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+        }
+    ]
+}

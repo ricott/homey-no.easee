@@ -7,12 +7,8 @@ const TokenManager = require('../../lib/tokenManager.js');
 class EqualizerDriver extends Homey.Driver {
 
     async onInit() {
-        this.log(`[Easee Home v${this.getAppVersion()}] Equalizer driver has been initialized`);
+        this.log(`[Easee Home Equalizer driver has been initialized`);
         this.tokenManager = TokenManager;
-    }
-
-    getAppVersion() {
-        return this.homey.manifest.version;
     }
 
     _registerFlows() {

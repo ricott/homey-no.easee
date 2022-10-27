@@ -14,5 +14,6 @@
             "name": "device",
             "filter": "driver_id=charger"
         }
-    ]
+    ],
+    "deprecated": true
 }

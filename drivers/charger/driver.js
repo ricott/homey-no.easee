@@ -9,15 +9,11 @@ const conditionHandler = require('../../lib/conditionHandler.js');
 class ChargerDriver extends Homey.Driver {
 
     async onInit() {
-        this.log(`[Easee Home v${this.getAppVersion()}] Charger driver has been initialized`);
+        this.log(`[Easee Home Charger driver has been initialized`);
 
         this.flowCards = {};
         this._registerFlows();
         this.tokenManager = TokenManager;
-    }
-
-    getAppVersion() {
-        return this.homey.manifest.version;
     }
 
     triggerStatusChanged(device, tokens) {
@@ -32,6 +28,9 @@ class ChargerDriver extends Homey.Driver {
         //Triggers
         //This trigger is triggered automatically by homey when capability value changes
         this.homey.flow.getDeviceTriggerCard('target_circuit_current_changed');
+        this.homey.flow.getDeviceTriggerCard('onoff_true');
+        this.homey.flow.getDeviceTriggerCard('onoff_false');
+
         this._charger_status_changed = this.homey.flow.getDeviceTriggerCard('charger_status_changed');
         this._charger_status_changedv2 = this.homey.flow.getDeviceTriggerCard('charger_status_changedv2');
         this._charger_status_changedv2.registerRunListener(async (args, state) => {
@@ -45,6 +44,11 @@ class ChargerDriver extends Homey.Driver {
         );
 
         //Conditions
+        const chargerOnOff = this.homey.flow.getConditionCard('on');
+        chargerOnOff.registerRunListener(async (args, state) => {
+            return args.device.getCapabilityValue('onoff');
+        });
+
         const chargerStatus = this.homey.flow.getConditionCard('chargerStatus');
         chargerStatus.registerRunListener(async (args, state) => {
             this.log(`[${args.device.getName()}] Condition 'chargerStatus' triggered`);
@@ -77,6 +81,39 @@ class ChargerDriver extends Homey.Driver {
         );
 
         //Actions
+        const turnOn = this.homey.flow.getActionCard('on');
+        turnOn.registerRunListener(async (args) => {
+            this.log(`[${args.device.getName()}] Action 'on' triggered`);
+            return args.device.startCharging()
+                .then(function (result) {
+                    return Promise.resolve(true);
+                }).catch(reason => {
+                    return Promise.reject(`Failed to turn on the charger. Reason: ${reason.message}`);
+                });
+        });
+
+        const turnOff = this.homey.flow.getActionCard('off');
+        turnOff.registerRunListener(async (args) => {
+            this.log(`[${args.device.getName()}] Action 'off' triggered`);
+            return args.device.stopCharging()
+                .then(function (result) {
+                    return Promise.resolve(true);
+                }).catch(reason => {
+                    return Promise.reject(`Failed to turn off the charger. Reason: ${reason.message}`);
+                });
+        });
+
+        const toggle = this.homey.flow.getActionCard('toggle');
+        toggle.registerRunListener(async (args) => {
+            this.log(`[${args.device.getName()}] Action 'toggle' triggered`);
+            return args.device.toggleCharging()
+                .then(function (result) {
+                    return Promise.resolve(true);
+                }).catch(reason => {
+                    return Promise.reject(`Failed to toggle the charger. Reason: ${reason.message}`);
+                });
+        });
+
         const rebootCharger = this.homey.flow.getActionCard('rebootCharger');
         rebootCharger.registerRunListener(async (args) => {
             this.log(`[${args.device.getName()}] Action 'rebootCharger' triggered`);
@@ -84,43 +121,40 @@ class ChargerDriver extends Homey.Driver {
                 .then(function (result) {
                     return Promise.resolve(true);
                 }).catch(reason => {
-                    return Promise.reject('Failed to reboot charger');
+                    return Promise.reject(`Failed to reboot the charger. Reason: ${reason.message}`);
                 });
         });
 
         const disableSmartCharging = this.homey.flow.getActionCard('disableSmartCharging');
         disableSmartCharging.registerRunListener(async (args) => {
             this.log(`[${args.device.getName()}] Action 'disableSmartCharging' triggered`);
-            let errMsg = `Failed to disable smart charging`;
             return args.device.disableSmartCharging()
                 .then(function (result) {
                     return Promise.resolve(true);
                 }).catch(reason => {
-                    return Promise.reject(errMsg);
+                    return Promise.reject(`Failed to disable smart charging. Reason: ${reason.message}`);
                 });
         });
 
         const pauseSmartCharging = this.homey.flow.getActionCard('pauseSmartCharging');
         pauseSmartCharging.registerRunListener(async (args) => {
             this.log(`[${args.device.getName()}] Action 'pauseSmartCharging' triggered`);
-            let errMsg = `Failed to pause smart charging`;
             return args.device.pauseSmartCharging()
                 .then(function (result) {
                     return Promise.resolve(true);
                 }).catch(reason => {
-                    return Promise.reject(errMsg);
+                    return Promise.reject(`Failed to pause smart charging. Reason: ${reason.message}`);
                 });
         });
 
         const enableSmartCharging = this.homey.flow.getActionCard('enableSmartCharging');
         enableSmartCharging.registerRunListener(async (args) => {
             this.log(`[${args.device.getName()}] Action 'enableSmartCharging' triggered`);
-            let errMsg = `Failed to enable smart charging`;
             return args.device.enableSmartCharging()
                 .then(function (result) {
                     return Promise.resolve(true);
                 }).catch(reason => {
-                    return Promise.reject(errMsg);
+                    return Promise.reject(`Failed to enable smart charging. Reason: ${reason.message}`);
                 });
         });
 
@@ -131,7 +165,7 @@ class ChargerDriver extends Homey.Driver {
                 .then(function (result) {
                     return Promise.resolve(true);
                 }).catch(reason => {
-                    return Promise.reject('Failed to override schedule');
+                    return Promise.reject(`Failed to override schedule. Reason: ${reason.message}`);
                 });
         });
 
@@ -142,7 +176,7 @@ class ChargerDriver extends Homey.Driver {
                 .then(function (result) {
                     return Promise.resolve(true);
                 }).catch(reason => {
-                    return Promise.reject('Failed to delete schedule');
+                    return Promise.reject(`Failed to delete schedule. Reason: ${reason.message}`);
                 });
         });
 
@@ -157,11 +191,11 @@ class ChargerDriver extends Homey.Driver {
                 .then(function (result) {
                     return Promise.resolve(true);
                 }).catch(reason => {
-                    this.log(reason);
-                    return Promise.reject('Failed to create schedule');
+                    return Promise.reject(`Failed to create schedule. Reason: ${reason.message}`);
                 });
         });
 
+        //Deprecated
         const toggleCharger = this.homey.flow.getActionCard('toggleCharger');
         toggleCharger.registerRunListener(async (args) => {
             this.log(`[${args.device.getName()}] Action 'toggleCharger' triggered`);
@@ -169,22 +203,23 @@ class ChargerDriver extends Homey.Driver {
                 .then(function (result) {
                     return Promise.resolve(true);
                 }).catch(reason => {
-                    return Promise.reject('Failed to toggle charging');
+                    return Promise.reject(`Failed to toggle charging. Reason: ${reason.message}`);
                 });
         });
 
+        //Deprecated
         const chargerControl = this.homey.flow.getActionCard('chargerControl');
         chargerControl.registerRunListener(async (args) => {
             this.log(`[${args.device.getName()}] Action 'chargerControl' triggered`);
             this.log(`[${args.device.getName()}] - action: '${args.chargerAction}'`);
 
-            let errMsg = `Failed to change status to '${args.chargerAction}'`;
+            let errMsg = `Failed to change status to '${args.chargerAction}'.`;
             if (args.chargerAction === 'START') {
                 return args.device.startCharging()
                     .then(function (result) {
                         return Promise.resolve(true);
                     }).catch(reason => {
-                        return Promise.reject(errMsg);
+                        return Promise.reject(`${errMsg} Reason: ${reason.message}`);
                     });
 
             } else if (args.chargerAction === 'STOP') {
@@ -192,7 +227,7 @@ class ChargerDriver extends Homey.Driver {
                     .then(function (result) {
                         return Promise.resolve(true);
                     }).catch(reason => {
-                        return Promise.reject(errMsg);
+                        return Promise.reject(`${errMsg} Reason: ${reason.message}`);
                     });
 
             } else if (args.chargerAction === 'PAUSE') {
@@ -200,7 +235,7 @@ class ChargerDriver extends Homey.Driver {
                     .then(function (result) {
                         return Promise.resolve(true);
                     }).catch(reason => {
-                        return Promise.reject(errMsg);
+                        return Promise.reject(`${errMsg} Reason: ${reason.message}`);
                     });
 
             } else if (args.chargerAction === 'RESUME') {
@@ -208,7 +243,7 @@ class ChargerDriver extends Homey.Driver {
                     .then(function (result) {
                         return Promise.resolve(true);
                     }).catch(reason => {
-                        return Promise.reject(errMsg);
+                        return Promise.reject(`${errMsg} Reason: ${reason.message}`);
                     });
             }
         });
@@ -228,7 +263,7 @@ class ChargerDriver extends Homey.Driver {
                     return Promise.resolve(true);
                 }).catch(reason => {
                     this.log(reason);
-                    return Promise.reject(`Failed to set dynamic Circuit current, reason: ${reason.message}`);
+                    return Promise.reject(`Failed to set dynamic Circuit current. Reason: ${reason.message}`);
                 });
         });
 
@@ -244,7 +279,7 @@ class ChargerDriver extends Homey.Driver {
                 .then(function (result) {
                     return Promise.resolve(true);
                 }).catch(reason => {
-                    return Promise.reject(`Failed to set dynamic Circuit current, reason: ${reason.message}`);
+                    return Promise.reject(`Failed to set dynamic Circuit current. Reason: ${reason.message}`);
                 });
         });
 
@@ -259,7 +294,7 @@ class ChargerDriver extends Homey.Driver {
                 .then(function (result) {
                     return Promise.resolve(true);
                 }).catch(reason => {
-                    return Promise.reject(errMsg);
+                    return Promise.reject(`${errMsg} Reason: ${reason.message}`);
                 });
         });
 
@@ -274,7 +309,7 @@ class ChargerDriver extends Homey.Driver {
                 .then(function (result) {
                     return Promise.resolve(true);
                 }).catch(reason => {
-                    return Promise.reject(errMsg);
+                    return Promise.reject(`${errMsg} Reason: ${reason.message}`);
                 });
         });
 
@@ -289,7 +324,7 @@ class ChargerDriver extends Homey.Driver {
                 .then(function (result) {
                     return Promise.resolve(true);
                 }).catch(reason => {
-                    return Promise.reject(errMsg);
+                    return Promise.reject(`${errMsg} Reason: ${reason.message}`);
                 });
         });
 
@@ -303,7 +338,7 @@ class ChargerDriver extends Homey.Driver {
                 .then(function (result) {
                     return Promise.resolve(true);
                 }).catch(reason => {
-                    return Promise.reject(errMsg);
+                    return Promise.reject(`${errMsg} Reason: ${reason.message}`);
                 });
         });
 
@@ -331,10 +366,10 @@ class ChargerDriver extends Homey.Driver {
                         .then(function (result) {
                             return Promise.resolve(true);
                         }).catch(reason => {
-                            return Promise.reject('Failed to decrease dynamic circuit current');
+                            return Promise.reject(`Failed to decrease dynamic circuit current. Reason: ${reason.message}`);
                         });
                 }).catch(reason => {
-                    return Promise.reject('Failed to decrease dynamic circuit current');
+                    return Promise.reject(`Failed to decrease dynamic circuit current. Reason: ${reason.message}`);
                 });
         });
 
@@ -363,10 +398,10 @@ class ChargerDriver extends Homey.Driver {
                         .then(function (result) {
                             return Promise.resolve(true);
                         }).catch(reason => {
-                            return Promise.reject('Failed to increase dynamic circuit current');
+                            return Promise.reject(`Failed to increase dynamic circuit current. Reason: ${reason.message}`);
                         });
                 }).catch(reason => {
-                    return Promise.reject('Failed to increase dynamic circuit current');
+                    return Promise.reject(`Failed to increase dynamic circuit current. Reason: ${reason.message}`);
                 });
         });
 
@@ -381,8 +416,7 @@ class ChargerDriver extends Homey.Driver {
                 .then(function (result) {
                     return Promise.resolve(true);
                 }).catch(reason => {
-                    this.log(reason);
-                    return Promise.reject('Failed to set charging price');
+                    return Promise.reject(`Failed to set charging price. Reason: ${reason.message}`);
                 });
         });
 
@@ -395,8 +429,7 @@ class ChargerDriver extends Homey.Driver {
                 .then(function (result) {
                     return Promise.resolve(true);
                 }).catch(reason => {
-                    this.log(reason);
-                    return Promise.reject('Failed to set max charging current');
+                    return Promise.reject(`Failed to set max charging current. Reason: ${reason.message}`);
                 });
         });
 

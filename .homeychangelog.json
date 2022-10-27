@@ -1,4 +1,8 @@
 {
+    "1.5.0": {
+        "en": "It is now possible to start and stop charging, and control the dynamic circuit current through new capabilities",
+        "sv": "Det är nu möjligt att starta och stopp laddning samt att sätta kretsens dynamiska ström via nya egenskaper"
+    },
     "1.4.9": {
         "en": "It is now possible to start and stop charging, change the access, and control the dynamic circuit current through new capabilities",
         "sv": "Det är nu möjligt att starta och stopp laddning, ändra access samt att sätta kretsens dynamiska ström via nya egenskaper"

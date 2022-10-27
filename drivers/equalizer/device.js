@@ -98,7 +98,7 @@ class EqualizerDevice extends Homey.Device {
     createEaseeChargerClient() {
         let options = {
             accessToken: this.getToken().accessToken,
-            appVersion: this.driver.getAppVersion()
+            appVersion: this.homey.app.getAppVersion()
         };
         return new Easee(options);
     }

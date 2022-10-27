@@ -1,0 +1,14 @@
+{
+    "id": "toggle",
+    "title": {
+        "en": "Toggle on or off",
+        "sv": "Växla på och av"
+    },
+    "args": [
+        {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+        }
+    ]
+}

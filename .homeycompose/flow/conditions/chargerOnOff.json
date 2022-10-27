@@ -1,0 +1,14 @@
+{
+    "id": "on",
+    "title": {
+        "en": "Charger is turned !{{on|off}}",
+        "sv": "Laddaren är !{{på|av}}"
+    },
+    "args": [
+        {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+        }
+    ]
+}

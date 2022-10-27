@@ -70,18 +70,6 @@
                 "sv": "Förra månaden"
             }
         },
-        "locked": {
-            "title": {
-                "en": "Access",
-                "sv": "Access"
-            }
-        },
-        "onoff": {
-            "title": {
-                "en": "Charging",
-                "sv": "Laddar"
-            }
-        },
         "button.organize": {
             "maintenanceAction": true,
             "title": {

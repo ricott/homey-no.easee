@@ -1,0 +1,15 @@
+{
+    "id": "onoff_true",
+    "highlight": true,
+    "title": {
+      "en": "Turned on",
+      "sv": "Aktiverad"
+    },
+    "args": [
+      {
+        "type": "device",
+        "name": "device",
+        "filter": "driver_id=charger"
+      }
+    ]
+}

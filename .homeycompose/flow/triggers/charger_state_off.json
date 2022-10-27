@@ -1,0 +1,15 @@
+{
+    "id": "onoff_false",
+    "highlight": true,
+    "title": {
+      "en": "Turned off",
+      "sv": "Inaktiverad"
+    },
+    "args": [
+      {
+        "type": "device",
+        "name": "device",
+        "filter": "driver_id=charger"
+      }
+    ]
+}
