@@ -1,19 +1,7 @@
 {
-    "1.5.1": {
+    "1.5.2": {
         "en": "It is now possible to start and stop charging, and control the dynamic circuit current through new capabilities",
         "sv": "Det är nu möjligt att starta och stopp laddning samt att sätta kretsens dynamiska ström via nya egenskaper"
-    },
-    "1.5.0": {
-        "en": "It is now possible to start and stop charging, and control the dynamic circuit current through new capabilities",
-        "sv": "Det är nu möjligt att starta och stopp laddning samt att sätta kretsens dynamiska ström via nya egenskaper"
-    },
-    "1.4.9": {
-        "en": "It is now possible to start and stop charging, change the access, and control the dynamic circuit current through new capabilities",
-        "sv": "Det är nu möjligt att starta och stopp laddning, ändra access samt att sätta kretsens dynamiska ström via nya egenskaper"
-    },
-    "1.4.8": {
-        "en": "It is now possible to start and stop charging, change the access, and control the dynamic circuit current through new capabilities",
-        "sv": "Det är nu möjligt att starta och stopp laddning, ändra access samt att sätta kretsens dynamiska ström via nya egenskaper"
     },
     "1.4.7": {
         "en": "New When card for charger status changed",
@@ -24,14 +12,6 @@
         "sv": "Sätt laddarens högsta laddström"
     },
     "1.4.5": {
-        "en": "Set charging price",
-        "sv": "Uppdatera laddpris"
-    },
-    "1.4.4": {
-        "en": "Set charging price",
-        "sv": "Uppdatera laddpris"
-    },
-    "1.4.3": {
         "en": "Set charging price",
         "sv": "Uppdatera laddpris"
     },
@@ -55,14 +35,6 @@
         "en": "Further improvements for IT grids",
         "sv": "Ytterligare förbättring för IT nät"
     },
-    "1.2.9": {
-        "en": "Further improvements for IT grids",
-        "sv": "Ytterligare förbättring för IT nät"
-    },
-    "1.2.8": {
-        "en": "Further improvements for IT grids",
-        "sv": "Ytterligare förbättring för IT nät"
-    },
     "1.2.7": {
         "en": "New device icons",
         "sv": "Nya enhetsikoner"
@@ -80,18 +52,6 @@
         "sv": "Nytt API anrop för inloggning samt ny reparera enhet funktion"
     },
     "1.2.3": {
-        "en": "Upgrade to SDK version 3",
-        "sv": "Uppgradering till SDK version 3"
-    },
-    "1.2.2": {
-        "en": "Upgrade to SDK version 3",
-        "sv": "Uppgradering till SDK version 3"
-    },
-    "1.2.1": {
-        "en": "Upgrade to SDK version 3",
-        "sv": "Uppgradering till SDK version 3"
-    },
-    "1.2.0": {
         "en": "Upgrade to SDK version 3",
         "sv": "Uppgradering till SDK version 3"
     },
@@ -115,14 +75,6 @@
         "en": "Added support for Easee Equalizer",
         "sv": "Stöd för Easee Equalizer"
     },
-    "1.0.9": {
-        "en": "Added support for Easee Equalizer",
-        "sv": "Stöd för Easee Equalizer"
-    },
-    "1.0.8": {
-        "en": "Added support for Easee Equalizer",
-        "sv": "Stöd för Easee Equalizer"
-    },
     "1.0.7": {
         "en": "Stability improvements",
         "sv": "Stabilitetsförbättringar"
@@ -136,21 +88,6 @@
         "sv": "Appen är översatt till Svenska"
     },
     "1.0.4": {
-        "en": "Major rewrite of the app to use the Easee streaming API. New capabilities and actions added."
-    },
-    "1.0.3": {
-        "en": "Major rewrite of the app to use the Easee streaming API. New capabilities and actions added."
-    },
-    "1.0.2": {
-        "en": "Major rewrite of the app to use the Easee streaming API. New capabilities and actions added."
-    },
-    "1.0.1": {
-        "en": "Major rewrite of the app to use the Easee streaming API. New capabilities and actions added."
-    },
-    "1.0.0": {
-        "en": "Major rewrite of the app to use the Easee streaming API. New capabilities and actions added."
-    },
-    "0.9.9": {
         "en": "Major rewrite of the app to use the Easee streaming API. New capabilities and actions added."
     },
     "0.9.8": {

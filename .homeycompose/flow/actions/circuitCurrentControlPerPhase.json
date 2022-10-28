@@ -8,6 +8,10 @@
         "en": "Set dynamic circuit current to [[current1]], [[current2]] and [[current3]]",
         "sv": "Ändra dynamisk strömstyrka till [[current1]], [[current2]] och [[current3]]"
     },
+    "hint": {
+        "en": "Changes the dynamic current for all chargers on this circuit",
+        "sv": "Ändrar den dynamiska strömstyrkan för alla laddare på denna säkringen"
+    },
     "args": [
         {
             "name": "current1",
