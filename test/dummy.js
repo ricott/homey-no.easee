@@ -1,11 +1,33 @@
 'use strict';
+/*
+const Stats = require('../lib/stats.js');
 
-const enums = require('../lib/enums.js');
+const stats = new Stats();
 
-//console.log(enums.decodeCarChargingState(true));
-//console.log(enums.getCarChargingState());
+stats.countError('/hej', '502');
+stats.countInvocation('/hej');
+stats.countError('/hej', '504');
+stats.countInvocation('/hej');
+stats.countError('/hej', '502');
 
-//console.log(enums.DETECTED_POWER_GRID_TYPE.TN_3_PHASE.key);
+console.log(stats.getTotalInvocations());
+console.log(stats.getInvocationStats());
+console.log(stats.getErrorStats());
+console.log(stats.getErrorList());
+console.log(stats.getInvocationList());
+console.log(stats.getInitDatetime('Europe/Stockholm'));
+*/
 
-console.log(enums.decodeChargerMode(3) == enums.decodeChargerMode('Charging'));
+console.log(resolvePath('/api/commands/EH1212121/2/1243134234243'));
 
+function resolvePath(path) {
+    const commandPath = '/api/commands/';
+    let fixedPath = path;
+    if (path.startsWith(commandPath)) {
+        const endPos = path.substring(commandPath.length).indexOf('/') + 1;
+        fixedPath = path.substring(0, commandPath.length + endPos);
+        fixedPath = fixedPath + '...'
+    }
+
+    return fixedPath;
+}

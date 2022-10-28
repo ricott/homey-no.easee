@@ -8,6 +8,10 @@
         "en": "Set max charger current to [[current]]",
         "sv": "Sätt laddarens högsta laddström till [[current]]"
     },
+    "hint": {
+        "en": "Not recommended to use, and don't set higher than installed fuse.",
+        "sv": "Rekommenderas inte att användas. Sätt inte strömstyrkan högre än den installerade säkringen."
+    },
     "args": [
         {
             "name": "current",

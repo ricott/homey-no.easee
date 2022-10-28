@@ -8,6 +8,10 @@
         "en": "Disable smart charging",
         "sv": "Stäng av smart charging"
     },
+    "hint": {
+        "en": "Not recommended to use too frequently since it will wear out the FLASH storage inside the charger.",
+        "sv": "Skall inte användas frekvent då risken finns att lokala (FLASH) lagringen i laddaren slits ut."
+    },
     "args": [
         {
             "type": "device",

@@ -4,6 +4,10 @@
         "en": "Toggle on or off",
         "sv": "Växla på och av"
     },
+    "hint": {
+        "en": "Uses Easee cloud toggle endpoint, i.e. no extra logic applied.",
+        "sv": "Använder Easee cloud egna toggle API, ingen extra logik är applicerad."
+    },
     "args": [
         {
             "type": "device",

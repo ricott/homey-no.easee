@@ -1,5 +1,6 @@
 {
     "id": "circuitCurrentControl",
+    "highlight": true,
     "title": {
         "en": "Set dynamic circuit current",
         "sv": "Sätt dynamisk strömstyrka"
@@ -7,6 +8,10 @@
     "titleFormatted": {
         "en": "Set dynamic Circuit current to [[current]]",
         "sv": "Ändra dynamisk strömstyrka till [[current]]"
+    },
+    "hint": {
+        "en": "Changes the dynamic current for all chargers on this circuit",
+        "sv": "Ändrar den dynamiska strömstyrkan för alla laddare på denna säkringen"
     },
     "args": [
         {

@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+
+<head>
+    <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
+</head>
+
+<body>
+    <h1>Easee Cloud API invocation statistics</h1>
+    <fieldset>
+        <div class="field row">
+            <label>Refreshed each 5 minutes</label><br/>
+        </div>
+        <div class="field row">
+            <label for="startOfStats">Start datetime</label>
+            <input id="startOfStats" type="text" value="" disabled />
+        </div>
+        <div class="field row">
+            <label for="totalInvocations">Total number of invocations</label>
+            <input id="totalInvocations" type="text" value="" disabled />
+        </div>
+        <div class="field row">
+            <label for="invocations">Invocations by endpoint (endpoint, counter)</label>
+            <textarea id="invocations" rows="15" cols="50"></textarea>
+        </div>
+        <div class="field row">
+            <label for="errors">Errors by endpoint (error, datetime, endpoint)</label>
+            <textarea id="errors" rows="15" cols="50"></textarea>
+        </div>
+    </fieldset>
+
+    <script type="text/javascript">
+        function onHomeyReady(Homey) {
+            var startOfStatsElement = document.getElementById('startOfStats');
+            var totalInvocationsElement = document.getElementById('totalInvocations');
+            var invocationsElement = document.getElementById('invocations');
+            var errorsElement = document.getElementById('errors');
+
+            Homey.get('startOfStats', function (err, data) {
+                if (err) return Homey.alert(err);
+                startOfStatsElement.value = data;
+            });
+            Homey.get('totalInvocations', function (err, data) {
+                if (err) return Homey.alert(err);
+                totalInvocationsElement.value = data;
+            });
+            Homey.get('invocations', function (err, data) {
+                if (err) return Homey.alert(err);
+                invocationsElement.value = data;
+            });
+            Homey.get('errors', function (err, data) {
+                if (err) return Homey.alert(err);
+                errorsElement.value = data;
+            });
+
+            // Tell Homey we're ready to be displayed
+            Homey.ready();
+        }
+    </script>
+
+</body>
+
+</html>

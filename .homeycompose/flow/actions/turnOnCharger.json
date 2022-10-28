@@ -5,6 +5,10 @@
         "en": "Turn on",
         "sv": "Aktivera"
     },
+    "hint": {
+        "en": "Triggers start charging, if not successful then automatically triggers resume charging.",
+        "sv": "Startar laddningen, om detta inte fungerar så skickas även kommandot återuppta laddningen automatiskt."
+    },
     "args": [
         {
             "type": "device",

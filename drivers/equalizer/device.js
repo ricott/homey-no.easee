@@ -100,7 +100,7 @@ class EqualizerDevice extends Homey.Device {
             accessToken: this.getToken().accessToken,
             appVersion: this.homey.app.getAppVersion()
         };
-        return new Easee(options);
+        return new Easee(options, this.homey.app.getStats());
     }
 
     updateEqualizerConfig() {
