@@ -1381,6 +1381,15 @@
               "value": ""
             },
             {
+              "id": "maxChargerCurrent",
+              "type": "label",
+              "label": {
+                "en": "Max charger current (A)",
+                "sv": "Laddarens högsta laddström (A)"
+              },
+              "value": ""
+            },
+            {
               "id": "offlineChargingMode",
               "type": "label",
               "label": {

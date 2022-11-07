@@ -320,7 +320,8 @@ class ChargerDevice extends Homey.Device {
                     phaseMode: enums.decodePhaseMode(config.phaseMode),
                     nodeType: enums.decodeNodeType(config.localNodeType),
                     detectedPowerGridType: enums.decodePowerGridType(config.detectedPowerGridType),
-                    offlineChargingMode: enums.decodeOfflineChargingModeType(config.offlineChargingMode)
+                    offlineChargingMode: enums.decodeOfflineChargingModeType(config.offlineChargingMode),
+                    maxChargerCurrent: `${config.maxChargerCurrent}`
                 }).catch(err => {
                     self.error(`Failed to update config settings`, err);
                 });
@@ -378,6 +379,8 @@ class ChargerDevice extends Homey.Device {
                     } else {
                         self._updateProperty('onoff', false);
                     }
+
+                    //dynamicChargerCurrent
 
                 } catch (error) {
                     self.logError(error);
@@ -462,6 +465,8 @@ class ChargerDevice extends Homey.Device {
                         self.error('Failed to update capability options', err);
                     });
                 }
+
+                //circuitFuse, maxChargerCurrent, max curcuit limit, circuit limit fallback, dynamic charger limit
 
             }).catch(reason => {
                 self.logError(reason);
