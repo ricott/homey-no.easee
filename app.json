@@ -1143,7 +1143,7 @@
           "sv": "Stäng av"
         },
         "hint": {
-          "en": "Triggers stop charging, if not successful then automatically triggers pause charging.",
+          "en": "Triggers stop charging, if not successful then automatically trigger pause charging.",
           "sv": "Stoppar laddningen, om detta inte fungerar så skickas även kommandot pausa laddningen automatiskt."
         },
         "args": [
