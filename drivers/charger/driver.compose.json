@@ -23,6 +23,7 @@
         "measure_charge.last_month",
         "onoff",
         "locked",
+        "target_charger_current",
         "target_circuit_current",
         "button.reconnect",
         "button.organize"

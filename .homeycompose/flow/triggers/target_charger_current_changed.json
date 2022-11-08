@@ -1,0 +1,29 @@
+{
+    "id": "target_charger_current_changed",
+    "title": {
+        "en": "Target charger dynamic current changed",
+        "sv": "Laddarens dynamiska maxström ändrades"
+    },
+    "titleFormatted": {
+        "en": "Target charger dynamic current changed",
+        "sv": "Laddarens dynamiska maxström ändrades"
+    },
+    "tokens": [
+        {
+            "name": "target_charger_current",
+            "type": "number",
+            "title": {
+                "en": "Charger dynamic current",
+                "sv": "Laddarens dynamiska maxström"
+            },
+            "example": 16
+        }
+    ],
+    "args": [
+      {
+        "type": "device",
+        "name": "device",
+        "filter": "driver_id=charger"
+      }
+    ]
+}

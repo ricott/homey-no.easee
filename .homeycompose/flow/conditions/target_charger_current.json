@@ -1,12 +1,12 @@
 {
-    "id": "target_circuit_current_condition",
+    "id": "target_charger_current_condition",
     "title": {
-        "en": "Target circuit current is !{{|not}}",
-        "sv": "Kretsens ström är !{{|inte}}"
+        "en": "Target charger dynamic current is !{{|not}}",
+        "sv": "Laddarens dynamiska laddström är !{{|inte}}"
     },
     "titleFormatted": {
-        "en": "Target circuit current is !{{|not}} [[conditionType]] [[current]]",
-        "sv": "Kretsens ström är !{{|inte}} [[conditionType]] [[current]]"
+        "en": "Target charger dynamic current is !{{|not}} [[conditionType]] [[current]]",
+        "sv": "Laddarens dynamiska laddström är !{{|inte}} [[conditionType]] [[current]]"
     },
     "args": [
         {

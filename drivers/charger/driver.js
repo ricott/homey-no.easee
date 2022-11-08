@@ -27,7 +27,7 @@ class ChargerDriver extends Homey.Driver {
         this.log('Registering flows');
         //Triggers
         //This trigger is triggered automatically by homey when capability value changes
-        this.homey.flow.getDeviceTriggerCard('target_circuit_current_changed');
+        this.homey.flow.getDeviceTriggerCard('target_charger_current_changed');
         this.homey.flow.getDeviceTriggerCard('onoff_true');
         this.homey.flow.getDeviceTriggerCard('onoff_false');
 
@@ -67,14 +67,14 @@ class ChargerDriver extends Homey.Driver {
             }
         );
 
-        const target_circuit_current_condition = this.homey.flow.getConditionCard('target_circuit_current_condition');
-        target_circuit_current_condition.registerRunListener(async (args, state) => {
-            //this.log(`[${args.device.getName()}] Condition 'target_circuit_current_condition' triggered`);
-            const current = args.device.getCapabilityValue('target_circuit_current');
+        const target_charger_current_condition = this.homey.flow.getConditionCard('target_charger_current_condition');
+        target_charger_current_condition.registerRunListener(async (args, state) => {
+            //this.log(`[${args.device.getName()}] Condition 'target_charger_current_condition' triggered`);
+            const current = args.device.getCapabilityValue('target_charger_current');
 
             return conditionHandler.evaluateNumericCondition(args.conditionType.id, args.current, current);
         });
-        target_circuit_current_condition.registerArgumentAutocompleteListener('conditionType',
+        target_charger_current_condition.registerArgumentAutocompleteListener('conditionType',
             async (query, args) => {
                 return conditionHandler.getNumberConditions();
             }
@@ -433,6 +433,18 @@ class ChargerDriver extends Homey.Driver {
                 });
         });
 
+        const setDynamicChargerCurrent = this.homey.flow.getActionCard('setDynamicChargerCurrent');
+        setDynamicChargerCurrent.registerRunListener(async (args) => {
+            this.log(`[${args.device.getName()}] Action 'setDynamicChargerCurrent' triggered`);
+            this.log(`[${args.device.getName()}] - current: '${args.current}'`);
+
+            return args.device.setDynamicChargerCurrent(args.current)
+                .then(function (result) {
+                    return Promise.resolve(true);
+                }).catch(reason => {
+                    return Promise.reject(`Failed to set charger dynamic current. Reason: ${reason.message}`);
+                });
+        });
     }
 
     async onPair(session) {

@@ -167,6 +167,15 @@
                     "sv": "Partner"
                 },
                 "value": ""
+            },
+            {
+                "id": "authorizationRequired",
+                "type": "label",
+                "label": {
+                    "en": "Authorization required",
+                    "sv": "Auktorisering krävs"
+                },
+                "value": ""
             }
         ]
     },

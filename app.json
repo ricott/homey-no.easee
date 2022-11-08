@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "no.easee",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "brandColor": "#323232",
   "compatibility": ">=7.4.0",
   "sdk": 3,
@@ -231,22 +231,22 @@
         ]
       },
       {
-        "id": "target_circuit_current_changed",
+        "id": "target_charger_current_changed",
         "title": {
-          "en": "Target circuit current changed",
-          "sv": "Kretsens ström ändrades"
+          "en": "Target charger dynamic current changed",
+          "sv": "Laddarens dynamiska maxström ändrades"
         },
         "titleFormatted": {
-          "en": "Target circuit current changed",
-          "sv": "Kretsens ström ändrades"
+          "en": "Target charger dynamic current changed",
+          "sv": "Laddarens dynamiska maxström ändrades"
         },
         "tokens": [
           {
-            "name": "target_circuit_current",
+            "name": "target_charger_current",
             "type": "number",
             "title": {
-              "en": "Circuit current",
-              "sv": "Kretsens ström"
+              "en": "Charger dynamic current",
+              "sv": "Laddarens dynamiska maxström"
             },
             "example": 16
           }
@@ -378,14 +378,14 @@
         ]
       },
       {
-        "id": "target_circuit_current_condition",
+        "id": "target_charger_current_condition",
         "title": {
-          "en": "Target circuit current is !{{|not}}",
-          "sv": "Kretsens ström är !{{|inte}}"
+          "en": "Target charger dynamic current is !{{|not}}",
+          "sv": "Laddarens dynamiska laddström är !{{|inte}}"
         },
         "titleFormatted": {
-          "en": "Target circuit current is !{{|not}} [[conditionType]] [[current]]",
-          "sv": "Kretsens ström är !{{|inte}} [[conditionType]] [[current]]"
+          "en": "Target charger dynamic current is !{{|not}} [[conditionType]] [[current]]",
+          "sv": "Laddarens dynamiska laddström är !{{|inte}} [[conditionType]] [[current]]"
         },
         "args": [
           {
@@ -1064,6 +1064,41 @@
         ]
       },
       {
+        "id": "setDynamicChargerCurrent",
+        "title": {
+          "en": "Set dynamic charger current",
+          "sv": "Sätt laddarens dynamiska laddström"
+        },
+        "titleFormatted": {
+          "en": "Set dynamic charger current to [[current]]",
+          "sv": "Sätt laddarens dynamiska laddström till [[current]]"
+        },
+        "hint": {
+          "en": "",
+          "sv": ""
+        },
+        "args": [
+          {
+            "name": "current",
+            "type": "range",
+            "title": {
+              "en": "Current",
+              "sv": "Ström"
+            },
+            "min": 0,
+            "max": 40,
+            "step": 1,
+            "label": "A",
+            "labelDecimals": 0
+          },
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+          }
+        ]
+      },
+      {
         "id": "setMaxChargerCurrent",
         "title": {
           "en": "Set max charger current",
@@ -1201,6 +1236,7 @@
         "measure_charge.last_month",
         "onoff",
         "locked",
+        "target_charger_current",
         "target_circuit_current",
         "button.reconnect",
         "button.organize"
@@ -1467,6 +1503,15 @@
               "label": {
                 "en": "Partner",
                 "sv": "Partner"
+              },
+              "value": ""
+            },
+            {
+              "id": "authorizationRequired",
+              "type": "label",
+              "label": {
+                "en": "Authorization required",
+                "sv": "Auktorisering krävs"
               },
               "value": ""
             }
@@ -1783,6 +1828,30 @@
       "uiComponent": "toggle",
       "uiQuickAction": false
     },
+    "target_charger_current": {
+      "title": {
+        "en": "Dynamic charger current",
+        "sv": "Laddarens dynamiska ström"
+      },
+      "type": "number",
+      "desc": {
+        "en": "Set the dynamic charger current. The max value is adjusted to the max charger current.",
+        "sv": "Sätt laddarens dynamiska ström. Maxvärdet sätts till laddarens max ström."
+      },
+      "min": 0,
+      "max": 40,
+      "decimals": 0,
+      "step": 1,
+      "units": {
+        "en": "A",
+        "sv": "A"
+      },
+      "setable": true,
+      "getable": true,
+      "insights": true,
+      "uiComponent": "slider",
+      "chartType": "stepLine"
+    },
     "target_circuit_current": {
       "title": {
         "en": "Dynamic circuit current",
@@ -1804,7 +1873,7 @@
       "setable": true,
       "getable": true,
       "insights": true,
-      "uiComponent": "slider",
+      "uiComponent": null,
       "chartType": "stepLine"
     }
   }

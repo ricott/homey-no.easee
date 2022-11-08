@@ -20,6 +20,7 @@ const deviceCapabilitesList = [
     'measure_charge',
     'measure_charge.last_month',
     'onoff',
+    'target_charger_current',
     'target_circuit_current'
 ];
 
@@ -40,7 +41,7 @@ class ChargerDevice extends Homey.Device {
         this.pollIntervals = [];
         this.tokenManager = TokenManager;
 
-        this.setupCapabilities();
+        await this.setupCapabilities();
 
         if (!this.homey.settings.get(`${this.getData().id}.username`)) {
             //This is a newly added device, lets copy login details to homey settings
@@ -58,6 +59,7 @@ class ChargerDevice extends Homey.Device {
                 self.updateChargerStatistics();
                 self.getSemiStaticChargerConfig();
                 self.getChargerState();
+                self.getDynamicCurrent();
                 self._initilializeTimers();
             }).catch(reason => {
                 self.logMessage(reason);
@@ -89,6 +91,17 @@ class ChargerDevice extends Homey.Device {
             //Adjust dynamic current to be <= circuit fuse
             const newCurrent = Math.min(this.getSettings().circuitFuse, current);
             await this.setDynamicCurrentPerPhase(newCurrent, newCurrent, newCurrent)
+                .catch(reason => {
+                    let defaultMsg = 'Failed to set dynamic circuit current!';
+                    return Promise.reject(new Error(this.createFriendlyErrorMsg(reason, defaultMsg)));
+                });
+        });
+
+        this.registerCapabilityListener("target_charger_current", async (current) => {
+            this.logMessage(`Set dynamic charger current to '${current}'`);
+            //Adjust dynamic current to be <= max charger current
+            const newCurrent = Math.min(this.getSettings().maxChargerCurrent, current);
+            await this.setDynamicChargerCurrent(newCurrent)
                 .catch(reason => {
                     let defaultMsg = 'Failed to set dynamic circuit current!';
                     return Promise.reject(new Error(this.createFriendlyErrorMsg(reason, defaultMsg)));
@@ -136,22 +149,22 @@ class ChargerDevice extends Homey.Device {
         this.setStoreValue('tokens', tokens);
     }
 
-    removeCapabilityHelper(capability) {
+    async removeCapabilityHelper(capability) {
         if (this.hasCapability(capability)) {
             try {
                 this.logMessage(`Remove existing capability '${capability}'`);
-                this.removeCapability(capability);
+                await this.removeCapability(capability);
             } catch (reason) {
                 this.error(`Failed to removed capability '${capability}'`);
                 this.error(reason);
             }
         }
     }
-    addCapabilityHelper(capability) {
+    async addCapabilityHelper(capability) {
         if (!this.hasCapability(capability)) {
             try {
                 this.logMessage(`Adding missing capability '${capability}'`);
-                this.addCapability(capability);
+                await this.addCapability(capability);
             } catch (reason) {
                 this.error(`Failed to add capability '${capability}'`);
                 this.error(reason);
@@ -159,41 +172,41 @@ class ChargerDevice extends Homey.Device {
         }
     }
 
-    setupCapabilities() {
+    async setupCapabilities() {
         this.logMessage('Setting up capabilities');
 
         //Add and remove capabilities as part of upgrading a device
-        this.removeCapabilityHelper('measure_charge.lifetime');
-        this.removeCapabilityHelper('connected');
-        this.removeCapabilityHelper('current_used');
-        this.removeCapabilityHelper('threePhase');
-        this.removeCapabilityHelper('locked');
+        await this.addCapabilityHelper('onoff');
+        await this.addCapabilityHelper('target_circuit_current');
+        await this.addCapabilityHelper('target_charger_current');
 
-        this.addCapabilityHelper('enabled');
-        this.addCapabilityHelper('button.organize');
-        this.addCapabilityHelper('button.reconnect');
-        this.addCapabilityHelper('measure_current.p1');
-        this.addCapabilityHelper('measure_current.p2');
-        this.addCapabilityHelper('measure_current.p3');
-        this.addCapabilityHelper('meter_power.lastCharge');
-        this.addCapabilityHelper('meter_power');
+        await this.removeCapabilityHelper('measure_charge.lifetime');
+        await this.removeCapabilityHelper('connected');
+        await this.removeCapabilityHelper('current_used');
+        await this.removeCapabilityHelper('threePhase');
+        await this.removeCapabilityHelper('locked');
 
-        //Upgrade device, add new capabilities v1.4.8
-        this.addCapabilityHelper('onoff');
-        this.addCapabilityHelper('target_circuit_current');
+        await this.addCapabilityHelper('enabled');
+        await this.addCapabilityHelper('button.organize');
+        await this.addCapabilityHelper('button.reconnect');
+        await this.addCapabilityHelper('measure_current.p1');
+        await this.addCapabilityHelper('measure_current.p2');
+        await this.addCapabilityHelper('measure_current.p3');
+        await this.addCapabilityHelper('meter_power.lastCharge');
+        await this.addCapabilityHelper('meter_power');
 
         let capability = 'measure_charge';
         if (!this.hasCapability(capability) && this.getSetting('showLast30daysStats')) {
-            this.addCapabilityHelper(capability);
+            await this.addCapabilityHelper(capability);
         } else if (this.hasCapability(capability) && !this.getSetting('showLast30daysStats')) {
-            this.removeCapabilityHelper(capability);
+            await this.removeCapabilityHelper(capability);
         }
 
         capability = 'measure_charge.last_month';
         if (!this.hasCapability(capability) && this.getSetting('showLastMonthStats')) {
-            this.addCapabilityHelper(capability);
+            await this.addCapabilityHelper(capability);
         } else if (this.hasCapability(capability) && !this.getSetting('showLastMonthStats')) {
-            this.removeCapabilityHelper(capability);
+            await this.removeCapabilityHelper(capability);
         }
     }
 
@@ -321,10 +334,22 @@ class ChargerDevice extends Homey.Device {
                     nodeType: enums.decodeNodeType(config.localNodeType),
                     detectedPowerGridType: enums.decodePowerGridType(config.detectedPowerGridType),
                     offlineChargingMode: enums.decodeOfflineChargingModeType(config.offlineChargingMode),
-                    maxChargerCurrent: `${config.maxChargerCurrent}`
+                    maxChargerCurrent: `${config.maxChargerCurrent}`,
+                    authorizationRequired: config.authorizationRequired ? 'Yes' : 'No'
                 }).catch(err => {
                     self.error(`Failed to update config settings`, err);
                 });
+
+                //Adjust the max value of the target charger current slider based on the 
+                //max charger current
+                if (self.getCapabilityOptions('target_charger_current').max != config.maxChargerCurrent) {
+                    self.logMessage(`Updating 'target_charger_current' max value to '${config.maxChargerCurrent}'`);
+                    self.setCapabilityOptions('target_charger_current', {
+                        max: config.maxChargerCurrent,
+                    }).catch(err => {
+                        self.error('Failed to update target_charger_current capability options', err);
+                    });
+                }
 
             }).catch(reason => {
                 self.logError(reason);
@@ -380,7 +405,8 @@ class ChargerDevice extends Homey.Device {
                         self._updateProperty('onoff', false);
                     }
 
-                    //dynamicChargerCurrent
+                    const dynamicChargerCurrent = Math.min(self.getSettings().maxChargerCurrent, state.dynamicChargerCurrent);
+                    self._updateProperty('target_charger_current', dynamicChargerCurrent);
 
                 } catch (error) {
                     self.logError(error);
@@ -465,8 +491,6 @@ class ChargerDevice extends Homey.Device {
                         self.error('Failed to update capability options', err);
                     });
                 }
-
-                //circuitFuse, maxChargerCurrent, max curcuit limit, circuit limit fallback, dynamic charger limit
 
             }).catch(reason => {
                 self.logError(reason);
@@ -680,6 +704,18 @@ class ChargerDevice extends Homey.Device {
             });
     }
 
+    setDynamicChargerCurrent(current) {
+        let self = this;
+        self.logMessage(`Setting dynamic charger current to '${current}'`);
+        return self.createEaseeChargerClient().setDynamicChargerCurrent(self.getData().id, current)
+            .then(function (result) {
+                return Promise.resolve(result);
+            }).catch(reason => {
+                self.logError(reason);
+                return Promise.reject(reason);
+            });
+    }
+
     setMaxChargerCurrent(current) {
         let self = this;
         self.logMessage(`Setting charger max current to '${current}'`);
@@ -791,12 +827,12 @@ class ChargerDevice extends Homey.Device {
         //Update semi static config
         this.pollIntervals.push(setInterval(() => {
             this.getSemiStaticChargerConfig();
+            this.getDynamicCurrent();
         }, 60 * 1000 * 60));
 
         //Update state
         this.pollIntervals.push(setInterval(() => {
             this.getChargerState();
-            this.getDynamicCurrent();
         }, 30 * 1000));
 
         //Update once per day for the sake of it

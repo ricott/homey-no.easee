@@ -1,7 +1,7 @@
 {
-    "1.5.2": {
-        "en": "It is now possible to start and stop charging, and control the dynamic circuit current through new capabilities",
-        "sv": "Det är nu möjligt att starta och stopp laddning samt att sätta kretsens dynamiska ström via nya egenskaper"
+    "1.5.3": {
+        "en": "It is now possible to start and stop charging, and control the dynamic charger current through new capabilities",
+        "sv": "Det är nu möjligt att starta och stopp laddning samt att sätta laddarens dynamiska ström via nya egenskaper"
     },
     "1.4.7": {
         "en": "New When card for charger status changed",
@@ -89,29 +89,5 @@
     },
     "1.0.4": {
         "en": "Major rewrite of the app to use the Easee streaming API. New capabilities and actions added."
-    },
-    "0.9.8": {
-        "en": "Added last month kWh usage, and settings to enable/disable statistics fields"
-    },
-    "0.9.7": {
-        "en": "Added last charge session kWh and last 30 days kWh capabilities"
-    },
-    "0.9.6": {
-        "en": "Added missing statuses in condition"
-    },
-    "0.9.5": {
-        "en": "Added missing enumerations from Easee new public docs"
-    },
-    "0.9.4": {
-        "en": "Removed possibility to force charger to refresh all properties"
-    },
-    "0.9.3": {
-        "en": "New action for enabling and disabling the charger"
-    },
-    "0.9.2": {
-        "en": "Improved access token management"
-    },
-    "0.9.1": {
-        "en": "Beta version"
     }
 }

@@ -1,0 +1,24 @@
+{
+    "title": {
+        "en": "Dynamic charger current",
+        "sv": "Laddarens dynamiska ström"
+    },
+    "type": "number",
+    "desc": {
+        "en": "Set the dynamic charger current. The max value is adjusted to the max charger current.",
+        "sv": "Sätt laddarens dynamiska ström. Maxvärdet sätts till laddarens max ström."
+    },
+    "min": 0,
+    "max": 40,
+    "decimals": 0,
+    "step": 1,
+    "units": {
+        "en": "A",
+        "sv": "A"
+    },
+    "setable": true,
+    "getable": true,
+    "insights": true,
+    "uiComponent": "slider",
+    "chartType": "stepLine"
+}

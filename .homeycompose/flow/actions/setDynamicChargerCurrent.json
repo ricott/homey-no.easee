@@ -1,0 +1,35 @@
+{
+    "id": "setDynamicChargerCurrent",
+    "title": {
+        "en": "Set dynamic charger current",
+        "sv": "Sätt laddarens dynamiska laddström"
+    },
+    "titleFormatted": {
+        "en": "Set dynamic charger current to [[current]]",
+        "sv": "Sätt laddarens dynamiska laddström till [[current]]"
+    },
+    "hint": {
+        "en": "",
+        "sv": ""
+    },
+    "args": [
+        {
+            "name": "current",
+            "type": "range",
+            "title": {
+                "en": "Current",
+                "sv": "Ström"
+            },
+            "min": 0,
+            "max": 40,
+            "step": 1,
+            "label": "A",
+            "labelDecimals": 0
+        },
+        {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+        }
+    ]
+}
