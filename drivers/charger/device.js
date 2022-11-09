@@ -103,7 +103,7 @@ class ChargerDevice extends Homey.Device {
             const newCurrent = Math.min(this.getSettings().maxChargerCurrent, current);
             await this.setDynamicChargerCurrent(newCurrent)
                 .catch(reason => {
-                    let defaultMsg = 'Failed to set dynamic circuit current!';
+                    let defaultMsg = 'Failed to set dynamic charger current!';
                     return Promise.reject(new Error(this.createFriendlyErrorMsg(reason, defaultMsg)));
                 });
         });
@@ -249,10 +249,12 @@ class ChargerDevice extends Homey.Device {
         let errMsg = baseMsg;
         if (reason.message.startsWith('Access token')) {
             errMsg = 'Access token expired';
-        } else if (reason.message.startsWith('Easee Cloud')) {
-            errMsg = `${errMsg} ${reason.message}`;
+        //} else if (reason.message.startsWith('Easee Cloud')) {
+        //    errMsg = `${errMsg} ${reason.message}`;
         } else if (reason.message.indexOf('rate limit') > -1) {
             errMsg = 'The Easee Cloud API rejected the call due to a rate limit';
+        } else {
+            errMsg = `${errMsg} ${reason.message}`;
         }
 
         return errMsg;

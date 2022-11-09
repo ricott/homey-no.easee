@@ -9,8 +9,8 @@
         "sv": "Sätt laddarens dynamiska laddström till [[current]]"
     },
     "hint": {
-        "en": "",
-        "sv": ""
+        "en": "Controls the charger current. Setting to less than ~7A will stop charging. Setting to higher than ~6A will start charging. If access is locked then the charger still needs to be turned on to start charging.",
+        "sv": "Kontrollera laddarens laddström. Sätts den till minre än ~7A så stannar pågående laddning. Sätts den till mer än ~6A så startas laddning. Om access är låst så måste laddaren också aktiveras för att laddning skall starta."
     },
     "args": [
         {
