@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "no.easee",
-  "version": "1.5.4",
+  "version": "1.5.5",
   "brandColor": "#323232",
   "compatibility": ">=7.4.0",
   "sdk": 3,
@@ -542,8 +542,8 @@
               "en": "Current",
               "sv": "Ström"
             },
-            "min": 1,
-            "max": 32,
+            "min": 0,
+            "max": 40,
             "step": 1,
             "label": " A",
             "labelDecimals": 0
@@ -578,7 +578,7 @@
               "sv": "Ström L1"
             },
             "min": 0,
-            "max": 32,
+            "max": 40,
             "step": 1,
             "label": " A",
             "labelDecimals": 0
@@ -591,7 +591,7 @@
               "sv": "Ström L2"
             },
             "min": 0,
-            "max": 32,
+            "max": 40,
             "step": 1,
             "label": " A",
             "labelDecimals": 0
@@ -604,7 +604,7 @@
               "sv": "Ström L3"
             },
             "min": 0,
-            "max": 32,
+            "max": 40,
             "step": 1,
             "label": " A",
             "labelDecimals": 0

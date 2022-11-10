@@ -21,8 +21,8 @@
                 "en": "Current",
                 "sv": "Ström"
             },
-            "min": 1,
-            "max": 32,
+            "min": 0,
+            "max": 40,
             "step": 1,
             "label": " A",
             "labelDecimals": 0

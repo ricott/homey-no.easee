@@ -88,9 +88,7 @@ class ChargerDevice extends Homey.Device {
 
         this.registerCapabilityListener("target_circuit_current", async (current) => {
             this.logMessage(`Set dynamic circuit current to '${current}'`);
-            //Adjust dynamic current to be <= circuit fuse
-            const newCurrent = Math.min(this.getSettings().circuitFuse, current);
-            await this.setDynamicCurrentPerPhase(newCurrent, newCurrent, newCurrent)
+            await this.setDynamicCurrentPerPhase(current, current, current)
                 .catch(reason => {
                     let defaultMsg = 'Failed to set dynamic circuit current!';
                     return Promise.reject(new Error(this.createFriendlyErrorMsg(reason, defaultMsg)));
@@ -249,8 +247,6 @@ class ChargerDevice extends Homey.Device {
         let errMsg = baseMsg;
         if (reason.message.startsWith('Access token')) {
             errMsg = 'Access token expired';
-        //} else if (reason.message.startsWith('Easee Cloud')) {
-        //    errMsg = `${errMsg} ${reason.message}`;
         } else if (reason.message.indexOf('rate limit') > -1) {
             errMsg = 'The Easee Cloud API rejected the call due to a rate limit';
         } else {
@@ -483,19 +479,21 @@ class ChargerDevice extends Homey.Device {
                     self.error('Failed to update site settings', err);
                 });
 
-                //Adjust the max value of the target curcuit current slider based on the 
-                //registered curcuit fuse size
-                if (self.getCapabilityOptions('target_circuit_current').max != circuitFuse) {
-                    self.logMessage(`Updating 'target_circuit_current' max value to '${circuitFuse}'`);
-                    self.setCapabilityOptions('target_circuit_current', {
-                        max: circuitFuse,
-                    }).catch(err => {
-                        self.error('Failed to update capability options', err);
-                    });
-                }
-
             }).catch(reason => {
                 self.logError(reason);
+            }).finally(() => {
+                if (!isInt(self.getSetting('siteId')) || !isInt(self.getSetting('circuitId'))) {
+                    //We failed to set circuitId and/or siteId and we have no previous values
+                    self.setUnavailable('Failed to retrieve site id and circuit id from Easee Cloud. Please restart the app to retry.')
+                        .catch(err => {
+                            self.error('Failed to make device unavailable', err);
+                        });
+                } else {
+                    self.setAvailable()
+                        .catch(err => {
+                            self.error('Failed to make device available', err);
+                        });
+                }
             });
 
         client.getChargerDetails(self.getData().id)
@@ -944,6 +942,10 @@ class ChargerDevice extends Homey.Device {
 // sleep time expects milliseconds
 function sleep(time) {
     return new Promise((resolve) => setTimeout(resolve, time));
+}
+
+function isInt(value) {
+    return !isNaN(value) && (function (x) { return (x | 0) === x; })(parseFloat(value))
 }
 
 module.exports = ChargerDevice;
