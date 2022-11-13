@@ -340,13 +340,16 @@ class ChargerDevice extends Homey.Device {
 
                 //Adjust the max value of the target charger current slider based on the 
                 //max charger current
-                if (self.getCapabilityOptions('target_charger_current').max != config.maxChargerCurrent) {
-                    self.logMessage(`Updating 'target_charger_current' max value to '${config.maxChargerCurrent}'`);
-                    self.setCapabilityOptions('target_charger_current', {
-                        max: config.maxChargerCurrent,
-                    }).catch(err => {
-                        self.error('Failed to update target_charger_current capability options', err);
-                    });
+                const capability = 'target_charger_current';
+                if (self.hasCapability(capability)) {
+                    if (self.getCapabilityOptions(capability).max != config.maxChargerCurrent) {
+                        self.logMessage(`Updating '${capability}' max value to '${config.maxChargerCurrent}'`);
+                        self.setCapabilityOptions(capability, {
+                            max: config.maxChargerCurrent,
+                        }).catch(err => {
+                            self.error(`Failed to update ${capability} capability options`, err);
+                        });
+                    }
                 }
 
             }).catch(reason => {
