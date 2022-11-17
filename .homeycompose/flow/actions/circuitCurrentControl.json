@@ -22,7 +22,7 @@
                 "sv": "Ström"
             },
             "min": 0,
-            "max": 40,
+            "max": 64,
             "step": 1,
             "label": " A",
             "labelDecimals": 0

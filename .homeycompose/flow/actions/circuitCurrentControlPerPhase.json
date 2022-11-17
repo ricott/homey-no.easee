@@ -21,7 +21,7 @@
                 "sv": "Ström L1"
             },
             "min": 0,
-            "max": 40,
+            "max": 64,
             "step": 1,
             "label": " A",
             "labelDecimals": 0
@@ -34,7 +34,7 @@
                 "sv": "Ström L2"
             },
             "min": 0,
-            "max": 40,
+            "max": 64,
             "step": 1,
             "label": " A",
             "labelDecimals": 0
@@ -47,7 +47,7 @@
                 "sv": "Ström L3"
             },
             "min": 0,
-            "max": 40,
+            "max": 64,
             "step": 1,
             "label": " A",
             "labelDecimals": 0
