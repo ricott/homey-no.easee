@@ -362,9 +362,9 @@ class ChargerDevice extends Homey.Device {
         self.getDynamicCircuitCurrent()
             .then(function (current) {
 
-                //Make sure we don't set a value higher than what is allowed
+                //Make sure we don't set a value higher than what is possible
                 let targetCurrent = Math.max(current.phase1, current.phase2, current.phase3);
-                targetCurrent = Math.min(self.getSettings().circuitFuse, targetCurrent);
+                targetCurrent = Math.min(self.getCapabilityOptions('target_circuit_current').max, targetCurrent);
 
                 try {
                     self._updateProperty('target_circuit_current', targetCurrent);
