@@ -1,4 +1,8 @@
 {
+    "1.5.7": {
+        "en": "Added retry for 404 errors from the Easee API",
+        "sv": "Appen försöker igen om den får ett 404 fel från API"
+    },
     "1.5.6": {
         "en": "Incread max target circuit current to 64A",
         "sv": "Ökade max elkrets ström till 64A"
