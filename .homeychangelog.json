@@ -1,4 +1,8 @@
 {
+    "1.5.8": {
+        "en": "Bugfix for null error when adding a charger and Easee returns null instead of an empty circuits array",
+        "sv": "Buggfix för null fel när man lägger till en laddare och Easee returnerar null istället för en tom circuits array"
+    },
     "1.5.7": {
         "en": "Added retry for 404 errors from the Easee API",
         "sv": "Appen försöker igen om den får ett 404 fel från API"
