@@ -1,4 +1,8 @@
 {
+    "1.5.9": {
+        "en": "Extended retires for the Easee commands API endpoint",
+        "sv": "Utökat antalet försök vid anrop till Easee commands API"
+    },
     "1.5.8": {
         "en": "Bugfix for null error when adding a charger and Easee returns null instead of an empty circuits array",
         "sv": "Buggfix för null fel när man lägger till en laddare och Easee returnerar null istället för en tom circuits array"
