@@ -59,7 +59,8 @@ class ChargerDevice extends Homey.Device {
                 self.updateChargerStatistics();
                 self.getSemiStaticChargerConfig();
                 self.getChargerState();
-                self.getDynamicCurrent();
+                //We have a race condition here, lets skip reading the dynamic current upon startup and do it using timer
+                //self.getDynamicCurrent();
                 self._initilializeTimers();
             }).catch(reason => {
                 self.logMessage(reason);
@@ -470,10 +471,10 @@ class ChargerDevice extends Homey.Device {
         self.logMessage('Getting charger site info');
         const client = self.createEaseeChargerClient();
         client.getSiteInfo(self.getData().id)
-            .then(function (site) {
+            .then(async function (site) {
                 const circuitFuse = Math.round(site.circuits[0].ratedCurrent);
 
-                self.setSettings({
+                await self.setSettings({
                     mainFuse: `${Math.round(site.ratedCurrent)}`,
                     circuitFuse: `${circuitFuse}`,
                     siteId: `${site.circuits[0].siteId}`,
