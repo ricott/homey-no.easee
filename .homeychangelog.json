@@ -1,4 +1,8 @@
 {
+    "1.6.0": {
+        "en": "Return the proper error message when max number of retries is reach for the Easee commands API",
+        "sv": "Returnera det korrekta felmeddelandet när max antal försök uppnåtts vid anrop till Easse commands API"
+    },
     "1.5.9": {
         "en": "Extended retires for the Easee commands API endpoint",
         "sv": "Utökat antalet försök vid anrop till Easee commands API"

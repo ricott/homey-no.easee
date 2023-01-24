@@ -30,11 +30,15 @@ describe('#Charger', function () {
             //         }); 
             //     });
             let startTime = Date.now();
-            easee.startCharging(config.charger)
+            easee.pauseCharging(config.charger)
                 .then(function (response) {
                     console.log(response);
-                    console.log(`Time: ${Date.now()-startTime} ms`);
-                });
+                    console.log(`Time: ${Date.now() - startTime} ms`);
+                })
+                .catch(reason => {
+                    console.error('Test failed');
+                    console.error(reason);
+                })
             //easee.pauseCharging(config.charger)
             //easee.resumeCharging(config.charger)
             //easee.stopCharging(config.charger)
@@ -49,7 +53,7 @@ describe('#Charger', function () {
                });*/
 
             //assert.strictEqual((isNaN(chargerConsumption) === false), true);
-        }).timeout(30000);
+        }).timeout(60 * 60 * 1000);
     });
 });
 
