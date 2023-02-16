@@ -1,4 +1,8 @@
 {
+    "1.6.1": {
+        "en": "Fixed small technical bug related to logging",
+        "sv": "Buggfix för tekniskt fel relaterat till loggning"
+    },
     "1.6.0": {
         "en": "Return the proper error message when max number of retries is reach for the Easee commands API",
         "sv": "Returnera det korrekta felmeddelandet när max antal försök uppnåtts vid anrop till Easse commands API"

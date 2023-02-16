@@ -1,7 +1,7 @@
 'use strict';
 const util = require('util');
 const { App } = require('homey');
-const Stats = require('../../lib/stats.js');
+const Stats = require('./lib/stats.js');
 
 class EaseeApp extends App {
 	async onInit() {
