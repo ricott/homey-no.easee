@@ -22,13 +22,15 @@
         "measure_charge",
         "measure_charge.last_month",
         "onoff",
-        "locked",
         "target_charger_current",
         "target_circuit_current",
         "button.reconnect",
         "button.organize"
     ],
     "capabilitiesOptions": {
+        "target_circuit_current": {
+            "max": 40
+        },
         "measure_current.offered": {
             "title": {
                 "en": "Current allocated",

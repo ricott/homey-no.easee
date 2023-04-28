@@ -55,12 +55,9 @@ class ChargerDevice extends Homey.Device {
             .then(function (tokens) {
                 self.setToken(tokens);
 
+                self.refreshChargerSettings();
                 self.updateChargerSiteInfo();
                 self.updateChargerStatistics();
-                self.getSemiStaticChargerConfig();
-                self.getChargerState();
-                //We have a race condition here, lets skip reading the dynamic current upon startup and do it using timer
-                //self.getDynamicCurrent();
                 self._initilializeTimers();
             }).catch(reason => {
                 self.logMessage(reason);
@@ -68,7 +65,7 @@ class ChargerDevice extends Homey.Device {
     }
 
     async setupCapabilityListeners() {
-        this.registerCapabilityListener("onoff", async (value) => {
+        this.registerCapabilityListener('onoff', async (value) => {
             if (value) {
                 //Start
                 await this.startCharging()
@@ -87,7 +84,7 @@ class ChargerDevice extends Homey.Device {
             }
         });
 
-        this.registerCapabilityListener("target_circuit_current", async (current) => {
+        this.registerCapabilityListener('target_circuit_current', async (current) => {
             this.logMessage(`Set dynamic circuit current to '${current}'`);
             await this.setDynamicCurrentPerPhase(current, current, current)
                 .catch(reason => {
@@ -96,7 +93,7 @@ class ChargerDevice extends Homey.Device {
                 });
         });
 
-        this.registerCapabilityListener("target_charger_current", async (current) => {
+        this.registerCapabilityListener('target_charger_current', async (current) => {
             this.logMessage(`Set dynamic charger current to '${current}'`);
             //Adjust dynamic current to be <= max charger current
             const newCurrent = Math.min(this.getSettings().maxChargerCurrent, current);
@@ -111,7 +108,7 @@ class ChargerDevice extends Homey.Device {
             //Delete all capabilities and then add them in right order
             this.logMessage(`Reorganizing all capabilities to correct order`);
             this.getCapabilities().forEach(capability => {
-                if (capability != 'button.organize') {
+                if (capability != 'button.organize' && capability != 'button.reconnect') {
                     this.removeCapabilityHelper(capability);
                 }
             });
@@ -330,42 +327,112 @@ class ChargerDevice extends Homey.Device {
         return new Easee(options, this.homey.app.getStats());
     }
 
-    getSemiStaticChargerConfig() {
+    /*
+        Different observations to read depending on grid type TN or IT
+        For IT grid
+        inCurrentT1=PE, inCurrentT2=L1, inCurrentT3=L2, inCurrentT4=L3, inCurrentT5=<not used>
+        For TN grid
+        inCurrentT1=PE, inCurrentT2=N, inCurrentT3=L1, inCurrentT4=L2, inCurrentT5=L3
+    */
+    refreshChargerState() {
         let self = this;
-        self.createEaseeChargerClient().getChargerConfig(self.getData().id)
-            .then(function (config) {
+        self.createEaseeChargerClient().getChargerState(self.getData().id)
+            .then(function (observations) {
 
+                const gridType = self.getSetting('detectedPowerGridType');
+                let targetCurrent = 0;
                 try {
-                    self._updateProperty('enabled', config.isEnabled);
+                    observations.forEach(observation => {
+                        switch (observation.id) {
+                            case 31:
+                                self._updateProperty('enabled', observation.value);
+                                break;
+
+                            case 48:
+                                self._updateProperty('target_charger_current',
+                                    Math.min(self.getSettings().maxChargerCurrent, observation.value));
+                                break;
+
+                            case 109:
+                                self._updateProperty('charger_status', enums.decodeChargerMode(observation.value));
+
+                                if (enums.decodeChargerMode(observation.value) == enums.decodeChargerMode('Charging')) {
+                                    self._updateProperty('onoff', true);
+                                } else {
+                                    self._updateProperty('onoff', false);
+                                }
+                                break;
+
+                            case 111:
+                            case 112:
+                            case 113:
+                                targetCurrent = Math.max(targetCurrent, observation.value);
+                                break;
+
+                            case 114:
+                                self._updateProperty('measure_current.offered', observation.value);
+                                break;
+
+                            case 120:
+                                // Convert kW to W
+                                self._updateProperty('measure_power', Math.round(observation.value * 1000));
+                                break;
+
+                            case 121:
+                                self._updateProperty('meter_power.lastCharge', observation.value);
+                                break;
+
+                            case 124:
+                                self._updateProperty('meter_power', observation.value);
+                                break;
+
+                            case 182:
+                                // InCurrent_T2
+                                if (gridType === enums.DETECTED_POWER_GRID_TYPE.IT_3_PHASE.key ||
+                                    gridType === enums.DETECTED_POWER_GRID_TYPE.IT_1_PHASE.key) {
+                                    self._updateProperty('measure_current.p1', observation.value);
+                                }
+                                break;
+
+                            case 183:
+                                // InCurrent_T3
+                                if (gridType === enums.DETECTED_POWER_GRID_TYPE.IT_3_PHASE.key ||
+                                    gridType === enums.DETECTED_POWER_GRID_TYPE.IT_1_PHASE.key) {
+                                    self._updateProperty('measure_current.p2', observation.value);
+                                } else {
+                                    self._updateProperty('measure_current.p1', observation.value);
+                                }
+                                break;
+                            case 184:
+                                // InCurrent_T4
+                                if (gridType === enums.DETECTED_POWER_GRID_TYPE.IT_3_PHASE.key ||
+                                    gridType === enums.DETECTED_POWER_GRID_TYPE.IT_1_PHASE.key) {
+                                    self._updateProperty('measure_current.p3', observation.value);
+                                } else {
+                                    self._updateProperty('measure_current.p2', observation.value);
+                                }
+                                break;
+                            case 185:
+                                // InCurrent_T5
+                                if (gridType != enums.DETECTED_POWER_GRID_TYPE.IT_3_PHASE.key &&
+                                    gridType != enums.DETECTED_POWER_GRID_TYPE.IT_1_PHASE.key) {
+                                    self._updateProperty('measure_current.p3', observation.value);
+                                }
+                                break;
+
+                            case 194:
+                                // InVolt_T2_T3
+                                // Parse as int to skip decimals
+                                self._updateProperty('measure_voltage', parseInt(observation.value));
+                                break;
+                        }
+                    });
+
+                    targetCurrent = Math.min(self.getCapabilityOptions('target_circuit_current').max, targetCurrent);
+                    self._updateProperty('target_circuit_current', targetCurrent);
+
                 } catch (error) {
                     self.logError(error);
-                }
-
-                self.setSettings({
-                    idleCurrent: config.enableIdleCurrent ? 'Yes' : 'No',
-                    lockCablePermanently: config.lockCablePermanently ? 'Yes' : 'No',
-                    phaseMode: enums.decodePhaseMode(config.phaseMode),
-                    nodeType: enums.decodeNodeType(config.localNodeType),
-                    detectedPowerGridType: enums.decodePowerGridType(config.detectedPowerGridType),
-                    offlineChargingMode: enums.decodeOfflineChargingModeType(config.offlineChargingMode),
-                    maxChargerCurrent: `${config.maxChargerCurrent}`,
-                    authorizationRequired: config.authorizationRequired ? 'Yes' : 'No'
-                }).catch(err => {
-                    self.error(`Failed to update config settings`, err);
-                });
-
-                //Adjust the max value of the target charger current slider based on the 
-                //max charger current
-                const capability = 'target_charger_current';
-                if (self.hasCapability(capability)) {
-                    if (self.getCapabilityOptions(capability).max != config.maxChargerCurrent) {
-                        self.logMessage(`Updating '${capability}' max value to '${config.maxChargerCurrent}'`);
-                        self.setCapabilityOptions(capability, {
-                            max: config.maxChargerCurrent,
-                        }).catch(err => {
-                            self.error(`Failed to update ${capability} capability options`, err);
-                        });
-                    }
                 }
 
             }).catch(reason => {
@@ -373,84 +440,92 @@ class ChargerDevice extends Homey.Device {
             });
     }
 
-    getDynamicCurrent() {
+    refreshChargerSettings() {
         let self = this;
-        self.getDynamicCircuitCurrent()
-            .then(function (current) {
+        self.createEaseeChargerClient().getChargerSettings(self.getData().id)
+            .then(function (observations) {
 
-                //Make sure we don't set a value higher than what is possible
-                let targetCurrent = Math.max(current.phase1, current.phase2, current.phase3);
-                targetCurrent = Math.min(self.getCapabilityOptions('target_circuit_current').max, targetCurrent);
+                let settings = {
+                    detectedPowerGridType: '',
+                    lockCablePermanently: '',
+                    idleCurrent: '',
+                    phaseMode: '',
+                    authorizationRequired: '',
+                    offlineChargingMode: '',
+                    maxChargerCurrent: 0,
+                    maxOfflineCurrent: 0,
+                    version: '',
+                    reasonForNoCurrent: '',
+                    smartCharging: '',
+                    nodeType: ''
+                };
 
-                try {
-                    self._updateProperty('target_circuit_current', targetCurrent);
-                } catch (error) {
-                    self.logError(error);
-                }
-
-            }).catch(reason => {
-                //Ignore, error is logged in getDynamicCircuitCurrent()
-                //self.logError(reason);
-            });
-    }
-
-    getChargerState() {
-        let self = this;
-        self.createEaseeChargerClient().getChargerState(self.getData().id)
-            .then(function (state) {
-
-                self.setSettings({
-                    version: String(state.chargerFirmware),
-                    smartCharging: state.smartCharging ? 'Yes' : 'No',
-                    maxOfflineCurrent: String(Math.max(state.offlineMaxCircuitCurrentP1, state.offlineMaxCircuitCurrentP2, state.offlineMaxCircuitCurrentP3)),
-                    reasonForNoCurrent: enums.decodeReasonForNoCurrent(state.reasonForNoCurrent)
-                }).catch(err => {
-                    self.error(`Failed to update state settings`, err);
+                observations.forEach(observation => {
+                    switch (observation.id) {
+                        case 21:
+                            settings.detectedPowerGridType = enums.decodePowerGridType(observation.value);
+                            break;
+                        case 30:
+                            settings.lockCablePermanently = observation.value ? 'Yes' : 'No';
+                            break;
+                        case 37:
+                            settings.idleCurrent = observation.value ? 'Yes' : 'No';
+                            break;
+                        case 38:
+                            settings.phaseMode = enums.decodePhaseMode(observation.value);
+                            break;
+                        case 42:
+                            settings.authorizationRequired = observation.value ? 'Yes' : 'No';
+                            break;
+                        case 45:
+                            //Currently not working in the observation api 2023-03-01
+                            //self.log(`${observation.id}: ${observation.value}`);
+                            settings.offlineChargingMode = enums.decodeOfflineChargingModeType(observation.value);
+                            break;
+                        case 47:
+                            settings.maxChargerCurrent = observation.value;
+                            break;
+                        case 50: //MaxOfflineCurrent_P1
+                        case 51: //MaxOfflineCurrent_P2
+                        case 52: //MaxOfflineCurrent_P3
+                            //Take the largest maxOfflineCurrent_P1-P3 value
+                            settings.maxOfflineCurrent = Math.max(settings.maxOfflineCurrent, observation.value);
+                            break;
+                        case 80:
+                            settings.version = String(observation.value);
+                            break;
+                        case 96:
+                            settings.reasonForNoCurrent = enums.decodeReasonForNoCurrent(observation.value);
+                            break;
+                        case 102:
+                            settings.smartCharging = observation.value ? 'Yes' : 'No';
+                            break;
+                        case 146:
+                            settings.nodeType = enums.decodeNodeType(observation.value);
+                            break;
+                    }
                 });
 
-                try {
-                    self._updateProperty('meter_power.lastCharge', state.sessionEnergy);
-                    self._updateProperty('meter_power', state.lifetimeEnergy);
-                    self._updateProperty('measure_current.offered', state.outputCurrent);
-                    self._updateProperty('measure_power', Math.round(state.totalPower * 1000));
-                    self._updateProperty('charger_status', enums.decodeChargerMode(state.chargerOpMode));
-                    self._updateProperty('measure_voltage', parseInt(state.voltage));
-
-                    if (enums.decodeChargerMode(state.chargerOpMode) == enums.decodeChargerMode('Charging')) {
-                        self._updateProperty('onoff', true);
-                    } else {
-                        self._updateProperty('onoff', false);
+                const capability = 'target_charger_current';
+                if (self.hasCapability(capability)) {
+                    if (self.getCapabilityOptions(capability).max != settings.maxChargerCurrent) {
+                        self.logMessage(`Updating '${capability}' max value to '${settings.maxChargerCurrent}'`);
+                        self.setCapabilityOptions(capability, {
+                            max: settings.maxChargerCurrent,
+                        }).catch(err => {
+                            self.error(`Failed to update ${capability} capability options`, err);
+                        });
                     }
-
-                    const dynamicChargerCurrent = Math.min(self.getSettings().maxChargerCurrent, state.dynamicChargerCurrent);
-                    self._updateProperty('target_charger_current', dynamicChargerCurrent);
-
-                } catch (error) {
-                    self.logError(error);
                 }
 
-                /*
-                    Different observations to read depending on grid type TN or IT
-                    For IT grid
-                    inCurrentT1=PE, inCurrentT2=L1, inCurrentT3=L2, inCurrentT4=L3, inCurrentT5=<not used>
-                    For TN grid
-                    inCurrentT1=PE, inCurrentT2=N, inCurrentT3=L1, inCurrentT4=L2, inCurrentT5=L3
-                */
-                try {
-                    const gridType = self.getSetting('detectedPowerGridType');
-                    if (gridType === enums.DETECTED_POWER_GRID_TYPE.IT_3_PHASE.key ||
-                        gridType === enums.DETECTED_POWER_GRID_TYPE.IT_1_PHASE.key) {
-                        self._updateProperty('measure_current.p1', state.inCurrentT2);
-                        self._updateProperty('measure_current.p2', state.inCurrentT3);
-                        self._updateProperty('measure_current.p3', state.inCurrentT4);
-                    } else {
-                        self._updateProperty('measure_current.p1', state.inCurrentT3);
-                        self._updateProperty('measure_current.p2', state.inCurrentT4);
-                        self._updateProperty('measure_current.p3', state.inCurrentT5);
-                    }
-                } catch (error) {
-                    self.logError(error);
-                }
+                //All settings are strings, some we need as number above
+                settings.maxOfflineCurrent = String(settings.maxOfflineCurrent);
+                settings.maxChargerCurrent = String(settings.maxChargerCurrent);
+
+                self.setSettings(settings)
+                    .catch(err => {
+                        self.logError('Failed to update site settings', err);
+                    });
 
             }).catch(reason => {
                 self.logError(reason);
@@ -838,20 +913,19 @@ class ChargerDevice extends Homey.Device {
             this.updateChargerStatistics();
         }, 60 * 1000 * 60));
 
-        //Update charger lifetime energy
+        //Poll charger lifetime energy
         this.pollIntervals.push(setInterval(() => {
             this.pollLifetimeEnergy();
         }, 60 * 1000 * 10));
 
-        //Update semi static config
+        //Refresh charger settings
         this.pollIntervals.push(setInterval(() => {
-            this.getSemiStaticChargerConfig();
-            this.getDynamicCurrent();
-        }, 60 * 1000 * 60));
+            this.refreshChargerSettings();
+        }, 60 * 1000 * 5));
 
-        //Update state
+        //Refresh charger state
         this.pollIntervals.push(setInterval(() => {
-            this.getChargerState();
+            this.refreshChargerState();
         }, 30 * 1000));
 
         //Update once per day for the sake of it

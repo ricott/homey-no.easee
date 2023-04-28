@@ -9,6 +9,16 @@ const TokenManager = require('../../lib/tokenManager.js');
 var tokenManager = TokenManager;
 
 describe('#Charger', function () {
+
+    it('get charger observations', async () => {
+        let tokens = await tokenManager.getTokens(config.credentials.userName, config.credentials.password);
+        let easee = new Easee(tokens);
+        const observationIds = [200];
+        const values = await easee.getChargerSettings(config.charger);
+        console.log(util.inspect(values, { showHidden: false, depth: null }));
+        //assert.strictEqual(!isNaN(dynamicCurrent.phase1), true);
+    });
+
     it('should return 2 of them', async () => {
         let tokens = await tokenManager.getTokens(config.credentials.userName, config.credentials.password);
         //console.log(tokens);

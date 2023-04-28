@@ -18,16 +18,20 @@ console.log(stats.getInvocationList());
 console.log(stats.getInitDatetime('Europe/Stockholm'));
 */
 
-console.log(resolvePath('/api/commands/EH1212121/2/1243134234243'));
+// console.log(resolvePath('/api/commands/EH1212121/2/1243134234243'));
 
-function resolvePath(path) {
-    const commandPath = '/api/commands/';
-    let fixedPath = path;
-    if (path.startsWith(commandPath)) {
-        const endPos = path.substring(commandPath.length).indexOf('/') + 1;
-        fixedPath = path.substring(0, commandPath.length + endPos);
-        fixedPath = fixedPath + '...'
-    }
+// function resolvePath(path) {
+//     const commandPath = '/api/commands/';
+//     let fixedPath = path;
+//     if (path.startsWith(commandPath)) {
+//         const endPos = path.substring(commandPath.length).indexOf('/') + 1;
+//         fixedPath = path.substring(0, commandPath.length + endPos);
+//         fixedPath = fixedPath + '...'
+//     }
 
-    return fixedPath;
-}
+//     return fixedPath;
+// }
+
+const enums = require('../lib/enums.js');
+
+console.log(enums.getSettingsObservationIds());

@@ -1,4 +1,8 @@
 {
+    "1.6.2": {
+        "en": "New observations API endpoint for data refresh",
+        "sv": "Ny observations API endpoint för att hämta data"
+    },
     "1.6.1": {
         "en": "Fixed small technical bug related to logging",
         "sv": "Buggfix för tekniskt fel relaterat till loggning"

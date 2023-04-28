@@ -110,8 +110,8 @@ class EqualizerDevice extends Homey.Device {
             .then(function (config) {
 
                 self.setSettings({
-                    meterid: config.meterId,
-                    equalizerid: config.equalizerId,
+                    meterid: config.meterId || '',
+                    equalizerid: config.equalizerId || '',
                     gridType: enums.decodeGridType(config.gridType)
                 }).catch(err => {
                     self.error(`Failed to update config settings`, err);
