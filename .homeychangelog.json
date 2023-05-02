@@ -1,4 +1,8 @@
 {
+    "1.6.4": {
+        "en": "Improved lifecycle handling of timers",
+        "sv": "Förbättrad livscykelhantering av timers"
+    },
     "1.6.3": {
         "en": "Added missing charger statuses",
         "sv": "Lagt till saknade laddstatusar"

@@ -38,7 +38,6 @@ class ChargerDevice extends Homey.Device {
         //App was restarted, Zero out last error field
         this.updateSetting('easee_last_error', '');
 
-        this.pollIntervals = [];
         this.tokenManager = TokenManager;
 
         await this.setupCapabilities();
@@ -909,53 +908,40 @@ class ChargerDevice extends Homey.Device {
     _initilializeTimers() {
         this.logMessage('Adding timers');
         //Update last 30 days kWh
-        this.pollIntervals.push(setInterval(() => {
+        this.homey.setInterval(() => {
             this.updateChargerStatistics();
-        }, 60 * 1000 * 60));
+        }, 60 * 1000 * 60);
 
         //Poll charger lifetime energy
-        this.pollIntervals.push(setInterval(() => {
+        this.homey.setInterval(() => {
             this.pollLifetimeEnergy();
-        }, 60 * 1000 * 10));
+        }, 60 * 1000 * 10);
 
         //Refresh charger settings
-        this.pollIntervals.push(setInterval(() => {
+        this.homey.setInterval(() => {
             this.refreshChargerSettings();
-        }, 60 * 1000 * 5));
+        }, 60 * 1000 * 5);
 
         //Refresh charger state
-        this.pollIntervals.push(setInterval(() => {
+        this.homey.setInterval(() => {
             this.refreshChargerState();
-        }, 30 * 1000));
+        }, 30 * 1000);
 
         //Update once per day for the sake of it
         //Fragile to only run once upon startup if the Easee API doesnt respond at that time
-        this.pollIntervals.push(setInterval(() => {
+        this.homey.setInterval(() => {
             this.updateChargerSiteInfo();
-        }, 24 * 60 * 60 * 1000));
+        }, 24 * 60 * 60 * 1000);
 
         //Refresh access token, each 5 mins from tokenManager
-        this.pollIntervals.push(setInterval(() => {
+        this.homey.setInterval(() => {
             this.refreshAccessToken(false);
-        }, 60 * 1000 * 5));
+        }, 60 * 1000 * 5);
 
         //Update debug info every minute with last 10 messages
-        this.pollIntervals.push(setInterval(() => {
+        this.homey.setInterval(() => {
             this.updateDebugMessages();
-        }, 60 * 1000));
-    }
-
-    _deleteTimers() {
-        //Kill interval object(s)
-        this.logMessage('Removing timers');
-        this.pollIntervals.forEach(timer => {
-            clearInterval(timer);
-        });
-    }
-
-    _reinitializeTimers() {
-        this._deleteTimers();
-        this._initilializeTimers();
+        }, 60 * 1000);
     }
 
     _updateProperty(key, value) {
@@ -984,7 +970,6 @@ class ChargerDevice extends Homey.Device {
 
     onDeleted() {
         this.log(`Deleting Easee charger '${this.getName()}' from Homey.`);
-        this._deleteTimers();
 
         this.homey.settings.unset(`${this.getData().id}.username`);
         this.homey.settings.unset(`${this.getData().id}.password`);
@@ -1034,7 +1019,7 @@ class ChargerDevice extends Homey.Device {
 
 // sleep time expects milliseconds
 function sleep(time) {
-    return new Promise((resolve) => setTimeout(resolve, time));
+    return new Promise((resolve) => this.homey.setTimeout(resolve, time));
 }
 
 function isInt(value) {

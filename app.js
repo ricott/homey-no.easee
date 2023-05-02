@@ -8,7 +8,7 @@ class EaseeApp extends App {
 		this.log(`Easee Home v${this.getAppVersion()} is running`);
         this.stats = new Stats();
 
-        setInterval(() => {
+        this.homey.setInterval(() => {
             this.#printStatsToSettings();
         }, 60 * 1000 * 5);
 	}
