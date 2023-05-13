@@ -112,7 +112,7 @@ class ChargerDevice extends Homey.Device {
                 }
             });
 
-            sleep(2000).then(() => {
+            this.#sleep(2000).then(() => {
                 deviceCapabilitesList.forEach(capability => {
                     if (capability != 'measure_charge' && capability != 'measure_charge.last_month') {
                         //All other fields should be added
@@ -575,7 +575,7 @@ class ChargerDevice extends Homey.Device {
             }).catch(reason => {
                 self.logError(reason);
             }).finally(() => {
-                if (!isInt(self.getSetting('siteId')) || !isInt(self.getSetting('circuitId'))) {
+                if (!self.#isInt(self.getSetting('siteId')) || !self.#isInt(self.getSetting('circuitId'))) {
                     //We failed to set circuitId and/or siteId and we have no previous values
                     self.setUnavailable('Failed to retrieve site id and circuit id from Easee Cloud. Please restart the app to retry.')
                         .catch(err => {
@@ -1015,15 +1015,14 @@ class ChargerDevice extends Homey.Device {
             this.error('Failed to update debug messages', err);
         });
     }
-}
 
-// sleep time expects milliseconds
-function sleep(time) {
-    return new Promise((resolve) => this.homey.setTimeout(resolve, time));
-}
+    #sleep(time) {
+        return new Promise((resolve) => this.homey.setTimeout(resolve, time));
+    }
 
-function isInt(value) {
-    return !isNaN(value) && (function (x) { return (x | 0) === x; })(parseFloat(value))
+    #isInt(value) {
+        return !isNaN(value) && (function (x) { return (x | 0) === x; })(parseFloat(value))
+    }
 }
 
 module.exports = ChargerDevice;
