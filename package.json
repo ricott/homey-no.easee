@@ -10,7 +10,7 @@
     "async-mutex": "^0.4.0",
     "enum": "^3.0.4",
     "http.min": "^2.1.0",
-    "spacetime": "^7.4.3"
+    "spacetime": "^7.4.4"
   },
   "scripts": {
     "test": "mocha"
@@ -26,5 +26,8 @@
   "author": "Richard Barkestam",
   "bugs": {
     "url": "https://github.com/ricott/homey-no.easee/issues"
+  },
+  "devDependencies": {
+    "mocha": "^10.2.0"
   }
 }

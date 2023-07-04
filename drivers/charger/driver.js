@@ -11,38 +11,12 @@ class ChargerDriver extends Homey.Driver {
     async onInit() {
         this.log(`[Easee Home Charger driver has been initialized`);
 
-        this.flowCards = {};
         this._registerFlows();
         this.tokenManager = TokenManager;
     }
 
-    triggerStatusChanged(device, tokens) {
-        //Old trigger uses token
-        this._charger_status_changed.trigger(device, tokens, {}).catch(error => { device.error(error) });
-        //New trigger uses state
-        this._charger_status_changedv2.trigger(device, {}, tokens).catch(error => { device.error(error) });
-    }
-
     _registerFlows() {
         this.log('Registering flows');
-        //Triggers
-        //This trigger is triggered automatically by homey when capability value changes
-        this.homey.flow.getDeviceTriggerCard('target_charger_current_changed');
-        this.homey.flow.getDeviceTriggerCard('onoff_true');
-        this.homey.flow.getDeviceTriggerCard('onoff_false');
-
-        this._charger_status_changed = this.homey.flow.getDeviceTriggerCard('charger_status_changed');
-        this._charger_status_changedv2 = this.homey.flow.getDeviceTriggerCard('charger_status_changedv2');
-        this._charger_status_changedv2.registerRunListener(async (args, state) => {
-            this.log(`Comparing '${args.status.name}' with '${state.status}'`);
-            return args.status.name == state.status;
-        });
-        this._charger_status_changedv2.registerArgumentAutocompleteListener('status',
-            async (query, args) => {
-                return enums.getChargerMode();
-            }
-        );
-
         //Conditions
         const chargerOnOff = this.homey.flow.getConditionCard('on');
         chargerOnOff.registerRunListener(async (args, state) => {
@@ -458,7 +432,12 @@ class ChargerDriver extends Homey.Driver {
 
             return self.tokenManager.getTokens(data.username, data.password)
                 .then(function (tokens) {
-                    const easee = new Easee(tokens);
+                    let options = {
+                        accessToken: tokens.accessToken,
+                        appVersion: self.homey.app.getAppVersion(),
+                        device: self
+                    };
+                    const easee = new Easee(options);
                     return easee.getChargers().then(function (chargers) {
                         chargers.forEach(charger => {
                             let name = 'charger.name';

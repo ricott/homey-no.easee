@@ -60,7 +60,12 @@ class EqualizerDriver extends Homey.Driver {
 
             return self.tokenManager.getTokens(data.username, data.password)
                 .then(function (tokens) {
-                    let easee = new Easee(tokens);
+                    let options = {
+                        accessToken: tokens.accessToken,
+                        appVersion: self.homey.app.getAppVersion(),
+                        device: self
+                    };
+                    let easee = new Easee(options);
                     return easee.getEqualizers().then(function (equalizers) {
                         equalizers.forEach(equalizer => {
                             let name = 'charger.name';

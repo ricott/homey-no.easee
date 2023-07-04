@@ -27,6 +27,23 @@ const deviceCapabilitesList = [
 class ChargerDevice extends Homey.Device {
 
     async onInit() {
+        // Register device triggers
+        //This trigger is triggered automatically by homey when capability value changes
+        this.homey.flow.getDeviceTriggerCard('target_charger_current_changed');
+        this.homey.flow.getDeviceTriggerCard('onoff_true');
+        this.homey.flow.getDeviceTriggerCard('onoff_false');
+        this._charger_status_changed = this.homey.flow.getDeviceTriggerCard('charger_status_changed');
+        this._charger_status_changedv2 = this.homey.flow.getDeviceTriggerCard('charger_status_changedv2');
+        this._charger_status_changedv2.registerRunListener(async (args, state) => {
+            this.log(`Comparing '${args.status.name}' with '${state.status}'`);
+            return args.status.name == state.status;
+        });
+        this._charger_status_changedv2.registerArgumentAutocompleteListener('status',
+            async (query, args) => {
+                return enums.getChargerMode();
+            }
+        );
+
         await this.setupCapabilityListeners();
 
         this.charger = {
@@ -257,9 +274,9 @@ class ChargerDevice extends Homey.Device {
 
     createFriendlyErrorMsg(reason, baseMsg) {
         let errMsg = baseMsg;
-        if (reason.message.startsWith('Access token')) {
+        if (reason.message.indexOf('Access token') > -1) {
             errMsg = 'Access token expired';
-        } else if (reason.message.indexOf('rate limit') > -1) {
+        } else if (reason.message.indexOf('Rate limit') > -1) {
             errMsg = 'The Easee Cloud API rejected the call due to a rate limit';
         } else {
             errMsg = `${errMsg} ${reason.message}`;
@@ -321,7 +338,8 @@ class ChargerDevice extends Homey.Device {
     createEaseeChargerClient() {
         let options = {
             accessToken: this.getToken().accessToken,
-            appVersion: this.homey.app.getAppVersion()
+            appVersion: this.homey.app.getAppVersion(),
+            device: this
         };
         return new Easee(options, this.homey.app.getStats());
     }
@@ -955,7 +973,11 @@ class ChargerDevice extends Homey.Device {
                         let tokens = {
                             status: value
                         }
-                        this.driver.triggerStatusChanged(this, tokens);
+                        //Old trigger uses token
+                        this._charger_status_changed.trigger(this, tokens, {}).catch(error => { device.error(error) });
+                        //New trigger uses state
+                        this._charger_status_changedv2.trigger(this, {}, tokens).catch(error => { device.error(error) });
+
                     }
                 } else {
                     this.setCapabilityValue(key, value);
