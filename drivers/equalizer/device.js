@@ -269,10 +269,10 @@ class EqualizerDevice extends Homey.Device {
             this.updateEqualizerConfig();
         }, 24 * 60 * 60 * 1000);
 
-        //Refresh access token, each 5 mins from tokenManager
+        //Refresh access token, each 2 mins from tokenManager
         this.homey.setInterval(() => {
             this.refreshAccessToken();
-        }, 60 * 1000 * 5);
+        }, 60 * 1000 * 2);
 
         //Update debug info every minute with last 10 messages
         this.homey.setInterval(() => {
