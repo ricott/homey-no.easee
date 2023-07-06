@@ -1,4 +1,8 @@
 {
+    "1.6.7": {
+        "en": "Fix for Easee access token expired (401)",
+        "sv": "Buggfix för Easee access token expired (401)"
+    },
     "1.6.6": {
         "en": "Improved lifecycle handling of timers",
         "sv": "Förbättrad livscykelhantering av timers"
