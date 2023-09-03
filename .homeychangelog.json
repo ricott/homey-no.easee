@@ -1,4 +1,8 @@
 {
+    "1.6.9": {
+        "en": "Stability improvements",
+        "sv": "Stabilitetsförbättringar"
+    },
     "1.6.8": {
         "en": "Fix for Easee access token expired (401)",
         "sv": "Buggfix för Easee access token expired (401)"

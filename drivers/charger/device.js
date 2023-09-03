@@ -196,6 +196,20 @@ class ChargerDevice extends Homey.Device {
         }
     }
 
+    fetchCapabilityOptions(capability) {
+        let options = {};
+        if (this.hasCapability(capability)) {
+            try {
+                //this.logMessage(`Trying to fetch capability options for '${capability}'`);
+                options = this.getCapabilityOptions(capability);
+            } catch (reason) {
+                this.logError(`Failed to fetch capability options for '${capability}', even if it exists!!!`);
+                this.logError(reason);
+            }
+        }
+        return options;
+    }
+
     async setupCapabilities() {
         this.logMessage('Setting up capabilities');
 
@@ -445,8 +459,13 @@ class ChargerDevice extends Homey.Device {
                         }
                     });
 
-                    targetCurrent = Math.min(self.getCapabilityOptions('target_circuit_current').max, targetCurrent);
-                    self._updateProperty('target_circuit_current', targetCurrent);
+                    const capability = 'target_circuit_current';
+                    // Trying to deal with athom's capability bugs ...
+                    const options = self.fetchCapabilityOptions(capability);
+                    if (options.max) {
+                        targetCurrent = Math.min(options.max, targetCurrent);
+                    }
+                    self._updateProperty(capability, targetCurrent);
 
                 } catch (error) {
                     self.logError(error);
@@ -460,7 +479,7 @@ class ChargerDevice extends Homey.Device {
     refreshChargerSettings() {
         let self = this;
         self.createEaseeChargerClient().getChargerSettings(self.getData().id)
-            .then(function (observations) {
+            .then(async function (observations) {
 
                 let settings = {
                     detectedPowerGridType: '',
@@ -525,13 +544,21 @@ class ChargerDevice extends Homey.Device {
 
                 const capability = 'target_charger_current';
                 if (self.hasCapability(capability)) {
-                    if (self.getCapabilityOptions(capability).max != settings.maxChargerCurrent) {
-                        self.logMessage(`Updating '${capability}' max value to '${settings.maxChargerCurrent}'`);
-                        self.setCapabilityOptions(capability, {
-                            max: settings.maxChargerCurrent,
-                        }).catch(err => {
-                            self.error(`Failed to update ${capability} capability options`, err);
-                        });
+                    // Trying to deal with athom's capability bugs ...
+                    const options = self.fetchCapabilityOptions(capability);
+                    if (options.max) {
+                        if (options.max != settings.maxChargerCurrent) {
+                            self.logMessage(`Updating '${capability}' max value to '${settings.maxChargerCurrent}'`);
+                            await self.updateCapabilityOptions(capability, { max: settings.maxChargerCurrent });
+
+                            // self.setCapabilityOptions(capability, {
+                            //     max: settings.maxChargerCurrent,
+                            // }).catch(err => {
+                            //     self.error(`Failed to update ${capability} capability options`, err);
+                            // });
+                        }
+                    } else {
+                        self.logMessage(`Failed to read capability options max of '${capability}'. Athom bugs ...`);
                     }
                 }
 
@@ -1027,7 +1054,11 @@ class ChargerDevice extends Homey.Device {
     }
 
     getLogMessages() {
-        return this.charger.log.toString();
+        if (this.charger && this.charger.log) {
+            return this.charger.log.toString();
+        } else {
+            return '';
+        }
     }
 
     updateDebugMessages() {
