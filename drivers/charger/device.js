@@ -990,30 +990,40 @@ class ChargerDevice extends Homey.Device {
     }
 
     _updateProperty(key, value) {
-        if (this.hasCapability(key)) {
+        let self = this;
+        if (self.hasCapability(key)) {
             if (typeof value !== 'undefined' && value !== null) {
-                let oldValue = this.getCapabilityValue(key);
+                let oldValue = self.getCapabilityValue(key);
                 if (oldValue !== null && oldValue != value) {
-                    this.setCapabilityValue(key, value);
 
-                    if (key === 'charger_status') {
-                        let tokens = {
-                            status: value
-                        }
-                        //Old trigger uses token
-                        this._charger_status_changed.trigger(this, tokens, {}).catch(error => { device.error(error) });
-                        //New trigger uses state
-                        this._charger_status_changedv2.trigger(this, {}, tokens).catch(error => { device.error(error) });
+                    self.setCapabilityValue(key, value)
+                        .then(function () {
 
-                    }
+                            if (key === 'charger_status') {
+                                let tokens = {
+                                    status: value
+                                }
+                                // Old trigger uses token
+                                self._charger_status_changed.trigger(self, tokens, {}).catch(error => { self.error(error) });
+                                // New trigger uses state
+                                self._charger_status_changedv2.trigger(self, {}, tokens).catch(error => { self.error(error) });
+                            }
+
+                        }).catch(reason => {
+                            self.logError(reason);
+                        });
                 } else {
-                    this.setCapabilityValue(key, value);
+                    self.setCapabilityValue(key, value)
+                        .catch(reason => {
+                            self.logError(reason);
+                        });
                 }
+
             } else {
-                this.logMessage(`Value for capability '${key}' is 'undefined'`);
+                self.logMessage(`Value for capability '${key}' is 'undefined'`);
             }
         } else {
-            this.logMessage(`Trying to set value for a missing capability '${key}'`);
+            self.logMessage(`Trying to set value for missing capability '${key}'`);
         }
     }
 
