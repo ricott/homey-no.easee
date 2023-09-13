@@ -1,4 +1,8 @@
 {
+    "1.7.0": {
+        "en": "Easee API domain change",
+        "sv": "Easee ändrar domän för sina APIer"
+    },
     "1.6.9": {
         "en": "Stability improvements",
         "sv": "Stabilitetsförbättringar"
