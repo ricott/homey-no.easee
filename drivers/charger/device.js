@@ -1054,13 +1054,15 @@ class ChargerDevice extends Homey.Device {
 
     logMessage(message) {
         this.log(`[${this.getName()}] ${message}`);
-        if (this.charger.log.length > 49) {
-            //Remove oldest entry
-            this.charger.log.shift();
+        if (this.charger && this.charger.log) {
+            if (this.charger.log.length > 49) {
+                //Remove oldest entry
+                this.charger.log.shift();
+            }
+            //Add new entry
+            let dateTime = new Date().toISOString();
+            this.charger.log.push(dateTime + ' ' + message + '\n');
         }
-        //Add new entry
-        let dateTime = new Date().toISOString();
-        this.charger.log.push(dateTime + ' ' + message + '\n');
     }
 
     getLogMessages() {

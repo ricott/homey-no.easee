@@ -1,0 +1,22 @@
+{
+    "id": "readyToCharge",
+    "title": {
+        "en": "Charger is !{{|not}} ready to start charging",
+        "sv": "Laddarens är !{{|inte}} redo att börja ladda"
+    },
+    "titleFormatted": {
+        "en": "Charger is !{{|not}} ready to start charging",
+        "sv": "Laddarens är !{{|inte}} redo att börja ladda"
+    },
+    "hint": {
+        "en": "Convenience condition to check if status is Paused, Car connected, or Awaiting Authentication",
+        "sv": "Enkelt villkor för att kontrollera om laddarens status är Paused, Car connected, or Awaiting Authentication"
+    },
+    "args": [
+        {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+        }
+    ]
+}

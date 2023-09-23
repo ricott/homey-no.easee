@@ -18,6 +18,23 @@ class ChargerDriver extends Homey.Driver {
     _registerFlows() {
         this.log('Registering flows');
         //Conditions
+        const readyToCharge = this.homey.flow.getConditionCard('readyToCharge');
+        readyToCharge.registerRunListener(async (args, state) => {
+            this.log(`[${args.device.getName()}] Condition 'readyToCharge' triggered`);
+            const status = args.device.getCapabilityValue('charger_status');
+            this.log(`[${args.device.getName()}] - current status: '${status}'`);
+
+            if (status == enums.decodeChargerMode('Paused') ||
+                status == enums.decodeChargerMode('Car connected') ||
+                status == enums.decodeChargerMode('Awaiting Authentication')) {
+                this.log(`[${args.device.getName()}] - ready to start charging`);
+                return true;
+            } else {
+                this.log(`[${args.device.getName()}] - not ready to start charging`);
+                return false;
+            }
+        });
+
         const chargerOnOff = this.homey.flow.getConditionCard('on');
         chargerOnOff.registerRunListener(async (args, state) => {
             return args.device.getCapabilityValue('onoff');

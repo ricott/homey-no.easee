@@ -325,17 +325,23 @@ class EqualizerDevice extends Homey.Device {
 
     logMessage(message) {
         this.log(`[${this.getName()}] ${message}`);
-        if (this.equalizer.log.length > 49) {
-            //Remove oldest entry
-            this.equalizer.log.shift();
+        if (this.equalizer && this.equalizer.log) {
+            if (this.equalizer.log.length > 49) {
+                //Remove oldest entry
+                this.equalizer.log.shift();
+            }
+            //Add new entry
+            let dateTime = new Date().toISOString();
+            this.equalizer.log.push(dateTime + ' ' + message + '\n');
         }
-        //Add new entry
-        let dateTime = new Date().toISOString();
-        this.equalizer.log.push(dateTime + ' ' + message + '\n');
     }
 
     getLogMessages() {
-        return this.equalizer.log.toString();
+        if (this.equalizer && this.equalizer.log) {
+            return this.equalizer.log.toString();
+        } else {
+            return '';
+        }
     }
 
     updateDebugMessages() {
