@@ -1,6 +1,5 @@
 {
     "id": "charger_status_changedv2",
-    "highlight": true,
     "title": {
         "en": "Charger status changed",
         "sv": "Laddarens status ändrades"

@@ -1,4 +1,8 @@
 {
+    "1.7.3": {
+        "en": "Stability improvements",
+        "sv": "Stabilitetsförbättringar"
+    },
     "1.7.2": {
         "en": "New simplified condition to check if charger is ready to start charging",
         "sv": "Nytt förenklat cillkor som kontrollerar om laddaren är redo att börja ladda"

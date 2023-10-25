@@ -27,6 +27,10 @@ const deviceCapabilitesList = [
 class ChargerDevice extends Homey.Device {
 
     async onInit() {
+
+        // Setup capabilities
+        await this.setupCapabilities();
+
         // Register device triggers
         //This trigger is triggered automatically by homey when capability value changes
         this.homey.flow.getDeviceTriggerCard('target_charger_current_changed');
@@ -56,8 +60,6 @@ class ChargerDevice extends Homey.Device {
         this.updateSetting('easee_last_error', '');
 
         this.tokenManager = TokenManager;
-
-        await this.setupCapabilities();
 
         if (!this.homey.settings.get(`${this.getData().id}.username`)) {
             //This is a newly added device, lets copy login details to homey settings
@@ -111,9 +113,7 @@ class ChargerDevice extends Homey.Device {
 
         this.registerCapabilityListener('target_charger_current', async (current) => {
             this.logMessage(`Set dynamic charger current to '${current}'`);
-            //Adjust dynamic current to be <= max charger current
-            const newCurrent = Math.min(this.getSettings().maxChargerCurrent, current);
-            await this.setDynamicChargerCurrent(newCurrent)
+            await this.setDynamicChargerCurrent(current)
                 .catch(reason => {
                     let defaultMsg = 'Failed to set dynamic charger current!';
                     return Promise.reject(new Error(this.createFriendlyErrorMsg(reason, defaultMsg)));
@@ -220,6 +220,8 @@ class ChargerDevice extends Homey.Device {
 
         await this.addCapabilityHelper('target_circuit_current');
         await this.addCapabilityHelper('target_charger_current');
+        // I surrender, athom is not fixing the capability bugs ...
+        await this.updateCapabilityOptions('target_charger_current', { max: 40 });
 
         await this.removeCapabilityHelper('measure_charge.lifetime');
         await this.removeCapabilityHelper('connected');
@@ -371,7 +373,7 @@ class ChargerDevice extends Homey.Device {
             .then(function (observations) {
 
                 const gridType = self.getSetting('detectedPowerGridType');
-                let targetCurrent = 0;
+                let targetCircuitCurrent = 0;
                 try {
                     observations.forEach(observation => {
                         switch (observation.id) {
@@ -380,8 +382,8 @@ class ChargerDevice extends Homey.Device {
                                 break;
 
                             case 48:
-                                self._updateProperty('target_charger_current',
-                                    Math.min(self.getSettings().maxChargerCurrent, observation.value));
+                                self._updateProperty('target_charger_current', observation.value);
+                                // self.logMessage(`target_charger_current = '${observation.value}'`);
                                 break;
 
                             case 109:
@@ -397,7 +399,8 @@ class ChargerDevice extends Homey.Device {
                             case 111:
                             case 112:
                             case 113:
-                                targetCurrent = Math.max(targetCurrent, observation.value);
+                                // Capture circuit current per phase, use the largest value
+                                targetCircuitCurrent = Math.max(targetCircuitCurrent, observation.value);
                                 break;
 
                             case 114:
@@ -459,13 +462,8 @@ class ChargerDevice extends Homey.Device {
                         }
                     });
 
-                    const capability = 'target_circuit_current';
-                    // Trying to deal with athom's capability bugs ...
-                    const options = self.fetchCapabilityOptions(capability);
-                    if (options.max) {
-                        targetCurrent = Math.min(options.max, targetCurrent);
-                    }
-                    self._updateProperty(capability, targetCurrent);
+                    // Use the largest of the three phases
+                    self._updateProperty('target_circuit_current', targetCircuitCurrent);
 
                 } catch (error) {
                     self.logError(error);
@@ -541,26 +539,6 @@ class ChargerDevice extends Homey.Device {
                             break;
                     }
                 });
-
-                const capability = 'target_charger_current';
-                if (self.hasCapability(capability)) {
-                    // Trying to deal with athom's capability bugs ...
-                    const options = self.fetchCapabilityOptions(capability);
-                    if (options.max) {
-                        if (options.max != settings.maxChargerCurrent) {
-                            self.logMessage(`Updating '${capability}' max value to '${settings.maxChargerCurrent}'`);
-                            await self.updateCapabilityOptions(capability, { max: settings.maxChargerCurrent });
-
-                            // self.setCapabilityOptions(capability, {
-                            //     max: settings.maxChargerCurrent,
-                            // }).catch(err => {
-                            //     self.error(`Failed to update ${capability} capability options`, err);
-                            // });
-                        }
-                    } else {
-                        self.logMessage(`Failed to read capability options max of '${capability}'. Athom bugs ...`);
-                    }
-                }
 
                 //All settings are strings, some we need as number above
                 settings.maxOfflineCurrent = String(settings.maxOfflineCurrent);

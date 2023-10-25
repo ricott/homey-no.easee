@@ -1,6 +1,5 @@
 {
     "id": "circuitCurrentControl",
-    "highlight": true,
     "title": {
         "en": "Set dynamic circuit current",
         "sv": "Sätt dynamisk strömstyrka"

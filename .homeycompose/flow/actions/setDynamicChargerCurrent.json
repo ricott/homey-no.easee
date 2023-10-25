@@ -1,5 +1,6 @@
 {
     "id": "setDynamicChargerCurrent",
+    "highlight": true,
     "title": {
         "en": "Set dynamic charger current",
         "sv": "Sätt laddarens dynamiska laddström"
