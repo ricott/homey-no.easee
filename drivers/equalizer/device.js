@@ -50,7 +50,10 @@ class EqualizerDevice extends Homey.Device {
     }
 
     setToken(tokens) {
-        this.setStoreValue('tokens', tokens);
+        this.setStoreValue('tokens', tokens)
+            .catch(reason => {
+                this.logError(reason);
+            });
     }
 
     resetTotalConsumptionAtMidnight() {
@@ -70,7 +73,10 @@ class EqualizerDevice extends Homey.Device {
     }
 
     resetTotalConsumption() {
-        this.setStoreValue('totalConsumptionAtMidnight', 0);
+        this.setStoreValue('totalConsumptionAtMidnight', 0)
+            .catch(reason => {
+                this.logError(reason);
+            });
     }
 
     calculateConsumptionSinceMidnight(totalConsumption) {
@@ -78,7 +84,10 @@ class EqualizerDevice extends Homey.Device {
         let totalConsumptionAtMidnight = this.getStoreValue('totalConsumptionAtMidnight') || 0;
         if (totalConsumptionAtMidnight === 0) {
             this.log(`[${this.getName()}] Total consumption store value is '0', setting it to '${totalConsumption}'`);
-            this.setStoreValue('totalConsumptionAtMidnight', totalConsumption);
+            this.setStoreValue('totalConsumptionAtMidnight', totalConsumption)
+                .catch(reason => {
+                    this.logError(reason);
+                });
         }
 
         let consumptionToday = totalConsumption - totalConsumptionAtMidnight;

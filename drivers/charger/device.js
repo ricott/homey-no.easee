@@ -158,7 +158,10 @@ class ChargerDevice extends Homey.Device {
     }
 
     setToken(tokens) {
-        this.setStoreValue('tokens', tokens);
+        this.setStoreValue('tokens', tokens)
+            .catch(reason => {
+                this.logError(reason);
+            });
     }
 
     async removeCapabilityHelper(capability) {
