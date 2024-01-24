@@ -92,8 +92,8 @@
       "options": {
         "logo": "../../../assets/images/logo.png",
         "usernameLabel": {
-            "en": "Phone number or email",
-            "sv": "Mobilnummer eller email"
+          "en": "Phone number or email",
+          "sv": "Mobilnummer eller email"
         },
         "passwordLabel": {
           "en": "Password",
@@ -111,6 +111,26 @@
     {
       "id": "add_devices",
       "template": "add_devices"
+    }
+  ],
+  "repair": [
+    {
+      "id": "login_credentials",
+      "template": "login_credentials",
+      "options": {
+        "logo": "../../../assets/images/logo.png",
+        "title": {
+          "en": "Login using your new credentials to repair the device"
+        },
+        "usernameLabel": {
+          "en": "Phone number or email",
+          "sv": "Mobilnummer eller email"
+        },
+        "passwordLabel": {
+          "en": "Password",
+          "sv": "Lösenord"
+        }
+      }
     }
   ]
 }

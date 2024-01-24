@@ -58,10 +58,10 @@ class EqualizerDriver extends Homey.Driver {
                 throw new Error('User name and password is mandatory!');
             }
 
-            return self.tokenManager.getTokens(data.username, data.password)
-                .then(function (tokens) {
+            return self.tokenManager.getToken(data.username, data.password)
+                .then(function (token) {
                     let options = {
-                        accessToken: tokens.accessToken,
+                        accessToken: token.accessToken,
                         appVersion: self.homey.app.getAppVersion(),
                         device: self
                     };
@@ -100,6 +100,47 @@ class EqualizerDriver extends Homey.Driver {
         session.setHandler('list_devices', async (data) => {
             return devices;
         });
+    }
+
+    onRepair(session, device) {
+        let self = this;
+
+        session.setHandler('login', async (data) => {
+            if (data.username == '' || data.password == '') {
+                throw new Error('User name and password is mandatory!');
+            }
+
+            return self.tokenManager.getToken(data.username, data.password, true)
+                .then(function (token) {
+                    let options = {
+                        accessToken: token.accessToken,
+                        appVersion: self.homey.app.getAppVersion(),
+                        device: self
+                    };
+                    const easee = new Easee(options);
+                    return easee.getEqualizers()
+                        .then(function (equalizers) {
+                            // Verify the new account has access to the equalizer being repaired
+                            const equalizer = equalizers.find(equalizer => equalizer.id == device.getData().id);
+                            if (equalizer) {
+                                self.log(`Found equalizer with id '${equalizer.id}'`);
+                                device.storeCredentialsEncrypted(data.username, data.password);
+                                return true;
+                            } else {
+                                const msg = `Equalizer '${device.getName()}' is not connected to the Easee account '${data.username}'`;
+                                self.error(msg);
+                                throw new Error(msg);
+                            }
+                        }).catch(reason => {
+                            self.error(reason);
+                            throw reason;
+                        });
+                }).catch(reason => {
+                    self.error(reason);
+                    throw reason;
+                });
+        });
+
     }
 }
 

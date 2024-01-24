@@ -1,6 +1,6 @@
 'use strict';
 
-const Easee = require('../../lib/easee.js');
+const Easee = require('../../lib/Easee.js');
 const assert = require('assert');
 const util = require('util');
 var config = require('../config');
@@ -11,7 +11,7 @@ var tokenManager = TokenManager;
 describe('#Equalizer', function () {
     /*
     it('should return 1 of them', async () => {
-        let tokens = await tokenManager.getTokens(config.credentials.userName, config.credentials.password);
+        let tokens = await tokenManager.getToken(config.credentials.userName, config.credentials.password);
         let easee = new Easee(tokens);
         let equalizers = await easee.getEqualizers();
         //console.log(util.inspect(equalizers, {showHidden: false, depth: null}));
@@ -19,7 +19,7 @@ describe('#Equalizer', function () {
     });
 */
     it('equalizer id should match', async () => {
-        let tokens = await tokenManager.getTokens(config.credentials.userName, config.credentials.password);
+        let tokens = await tokenManager.getToken(config.credentials.userName, config.credentials.password);
         let easee = new Easee(tokens);
         let site = await easee.getEqualizerSiteInfo(config.equalizer);
         //console.log(util.inspect(site, {showHidden: false, depth: null}));
@@ -27,7 +27,7 @@ describe('#Equalizer', function () {
     });
 
     it('asdf', async () => {
-        let tokens = await tokenManager.getTokens(config.credentials.userName, config.credentials.password);
+        let tokens = await tokenManager.getToken(config.credentials.userName, config.credentials.password);
         let easee = new Easee(tokens);
         let site = await easee.getEqualizerState(config.equalizer);
         console.log(util.inspect(site, {showHidden: false, depth: null}));

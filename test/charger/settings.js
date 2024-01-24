@@ -1,6 +1,6 @@
 'use strict';
 
-const Easee = require('../../lib/easee.js');
+const Easee = require('../../lib/Easee.js');
 const assert = require('assert');
 const util = require('util');
 var config = require('../config');
@@ -11,7 +11,7 @@ var tokenManager = TokenManager;
 describe('#Settings', function () {
 
     it('setMaxChargerCurrent', async () => {
-        let tokens = await tokenManager.getTokens(config.credentials.userName, config.credentials.password);
+        let tokens = await tokenManager.getToken(config.credentials.userName, config.credentials.password);
         let easee = new Easee(tokens);
         let result = await easee.setMaxChargerCurrent(config.charger, 20);
         //console.log(util.inspect(result, { showHidden: false, depth: null }));
@@ -19,7 +19,7 @@ describe('#Settings', function () {
     });
 /*
     it('xyz', async () => {
-        let tokens = await tokenManager.getTokens(config.credentials.userName, config.credentials.password);
+        let tokens = await tokenManager.getToken(config.credentials.userName, config.credentials.password);
         let easee = new Easee(tokens);
         let result = await easee.disableSmartCharging(config.charger);
         console.log(util.inspect(result, { showHidden: false, depth: null }));

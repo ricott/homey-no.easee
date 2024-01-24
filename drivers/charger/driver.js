@@ -10,9 +10,34 @@ class ChargerDriver extends Homey.Driver {
 
     async onInit() {
         this.log(`[Easee Home Charger driver has been initialized`);
+        this.tokenManager = TokenManager;
+
+        // Register device triggers
+        // These triggers are triggered automatically by homey when capability value changes
+        this.homey.flow.getDeviceTriggerCard('target_charger_current_changed');
+        this.homey.flow.getDeviceTriggerCard('onoff_true');
+        this.homey.flow.getDeviceTriggerCard('onoff_false');
+        // These two are manually triggered
+        this._charger_status_changed = this.homey.flow.getDeviceTriggerCard('charger_status_changed');
+        this._charger_status_changedv2 = this.homey.flow.getDeviceTriggerCard('charger_status_changedv2');
+        this._charger_status_changedv2.registerRunListener(async (args, state) => {
+            this.log(`Comparing '${args.status.name}' with '${state.status}'`);
+            return args.status.name == state.status;
+        });
+        this._charger_status_changedv2.registerArgumentAutocompleteListener('status',
+            async (query, args) => {
+                return enums.getChargerMode();
+            }
+        );
 
         this._registerFlows();
-        this.tokenManager = TokenManager;
+    }
+
+    triggerStatusChanged(device, tokens) {
+        // Old trigger uses token
+        this._charger_status_changed.trigger(device, tokens, {}).catch(error => { this.error(error) });
+        // New trigger uses state
+        this._charger_status_changedv2.trigger(device, {}, tokens).catch(error => { this.error(error) });
     }
 
     _registerFlows() {
@@ -447,10 +472,10 @@ class ChargerDriver extends Homey.Driver {
                 throw new Error('User name and password is mandatory!');
             }
 
-            return self.tokenManager.getTokens(data.username, data.password)
-                .then(function (tokens) {
+            return self.tokenManager.getToken(data.username, data.password)
+                .then(function (token) {
                     let options = {
-                        accessToken: tokens.accessToken,
+                        accessToken: token.accessToken,
                         appVersion: self.homey.app.getAppVersion(),
                         device: self
                     };
@@ -489,6 +514,48 @@ class ChargerDriver extends Homey.Driver {
         session.setHandler('list_devices', async (data) => {
             return devices;
         });
+    }
+
+    onRepair(session, device) {
+        let self = this;
+
+        session.setHandler('login', async (data) => {
+            if (data.username == '' || data.password == '') {
+                throw new Error('User name and password is mandatory!');
+            }
+
+            return self.tokenManager.getToken(data.username, data.password, true)
+                .then(function (token) {
+                    let options = {
+                        accessToken: token.accessToken,
+                        appVersion: self.homey.app.getAppVersion(),
+                        device: self
+                    };
+                    const easee = new Easee(options);
+                    return easee.getChargers()
+                        .then(function (chargers) {
+
+                            // Verify the new account has access to the charger being repaired
+                            const charger = chargers.find(charger => charger.id == device.getData().id);
+                            if (charger) {
+                                self.log(`Found charger with id '${charger.id}'`);
+                                device.storeCredentialsEncrypted(data.username, data.password);
+                                return true;
+                            } else {
+                                const msg = `Charger '${device.getName()}' is not connected to the Easee account '${data.username}'`;
+                                self.error(msg);
+                                throw new Error(msg);
+                            }
+                        }).catch(reason => {
+                            self.error(reason);
+                            throw reason;
+                        });
+                }).catch(reason => {
+                    self.error(reason);
+                    throw reason;
+                });
+        });
+
     }
 }
 

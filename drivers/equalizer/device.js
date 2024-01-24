@@ -11,6 +11,9 @@ class EqualizerDevice extends Homey.Device {
 
     async onInit() {
 
+        this.logMessage(`[${this.getName()}] Easee Equalizer initiated`);
+        this.tokenManager = TokenManager;
+
         this._consumption_since_midnight_changed = this.homey.flow.getDeviceTriggerCard('consumption_since_midnight_changed');
         this._phase_load_changed = this.homey.flow.getDeviceTriggerCard('phase_load_changed');
 
@@ -19,20 +22,15 @@ class EqualizerDevice extends Homey.Device {
             consumptionSinceMidnight: 0
         };
 
-        this.logMessage(`[${this.getName()}] Easee Equalizer initiated`);
-
-        this.tokenManager = TokenManager;
-
         if (!this.homey.settings.get(`${this.getData().id}.username`)) {
             //This is a newly added device, lets copy login details to homey settings
-            this.logMessage(`Storing credentials for user '${this.getStoreValue('username')}'`);
             this.storeCredentialsEncrypted(this.getStoreValue('username'), this.getStoreValue('password'));
         }
 
         let self = this;
-        self.tokenManager.getTokens(self.getUsername(), self.getPassword())
-            .then(function (tokens) {
-                self.setToken(tokens);
+        self.tokenManager.getToken(self.getUsername(), self.getPassword())
+            .then(function (token) {
+                self.setToken(token);
 
                 self.updateEqualizerSiteInfo();
                 self.updateEqualizerConfig();
@@ -215,7 +213,7 @@ class EqualizerDevice extends Homey.Device {
     }
 
     storeCredentialsEncrypted(plainUser, plainPassword) {
-        this.logMessage(`Encrypting credentials for user '${plainUser}'`);
+        this.logMessage(`Storing encrypted credentials for user '${plainUser}'`);
         this.homey.settings.set(`${this.getData().id}.username`, this.encryptText(plainUser));
         this.homey.settings.set(`${this.getData().id}.password`, this.encryptText(plainPassword));
 
@@ -251,12 +249,12 @@ class EqualizerDevice extends Homey.Device {
 
     refreshAccessToken() {
         let self = this;
-        return self.tokenManager.getTokens(self.getUsername(), self.getPassword())
-            .then(function (tokens) {
-                if (self.getToken().accessToken != tokens.accessToken) {
+        return self.tokenManager.getToken(self.getUsername(), self.getPassword())
+            .then(function (token) {
+                if (self.getToken().accessToken != token.accessToken) {
                     self.logMessage('Renewed access token');
                 }
-                self.setToken(tokens);
+                self.setToken(token);
                 return Promise.resolve(true);
             }).catch(reason => {
                 self.logError(reason);
@@ -278,10 +276,10 @@ class EqualizerDevice extends Homey.Device {
             this.updateEqualizerConfig();
         }, 24 * 60 * 60 * 1000);
 
-        //Refresh access token, each 2 mins from tokenManager
+        //Refresh access token, each 1 mins from tokenManager
         this.homey.setInterval(() => {
             this.refreshAccessToken();
-        }, 60 * 1000 * 2);
+        }, 60 * 1000 * 1);
 
         //Update debug info every minute with last 10 messages
         this.homey.setInterval(() => {

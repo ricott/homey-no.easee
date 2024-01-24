@@ -1,6 +1,6 @@
 'use strict';
 
-const Easee = require('../../lib/easee.js');
+const Easee = require('../../lib/Easee.js');
 const assert = require('assert');
 const util = require('util');
 var config = require('../config');
@@ -12,7 +12,7 @@ describe('#Charger', function () {
 
     describe('#setDynamicCurrent', function () {
         it('setting dynamic current should not throw an error', async () => {
-            let tokens = await tokenManager.getTokens(config.credentials.userName, config.credentials.password);
+            let tokens = await tokenManager.getToken(config.credentials.userName, config.credentials.password);
             let easee = new Easee(tokens);
 
             // easee.stopCharging(config.charger)

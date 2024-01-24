@@ -28,50 +28,30 @@ class ChargerDevice extends Homey.Device {
 
     async onInit() {
 
+        this.logMessage(`Easee charger initialized, '${this.getName()}'`);
+        this.tokenManager = TokenManager;
+
         // Setup capabilities
         await this.setupCapabilities();
-
-        // Register device triggers
-        //This trigger is triggered automatically by homey when capability value changes
-        this.homey.flow.getDeviceTriggerCard('target_charger_current_changed');
-        this.homey.flow.getDeviceTriggerCard('onoff_true');
-        this.homey.flow.getDeviceTriggerCard('onoff_false');
-        this._charger_status_changed = this.homey.flow.getDeviceTriggerCard('charger_status_changed');
-        this._charger_status_changedv2 = this.homey.flow.getDeviceTriggerCard('charger_status_changedv2');
-        this._charger_status_changedv2.registerRunListener(async (args, state) => {
-            this.log(`Comparing '${args.status.name}' with '${state.status}'`);
-            return args.status.name == state.status;
-        });
-        this._charger_status_changedv2.registerArgumentAutocompleteListener('status',
-            async (query, args) => {
-                return enums.getChargerMode();
-            }
-        );
-
         await this.setupCapabilityListeners();
 
         this.charger = {
             log: []
         };
 
-        this.logMessage(`Easee charger initiated, '${this.getName()}'`);
-
         //App was restarted, Zero out last error field
         this.updateSetting('easee_last_error', '');
 
-        this.tokenManager = TokenManager;
-
         if (!this.homey.settings.get(`${this.getData().id}.username`)) {
             //This is a newly added device, lets copy login details to homey settings
-            this.logMessage(`Storing credentials for user '${this.getStoreValue('username')}'`);
             this.storeCredentialsEncrypted(this.getStoreValue('username'), this.getStoreValue('password'));
         }
 
         let self = this;
         //Force renewal of token, if a user restarts the app a new token should be generated
-        self.tokenManager.getTokens(self.getUsername(), self.getPassword(), true)
-            .then(function (tokens) {
-                self.setToken(tokens);
+        self.tokenManager.getToken(self.getUsername(), self.getPassword(), true)
+            .then(function (token) {
+                self.setToken(token);
 
                 self.refreshChargerSettings();
                 self.updateChargerSiteInfo();
@@ -118,38 +98,6 @@ class ChargerDevice extends Homey.Device {
                     let defaultMsg = 'Failed to set dynamic charger current!';
                     return Promise.reject(new Error(this.createFriendlyErrorMsg(reason, defaultMsg)));
                 });
-        });
-
-        this.registerCapabilityListener('button.organize', async () => {
-            //Delete all capabilities and then add them in right order
-            this.logMessage(`Reorganizing all capabilities to correct order`);
-            this.getCapabilities().forEach(capability => {
-                if (capability != 'button.organize' && capability != 'button.reconnect') {
-                    this.removeCapabilityHelper(capability);
-                }
-            });
-
-            this.#sleep(2000).then(() => {
-                deviceCapabilitesList.forEach(capability => {
-                    if (capability != 'measure_charge' && capability != 'measure_charge.last_month') {
-                        //All other fields should be added
-                        this.addCapabilityHelper(capability);
-                    } else if ((capability === 'measure_charge' && this.getSetting('showLast30daysStats')) ||
-                        (capability === 'measure_charge.last_month' && this.getSetting('showLastMonthStats'))) {
-                        //Add if configured to be shown
-                        this.logMessage(`Adding capability based on configuration '${capability}'`);
-                        this.addCapabilityHelper(capability);
-                    }
-                });
-            });
-
-            return Promise.resolve(true);
-        });
-
-        this.registerCapabilityListener('button.reconnect', async () => {
-            this.logMessage(`Reconnect to Easee Cloud API`);
-            await this.refreshAccessToken(true);
-            return Promise.resolve(true);
         });
     }
 
@@ -233,13 +181,16 @@ class ChargerDevice extends Homey.Device {
         await this.removeCapabilityHelper('locked');
 
         await this.addCapabilityHelper('enabled');
-        await this.addCapabilityHelper('button.organize');
-        await this.addCapabilityHelper('button.reconnect');
         await this.addCapabilityHelper('measure_current.p1');
         await this.addCapabilityHelper('measure_current.p2');
         await this.addCapabilityHelper('measure_current.p3');
         await this.addCapabilityHelper('meter_power.lastCharge');
         await this.addCapabilityHelper('meter_power');
+
+        // Skipping reconnect is favour of repair
+        await this.removeCapabilityHelper('button.reconnect');
+        // Capabilities can't be ordered in HP23
+        await this.removeCapabilityHelper('button.organize');
 
         let capability = 'measure_charge';
         if (!this.hasCapability(capability) && this.getSetting('showLast30daysStats')) {
@@ -305,7 +256,7 @@ class ChargerDevice extends Homey.Device {
     }
 
     storeCredentialsEncrypted(plainUser, plainPassword) {
-        this.logMessage(`Encrypting credentials for user '${plainUser}'`);
+        this.logMessage(`Storing encrypted credentials for user '${plainUser}'`);
         this.homey.settings.set(`${this.getData().id}.username`, this.encryptText(plainUser));
         this.homey.settings.set(`${this.getData().id}.password`, this.encryptText(plainPassword));
 
@@ -341,12 +292,12 @@ class ChargerDevice extends Homey.Device {
 
     refreshAccessToken(force) {
         let self = this;
-        return self.tokenManager.getTokens(self.getUsername(), self.getPassword(), force)
-            .then(function (tokens) {
-                if (self.getToken().accessToken != tokens.accessToken) {
+        return self.tokenManager.getToken(self.getUsername(), self.getPassword(), force)
+            .then(function (token) {
+                if (self.getToken().accessToken != token.accessToken) {
                     self.logMessage('We have a new access token from TokenManager');
                 }
-                self.setToken(tokens);
+                self.setToken(token);
                 return Promise.resolve(true);
             }).catch(reason => {
                 self.logError(reason);
@@ -933,38 +884,38 @@ class ChargerDevice extends Homey.Device {
 
     _initilializeTimers() {
         this.logMessage('Adding timers');
-        //Update last 30 days kWh
+        // Update last 30 days kWh
         this.homey.setInterval(() => {
             this.updateChargerStatistics();
         }, 60 * 1000 * 60);
 
-        //Poll charger lifetime energy
+        // Poll charger lifetime energy
         this.homey.setInterval(() => {
             this.pollLifetimeEnergy();
         }, 60 * 1000 * 10);
 
-        //Refresh charger settings
+        // Refresh charger settings
         this.homey.setInterval(() => {
             this.refreshChargerSettings();
         }, 60 * 1000 * 5);
 
-        //Refresh charger state
+        // Refresh charger state
         this.homey.setInterval(() => {
             this.refreshChargerState();
         }, 30 * 1000);
 
-        //Update once per day for the sake of it
-        //Fragile to only run once upon startup if the Easee API doesnt respond at that time
+        // Update once per day for the sake of it
+        // Fragile to only run once upon startup if the Easee API doesnt respond at that time
         this.homey.setInterval(() => {
             this.updateChargerSiteInfo();
         }, 24 * 60 * 60 * 1000);
 
-        //Refresh access token, each 2 mins from tokenManager
+        // Refresh access token, each 1 min from tokenManager
         this.homey.setInterval(() => {
             this.refreshAccessToken(false);
-        }, 60 * 1000 * 2);
+        }, 60 * 1000 * 1);
 
-        //Update debug info every minute with last 10 messages
+        // Update debug info every minute with last 10 messages
         this.homey.setInterval(() => {
             this.updateDebugMessages();
         }, 60 * 1000);
@@ -984,10 +935,7 @@ class ChargerDevice extends Homey.Device {
                                 let tokens = {
                                     status: value
                                 }
-                                // Old trigger uses token
-                                self._charger_status_changed.trigger(self, tokens, {}).catch(error => { self.error(error) });
-                                // New trigger uses state
-                                self._charger_status_changedv2.trigger(self, {}, tokens).catch(error => { self.error(error) });
+                                self.driver.triggerStatusChanged(self, tokens);
                             }
 
                         }).catch(reason => {
