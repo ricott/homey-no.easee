@@ -120,6 +120,13 @@ class EqualizerDriver extends Homey.Driver {
                     const easee = new Easee(options);
                     return easee.getEqualizers()
                         .then(function (equalizers) {
+                            const msg = `Equalizer '${device.getName()}' is not connected to the Easee account '${data.username}'`;
+                            if (!Array.isArray(equalizers)) {
+                                // The account doesnt have any linked equalizers
+                                self.error(msg);
+                                throw new Error(msg);
+                            }
+
                             // Verify the new account has access to the equalizer being repaired
                             const equalizer = equalizers.find(equalizer => equalizer.id == device.getData().id);
                             if (equalizer) {
@@ -127,7 +134,6 @@ class EqualizerDriver extends Homey.Driver {
                                 device.storeCredentialsEncrypted(data.username, data.password);
                                 return true;
                             } else {
-                                const msg = `Equalizer '${device.getName()}' is not connected to the Easee account '${data.username}'`;
                                 self.error(msg);
                                 throw new Error(msg);
                             }

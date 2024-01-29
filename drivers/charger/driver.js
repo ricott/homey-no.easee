@@ -534,6 +534,12 @@ class ChargerDriver extends Homey.Driver {
                     const easee = new Easee(options);
                     return easee.getChargers()
                         .then(function (chargers) {
+                            const msg = `Charger '${device.getName()}' is not connected to the Easee account '${data.username}'`;
+                            if (!Array.isArray(chargers)) {
+                                // The account doesnt have any linked chargers
+                                self.error(msg);
+                                throw new Error(msg);
+                            }
 
                             // Verify the new account has access to the charger being repaired
                             const charger = chargers.find(charger => charger.id == device.getData().id);
@@ -542,7 +548,6 @@ class ChargerDriver extends Homey.Driver {
                                 device.storeCredentialsEncrypted(data.username, data.password);
                                 return true;
                             } else {
-                                const msg = `Charger '${device.getName()}' is not connected to the Easee account '${data.username}'`;
                                 self.error(msg);
                                 throw new Error(msg);
                             }
