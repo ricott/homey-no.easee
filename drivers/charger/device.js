@@ -167,7 +167,8 @@ class ChargerDevice extends Homey.Device {
         //Add and remove capabilities as part of upgrading a device
         await this.addCapabilityHelper('onoff');
         //Don't want the option of single click in mobile app to start/stop charging
-        await this.updateCapabilityOptions('onoff', { uiQuickAction: false });
+        //Seems to work as defined in onoff.json capability 2024-10-04
+        //await this.updateCapabilityOptions('onoff', { uiQuickAction: false });
 
         await this.addCapabilityHelper('target_circuit_current');
         await this.addCapabilityHelper('target_charger_current');

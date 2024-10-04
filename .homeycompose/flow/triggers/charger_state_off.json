@@ -1,5 +1,6 @@
 {
     "id": "onoff_false",
+    "highlight": true,
     "title": {
       "en": "Turned off",
       "sv": "Inaktiverad"

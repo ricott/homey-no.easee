@@ -1,4 +1,8 @@
 {
+    "1.7.6": {
+        "en": "Maintenance",
+        "sv": "Underhåll"
+    },
     "1.7.5": {
         "en": "Added support for the repair function which allows to change Easee account details on an existing device",
         "sv": "Lade till stöd för reparera funktionen som möjliggör att byta Easee konto på en befintlig enhet"

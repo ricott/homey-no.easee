@@ -7,10 +7,10 @@
     "lib": "lib"
   },
   "dependencies": {
-    "async-mutex": "^0.4.1",
+    "async-mutex": "^0.5.0",
     "enum": "^3.0.4",
     "http.min": "^2.1.0",
-    "spacetime": "^7.5.0"
+    "spacetime": "^7.6.1"
   },
   "scripts": {
     "test": "mocha"
@@ -28,6 +28,6 @@
     "url": "https://github.com/ricott/homey-no.easee/issues"
   },
   "devDependencies": {
-    "mocha": "^10.2.0"
+    "mocha": "^10.7.3"
   }
 }
