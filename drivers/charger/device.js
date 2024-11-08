@@ -585,18 +585,6 @@ class ChargerDevice extends Homey.Device {
             });
     }
 
-    pollLifetimeEnergy() {
-        let self = this;
-        //self.logMessage(`Poll lifetime energy`);
-        return self.createEaseeChargerClient().pollLifetimeEnergy(self.getData().id)
-            .then(function (result) {
-                return Promise.resolve(result);
-            }).catch(reason => {
-                self.logError(reason);
-                //return Promise.reject(reason);
-            });
-    }
-
     rebootCharger() {
         let self = this;
         self.logMessage(`Rebooting charger`);
@@ -889,11 +877,6 @@ class ChargerDevice extends Homey.Device {
         this.homey.setInterval(() => {
             this.updateChargerStatistics();
         }, 60 * 1000 * 60);
-
-        // Poll charger lifetime energy
-        this.homey.setInterval(() => {
-            this.pollLifetimeEnergy();
-        }, 60 * 1000 * 10);
 
         // Refresh charger settings
         this.homey.setInterval(() => {
