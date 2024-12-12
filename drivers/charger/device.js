@@ -6,30 +6,18 @@ const crypto = require('crypto');
 const TokenManager = require('../../lib/tokenManager.js');
 const algorithm = 'aes-256-cbc';
 
-const deviceCapabilitesList = [
-    'charger_status',
-    'enabled',
-    'measure_current.offered',
-    'measure_power',
-    'measure_current.p1',
-    'measure_current.p2',
-    'measure_current.p3',
-    'measure_voltage',
-    'meter_power.lastCharge',
-    'meter_power',
-    'measure_charge',
-    'measure_charge.last_month',
-    'onoff',
-    'target_charger_current',
-    'target_circuit_current'
-];
+const deviceClass = 'evcharger';
 
 class ChargerDevice extends Homey.Device {
 
     async onInit() {
-
         this.logMessage(`Easee charger initialized, '${this.getName()}'`);
         this.tokenManager = TokenManager;
+
+        // Change device class to evcharger if not already
+        if (this.getClass() !== deviceClass) {
+            this.setClass(deviceClass);
+        }
 
         // Setup capabilities
         await this.setupCapabilities();
