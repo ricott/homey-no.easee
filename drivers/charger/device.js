@@ -16,7 +16,7 @@ class ChargerDevice extends Homey.Device {
 
         // Change device class to evcharger if not already
         if (this.getClass() !== deviceClass) {
-            this.setClass(deviceClass);
+            await this.setClass(deviceClass);
         }
 
         // Setup capabilities
