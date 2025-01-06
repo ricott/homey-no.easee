@@ -1,4 +1,8 @@
 {
+    "1.8.0": {
+        "en": "The Equalizer supports the new Energy tab",
+        "sv": "Equalizer stödjer nya Energi funktionen"
+    },
     "1.7.9": {
         "en": "Changed device type to evcharger",
         "sv": "Ändrade enhetstyp till evcharger"

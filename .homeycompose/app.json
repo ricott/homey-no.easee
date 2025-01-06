@@ -1,6 +1,6 @@
 {
   "id": "no.easee",
-  "version": "1.7.9",
+  "version": "1.8.0",
   "brandColor": "#323232",
   "compatibility": ">=12.1.2",
   "sdk": 3,

@@ -5,7 +5,9 @@
     "sv": "Easee Equalizer"
   },
   "energy": {
-    "cumulative": true
+    "cumulative": true,
+    "cumulativeImportedCapability": "meter_power",
+    "cumulativeExportedCapability": "meter_power.surplus"
   },
   "images": {
     "large": "/drivers/equalizer/assets/images/large.png",
