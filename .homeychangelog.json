@@ -1,4 +1,8 @@
 {
+    "1.8.1": {
+        "en": "Maintenance",
+        "sv": "Underhåll"
+    },
     "1.8.0": {
         "en": "The Equalizer supports the new Energy tab",
         "sv": "Equalizer stödjer nya Energi funktionen"
