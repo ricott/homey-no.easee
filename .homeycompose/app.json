@@ -1,8 +1,8 @@
 {
   "id": "no.easee",
-  "version": "1.8.1",
+  "version": "1.8.2",
   "brandColor": "#323232",
-  "compatibility": ">=12.1.2",
+  "compatibility": ">=12.3.0",
   "sdk": 3,
   "name": {
     "en": "Easee Home",

@@ -7,12 +7,19 @@ const Easee = require('../../lib/Easee.js');
 const TokenManager = require('../../lib/tokenManager.js');
 const algorithm = 'aes-256-cbc';
 
+const deviceClass = 'other';
+
 class EqualizerDevice extends Homey.Device {
 
     async onInit() {
 
         this.logMessage(`[${this.getName()}] Easee Equalizer initiated`);
         this.tokenManager = TokenManager;
+
+        // Change device class to other if not already
+        if (this.getClass() !== deviceClass) {
+            await this.setClass(deviceClass);
+        }
 
         this._consumption_since_midnight_changed = this.homey.flow.getDeviceTriggerCard('consumption_since_midnight_changed');
         this._phase_load_changed = this.homey.flow.getDeviceTriggerCard('phase_load_changed');
