@@ -16,10 +16,7 @@ class EqualizerDevice extends Homey.Device {
         this.logMessage(`[${this.getName()}] Easee Equalizer initiated`);
         this.tokenManager = TokenManager;
 
-        // Change device class to other if not already
-        if (this.getClass() !== deviceClass) {
-            await this.setClass(deviceClass);
-        }
+        await this.upgradeDevice();
 
         this._consumption_since_midnight_changed = this.homey.flow.getDeviceTriggerCard('consumption_since_midnight_changed');
         this._phase_load_changed = this.homey.flow.getDeviceTriggerCard('phase_load_changed');
@@ -48,6 +45,40 @@ class EqualizerDevice extends Homey.Device {
             }).catch(reason => {
                 self.logMessage(reason);
             });
+    }
+
+    async upgradeDevice() {
+        this.log('Upgrading existing device');
+
+        // Change device class to other if not already
+        if (this.getClass() !== deviceClass) {
+            await this.setClass(deviceClass);
+        }
+
+        await this.removeCapabilityHelper('measure_power.surplus');
+    }
+
+    async removeCapabilityHelper(capability) {
+        if (this.hasCapability(capability)) {
+            try {
+                this.log(`Remove existing capability '${capability}'`);
+                await this.removeCapability(capability);
+            } catch (reason) {
+                this.error(`Failed to removed capability '${capability}'`);
+                this.error(reason);
+            }
+        }
+    }
+    async addCapabilityHelper(capability) {
+        if (!this.hasCapability(capability)) {
+            try {
+                this.log(`Adding missing capability '${capability}'`);
+                await this.addCapability(capability);
+            } catch (reason) {
+                this.error(`Failed to add capability '${capability}'`);
+                this.error(reason);
+            }
+        }
     }
 
     getToken() {
@@ -149,8 +180,7 @@ class EqualizerDevice extends Homey.Device {
                 });
 
                 try {
-                    self._updateProperty('measure_power', Math.round(state.activePowerImport * 1000));
-                    self._updateProperty('measure_power.surplus', Math.round(state.activePowerExport * 1000));
+                    self._updateProperty('measure_power', Math.round(state.activePowerImport * 1000) - Math.round(state.activePowerExport * 1000));
                     self._updateProperty('meter_power', state.cumulativeActivePowerImport);
                     self._updateProperty('meter_power.surplus', state.cumulativeActivePowerExport);
                     self._updateProperty('measure_current.L1', state.currentL1);

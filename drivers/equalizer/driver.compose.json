@@ -15,7 +15,6 @@
   },
   "capabilities": [
     "measure_power",
-    "measure_power.surplus",
     "measure_current.L1",
     "measure_voltage.L1",
     "measure_current.L2",
@@ -28,14 +27,8 @@
   "capabilitiesOptions": {
     "measure_power": {
       "title": {
-        "en": "Power import",
-        "sv": "Strömimport"
-      }
-    },
-    "measure_power.surplus": {
-      "title": {
-        "en": "Power export",
-        "sv": "Strömexport"
+        "en": "Grid power",
+        "sv": "Elnät"
       }
     },
     "measure_current.L1": {
