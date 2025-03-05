@@ -1,5 +1,5 @@
 {
-    "1.8.3": {
+    "1.8.4": {
         "en": "Removed surplus power capability for the Equalizer device, instead show negative value for grid power",
         "sv": "Elnät export har tagits bort för Equalizer, istället visas negativt värde för uttag elnät"
     },
