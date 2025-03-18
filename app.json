@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "no.easee",
-  "version": "1.8.4",
+  "version": "1.8.5",
   "brandColor": "#323232",
   "compatibility": ">=12.3.0",
   "sdk": 3,
@@ -1602,12 +1602,6 @@
         "meter_power.surplus"
       ],
       "capabilitiesOptions": {
-        "measure_power": {
-          "title": {
-            "en": "Grid power",
-            "sv": "Elnät"
-          }
-        },
         "measure_current.L1": {
           "title": {
             "en": "L1 current",

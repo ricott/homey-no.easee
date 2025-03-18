@@ -25,12 +25,6 @@
     "meter_power.surplus"
   ],
   "capabilitiesOptions": {
-    "measure_power": {
-      "title": {
-        "en": "Grid power",
-        "sv": "Elnät"
-      }
-    },
     "measure_current.L1": {
       "title": {
         "en": "L1 current",
