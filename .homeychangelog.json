@@ -1,4 +1,8 @@
 {
+    "1.8.6": {
+        "en": "Added flow cards for pausing and resuming charging sessions.",
+        "sv": "Lade till flödeskort för att pausa och återuppta laddningssessioner."
+    },
     "1.8.5": {
         "en": "Fix for dynamic circuit current",
         "sv": "Buggfix för dynamisk kretsström"

@@ -945,6 +945,24 @@
         ]
       },
       {
+        "id": "pauseCharging",
+        "title": {
+          "en": "Pause Charging",
+          "sv": "Pausa laddning"
+        },
+        "titleFormatted": {
+          "en": "Pause Charging",
+          "sv": "Pausa laddning"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+          }
+        ]
+      },
+      {
         "id": "pauseSmartCharging",
         "title": {
           "en": "Pause smart charging",
@@ -975,6 +993,24 @@
         "titleFormatted": {
           "en": "Reboot charger",
           "sv": "Starta om laddaren"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+          }
+        ]
+      },
+      {
+        "id": "resumeCharging",
+        "title": {
+          "en": "Resume Charging",
+          "sv": "Återuppta laddning"
+        },
+        "titleFormatted": {
+          "en": "Resume Charging",
+          "sv": "Återuppta laddning"
         },
         "args": [
           {
