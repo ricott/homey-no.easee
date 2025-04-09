@@ -211,6 +211,24 @@ class ChargerDriver extends Homey.Driver {
                 });
         });
 
+        // Register flow card for pausing charging
+        const pauseCharging = this.homey.flow.getActionCard('pauseCharging');
+        pauseCharging.registerRunListener(async (args) => {
+            this.log(`[${args.device.getName()}] Action 'pauseCharging' triggered`);
+            return args.device.pauseCharging()
+                .then(() => Promise.resolve(true))
+                .catch(reason => Promise.reject(`Failed to pause charging. Reason: ${reason.message}`));
+        });
+
+        // Register flow card for resuming charging
+        const resumeCharging = this.homey.flow.getActionCard('resumeCharging');
+        resumeCharging.registerRunListener(async (args) => {
+            this.log(`[${args.device.getName()}] Action 'resumeCharging' triggered`);
+            return args.device.resumeCharging()
+                .then(() => Promise.resolve(true))
+                .catch(reason => Promise.reject(`Failed to resume charging. Reason: ${reason.message}`));
+        });
+
         //Deprecated
         const toggleCharger = this.homey.flow.getActionCard('toggleCharger');
         toggleCharger.registerRunListener(async (args) => {
