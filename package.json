@@ -10,7 +10,7 @@
     "async-mutex": "^0.5.0",
     "enum": "^3.0.4",
     "node-fetch": "^3.3.2",
-    "spacetime": "^7.7.0"
+    "spacetime": "^7.9.0"
   },
   "scripts": {
     "test": "mocha"
