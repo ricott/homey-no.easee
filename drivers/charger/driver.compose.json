@@ -21,9 +21,10 @@
         "meter_power",
         "measure_charge",
         "measure_charge.last_month",
-        "onoff",
         "target_charger_current",
-        "target_circuit_current"
+        "target_circuit_current",
+        "evcharger_charging",
+        "evcharger_charging_state"
     ],
     "capabilitiesOptions": {
         "target_circuit_current": {
@@ -71,6 +72,10 @@
                 "sv": "Förra månaden"
             }
         }
+    },
+    "energy": {
+        "evCharger": true,
+        "meterPowerImportedCapability": "meter_power"
     },
     "pair": [
         {

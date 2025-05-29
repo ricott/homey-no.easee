@@ -2,7 +2,7 @@
   "id": "no.easee",
   "version": "1.8.6",
   "brandColor": "#323232",
-  "compatibility": ">=12.3.0",
+  "compatibility": ">=12.4.5",
   "sdk": 3,
   "name": {
     "en": "Easee Home",

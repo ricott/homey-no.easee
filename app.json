@@ -3,7 +3,7 @@
   "id": "no.easee",
   "version": "1.8.6",
   "brandColor": "#323232",
-  "compatibility": ">=12.3.0",
+  "compatibility": ">=12.4.5",
   "sdk": 3,
   "name": {
     "en": "Easee Home",
@@ -57,6 +57,37 @@
   },
   "flow": {
     "triggers": [
+      {
+        "id": "consumption_since_midnight_changed",
+        "title": {
+          "en": "Consumption since midnight changed",
+          "sv": "Förbrukningen sedan midnatt ändrades"
+        },
+        "titleFormatted": {
+          "en": "Consumption since midnight is [[consumptionSinceMidnight]]kWh",
+          "sv": "Förbrukningen sedan midnatt är [[consumptionSinceMidnight]]kWh"
+        },
+        "tokens": [
+          {
+            "name": "consumptionSinceMidnight",
+            "type": "number",
+            "title": {
+              "en": "Consumption (kWh)",
+              "sv": "Förbrukning (kWh)"
+            },
+            "example": {
+              "en": "32.8"
+            }
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=equalizer"
+          }
+        ]
+      },
       {
         "id": "onoff_false",
         "highlight": true,
@@ -142,37 +173,6 @@
             "type": "device",
             "name": "device",
             "filter": "driver_id=charger"
-          }
-        ]
-      },
-      {
-        "id": "consumption_since_midnight_changed",
-        "title": {
-          "en": "Consumption since midnight changed",
-          "sv": "Förbrukningen sedan midnatt ändrades"
-        },
-        "titleFormatted": {
-          "en": "Consumption since midnight is [[consumptionSinceMidnight]]kWh",
-          "sv": "Förbrukningen sedan midnatt är [[consumptionSinceMidnight]]kWh"
-        },
-        "tokens": [
-          {
-            "name": "consumptionSinceMidnight",
-            "type": "number",
-            "title": {
-              "en": "Consumption (kWh)",
-              "sv": "Förbrukning (kWh)"
-            },
-            "example": {
-              "en": "32.8"
-            }
-          }
-        ],
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=equalizer"
           }
         ]
       },
@@ -438,109 +438,6 @@
       }
     ],
     "actions": [
-      {
-        "id": "chargerControl",
-        "title": {
-          "en": "Control charger",
-          "sv": "Styr laddarens funktion"
-        },
-        "titleFormatted": {
-          "en": "Set state to [[chargerAction]]",
-          "sv": "Ändra funtion till [[chargerAction]]"
-        },
-        "args": [
-          {
-            "name": "chargerAction",
-            "type": "dropdown",
-            "title": {
-              "en": "Charger action",
-              "sv": "Funktion"
-            },
-            "values": [
-              {
-                "id": "START",
-                "label": {
-                  "en": "Start Charging",
-                  "sv": "Starta laddning"
-                }
-              },
-              {
-                "id": "STOP",
-                "label": {
-                  "en": "Stop Charging",
-                  "sv": "Stoppa laddning"
-                }
-              },
-              {
-                "id": "PAUSE",
-                "label": {
-                  "en": "Pause Charging",
-                  "sv": "Pausa laddning"
-                }
-              },
-              {
-                "id": "RESUME",
-                "label": {
-                  "en": "Resume Charging",
-                  "sv": "Återuppta laddning"
-                }
-              }
-            ]
-          },
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=charger"
-          }
-        ],
-        "deprecated": true
-      },
-      {
-        "id": "chargerState",
-        "title": {
-          "en": "Set charger state",
-          "sv": "Ändra laddarens tillstånd"
-        },
-        "titleFormatted": {
-          "en": "Set charger state to [[chargerState]]",
-          "sv": "Ändra laddarens tillstånd till [[chargerState]]"
-        },
-        "hint": {
-          "en": "Not recommended to use too frequently since it will wear out the FLASH storage inside the charger.",
-          "sv": "Skall inte användas frekvent då risken finns att lokala (FLASH) lagringen i laddaren slits ut."
-        },
-        "args": [
-          {
-            "name": "chargerState",
-            "type": "dropdown",
-            "title": {
-              "en": "State",
-              "sv": "Tillstånd"
-            },
-            "values": [
-              {
-                "id": "true",
-                "label": {
-                  "en": "Enabled",
-                  "sv": "Aktiverad"
-                }
-              },
-              {
-                "id": "false",
-                "label": {
-                  "en": "Disabled",
-                  "sv": "Inaktiverad"
-                }
-              }
-            ]
-          },
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=charger"
-          }
-        ]
-      },
       {
         "id": "circuitCurrentControl",
         "title": {
@@ -828,6 +725,109 @@
         ]
       },
       {
+        "id": "chargerControl",
+        "title": {
+          "en": "Control charger",
+          "sv": "Styr laddarens funktion"
+        },
+        "titleFormatted": {
+          "en": "Set state to [[chargerAction]]",
+          "sv": "Ändra funtion till [[chargerAction]]"
+        },
+        "args": [
+          {
+            "name": "chargerAction",
+            "type": "dropdown",
+            "title": {
+              "en": "Charger action",
+              "sv": "Funktion"
+            },
+            "values": [
+              {
+                "id": "START",
+                "label": {
+                  "en": "Start Charging",
+                  "sv": "Starta laddning"
+                }
+              },
+              {
+                "id": "STOP",
+                "label": {
+                  "en": "Stop Charging",
+                  "sv": "Stoppa laddning"
+                }
+              },
+              {
+                "id": "PAUSE",
+                "label": {
+                  "en": "Pause Charging",
+                  "sv": "Pausa laddning"
+                }
+              },
+              {
+                "id": "RESUME",
+                "label": {
+                  "en": "Resume Charging",
+                  "sv": "Återuppta laddning"
+                }
+              }
+            ]
+          },
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+          }
+        ],
+        "deprecated": true
+      },
+      {
+        "id": "chargerState",
+        "title": {
+          "en": "Set charger state",
+          "sv": "Ändra laddarens tillstånd"
+        },
+        "titleFormatted": {
+          "en": "Set charger state to [[chargerState]]",
+          "sv": "Ändra laddarens tillstånd till [[chargerState]]"
+        },
+        "hint": {
+          "en": "Not recommended to use too frequently since it will wear out the FLASH storage inside the charger.",
+          "sv": "Skall inte användas frekvent då risken finns att lokala (FLASH) lagringen i laddaren slits ut."
+        },
+        "args": [
+          {
+            "name": "chargerState",
+            "type": "dropdown",
+            "title": {
+              "en": "State",
+              "sv": "Tillstånd"
+            },
+            "values": [
+              {
+                "id": "true",
+                "label": {
+                  "en": "Enabled",
+                  "sv": "Aktiverad"
+                }
+              },
+              {
+                "id": "false",
+                "label": {
+                  "en": "Disabled",
+                  "sv": "Inaktiverad"
+                }
+              }
+            ]
+          },
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+          }
+        ]
+      },
+      {
         "id": "increaseCircuitCurrent",
         "title": {
           "en": "Increase dynamic circuit current by 1 amp",
@@ -1021,6 +1021,42 @@
         ]
       },
       {
+        "id": "setDynamicChargerCurrent",
+        "highlight": true,
+        "title": {
+          "en": "Set dynamic charger current",
+          "sv": "Sätt laddarens dynamiska laddström"
+        },
+        "titleFormatted": {
+          "en": "Set dynamic charger current to [[current]]",
+          "sv": "Sätt laddarens dynamiska laddström till [[current]]"
+        },
+        "hint": {
+          "en": "Controls the charger current. Setting to less than ~7A will stop charging. Setting to higher than ~6A will start charging. If access is locked then the charger still needs to be turned on to start charging.",
+          "sv": "Kontrollera laddarens laddström. Sätts den till minre än ~7A så stannar pågående laddning. Sätts den till mer än ~6A så startas laddning. Om access är låst så måste laddaren också aktiveras för att laddning skall starta."
+        },
+        "args": [
+          {
+            "name": "current",
+            "type": "range",
+            "title": {
+              "en": "Current",
+              "sv": "Ström"
+            },
+            "min": 0,
+            "max": 40,
+            "step": 1,
+            "label": "A",
+            "labelDecimals": 0
+          },
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=charger"
+          }
+        ]
+      },
+      {
         "id": "setChargingPrice",
         "title": {
           "en": "Set charging price",
@@ -1112,42 +1148,6 @@
               "en": "Per kWh in selected currency",
               "sv": "Per kWh i vald valuta"
             }
-          },
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=charger"
-          }
-        ]
-      },
-      {
-        "id": "setDynamicChargerCurrent",
-        "highlight": true,
-        "title": {
-          "en": "Set dynamic charger current",
-          "sv": "Sätt laddarens dynamiska laddström"
-        },
-        "titleFormatted": {
-          "en": "Set dynamic charger current to [[current]]",
-          "sv": "Sätt laddarens dynamiska laddström till [[current]]"
-        },
-        "hint": {
-          "en": "Controls the charger current. Setting to less than ~7A will stop charging. Setting to higher than ~6A will start charging. If access is locked then the charger still needs to be turned on to start charging.",
-          "sv": "Kontrollera laddarens laddström. Sätts den till minre än ~7A så stannar pågående laddning. Sätts den till mer än ~6A så startas laddning. Om access är låst så måste laddaren också aktiveras för att laddning skall starta."
-        },
-        "args": [
-          {
-            "name": "current",
-            "type": "range",
-            "title": {
-              "en": "Current",
-              "sv": "Ström"
-            },
-            "min": 0,
-            "max": 40,
-            "step": 1,
-            "label": "A",
-            "labelDecimals": 0
           },
           {
             "type": "device",
@@ -1292,9 +1292,10 @@
         "meter_power",
         "measure_charge",
         "measure_charge.last_month",
-        "onoff",
         "target_charger_current",
-        "target_circuit_current"
+        "target_circuit_current",
+        "evcharger_charging",
+        "evcharger_charging_state"
       ],
       "capabilitiesOptions": {
         "target_circuit_current": {
@@ -1342,6 +1343,10 @@
             "sv": "Förra månaden"
           }
         }
+      },
+      "energy": {
+        "evCharger": true,
+        "meterPowerImportedCapability": "meter_power"
       },
       "pair": [
         {
@@ -1822,17 +1827,6 @@
     }
   ],
   "capabilities": {
-    "charger_status": {
-      "type": "string",
-      "title": {
-        "en": "Status",
-        "sv": "Status"
-      },
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor",
-      "icon": "/assets/onoff.svg"
-    },
     "current_offered": {
       "type": "number",
       "decimals": 2,
@@ -1857,6 +1851,17 @@
       "getable": true,
       "setable": false,
       "icon": "/assets/enabled.svg"
+    },
+    "charger_status": {
+      "type": "string",
+      "title": {
+        "en": "Status",
+        "sv": "Status"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/onoff.svg"
     },
     "measure_charge": {
       "type": "number",
@@ -1893,30 +1898,6 @@
       "uiComponent": "toggle",
       "uiQuickAction": false
     },
-    "target_charger_current": {
-      "title": {
-        "en": "Dynamic charger current",
-        "sv": "Laddarens dynamiska ström"
-      },
-      "type": "number",
-      "desc": {
-        "en": "Set the dynamic charger current. The max value is adjusted to the max charger current.",
-        "sv": "Sätt laddarens dynamiska ström. Maxvärdet sätts till laddarens max ström."
-      },
-      "min": 0,
-      "max": 40,
-      "decimals": 0,
-      "step": 1,
-      "units": {
-        "en": "A",
-        "sv": "A"
-      },
-      "setable": true,
-      "getable": true,
-      "insights": true,
-      "uiComponent": "slider",
-      "chartType": "stepLine"
-    },
     "target_circuit_current": {
       "title": {
         "en": "Dynamic circuit current",
@@ -1939,6 +1920,30 @@
       "getable": true,
       "insights": true,
       "uiComponent": null,
+      "chartType": "stepLine"
+    },
+    "target_charger_current": {
+      "title": {
+        "en": "Dynamic charger current",
+        "sv": "Laddarens dynamiska ström"
+      },
+      "type": "number",
+      "desc": {
+        "en": "Set the dynamic charger current. The max value is adjusted to the max charger current.",
+        "sv": "Sätt laddarens dynamiska ström. Maxvärdet sätts till laddarens max ström."
+      },
+      "min": 0,
+      "max": 40,
+      "decimals": 0,
+      "step": 1,
+      "units": {
+        "en": "A",
+        "sv": "A"
+      },
+      "setable": true,
+      "getable": true,
+      "insights": true,
+      "uiComponent": "slider",
       "chartType": "stepLine"
     }
   }
