@@ -19,3 +19,4 @@ build
 
 # Added by Homey CLI
 /.homeybuild/
+.prettierrc

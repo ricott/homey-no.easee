@@ -1,0 +1,16 @@
+{
+  "overrides": [
+    {
+      "files": ["*.html", "**/*.js"],
+      "options": {
+        "semi": true,
+		"singleQuote": true,
+		"quoteProps": "consistent",
+        "tabWidth": 4,
+        "printWidth": 1200,
+        "trailingComma": "none",
+        "arrowParens": "avoid" 
+      }
+    }
+  ]
+}
