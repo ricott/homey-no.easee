@@ -1,4 +1,8 @@
 {
+    "1.8.7": {
+        "en": "Added support for Homey Energy",
+        "sv": "Lade till stöd för Homey Energy"
+    },
     "1.8.6": {
         "en": "Added flow cards for pausing and resuming charging sessions.",
         "sv": "Lade till flödeskort för att pausa och återuppta laddningssessioner."
