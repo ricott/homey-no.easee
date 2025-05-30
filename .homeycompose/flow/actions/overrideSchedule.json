@@ -8,6 +8,10 @@
         "en": "Override schedule",
         "sv": "Ignorera schema"
     },
+    "hint": {
+        "en": "Allows current session to charge immediately provided that schedule is the only mechanism stopping charge currently.",
+        "sv": "Tillåter nuvarande session att ladda omedelbart, så länge som schema är den enda mekanism som stoppar laddningen just nu."
+    },
     "args": [
       {
         "type": "device",

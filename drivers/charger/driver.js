@@ -229,59 +229,6 @@ class ChargerDriver extends Homey.Driver {
                 .catch(reason => Promise.reject(`Failed to resume charging. Reason: ${reason.message}`));
         });
 
-        //Deprecated
-        const toggleCharger = this.homey.flow.getActionCard('toggleCharger');
-        toggleCharger.registerRunListener(async (args) => {
-            this.log(`[${args.device.getName()}] Action 'toggleCharger' triggered`);
-            return args.device.toggleCharging()
-                .then(function (result) {
-                    return Promise.resolve(true);
-                }).catch(reason => {
-                    return Promise.reject(`Failed to toggle charging. Reason: ${reason.message}`);
-                });
-        });
-
-        //Deprecated
-        const chargerControl = this.homey.flow.getActionCard('chargerControl');
-        chargerControl.registerRunListener(async (args) => {
-            this.log(`[${args.device.getName()}] Action 'chargerControl' triggered`);
-            this.log(`[${args.device.getName()}] - action: '${args.chargerAction}'`);
-
-            let errMsg = `Failed to change status to '${args.chargerAction}'.`;
-            if (args.chargerAction === 'START') {
-                return args.device.startCharging()
-                    .then(function (result) {
-                        return Promise.resolve(true);
-                    }).catch(reason => {
-                        return Promise.reject(`${errMsg} Reason: ${reason.message}`);
-                    });
-
-            } else if (args.chargerAction === 'STOP') {
-                return args.device.stopCharging()
-                    .then(function (result) {
-                        return Promise.resolve(true);
-                    }).catch(reason => {
-                        return Promise.reject(`${errMsg} Reason: ${reason.message}`);
-                    });
-
-            } else if (args.chargerAction === 'PAUSE') {
-                return args.device.pauseCharging()
-                    .then(function (result) {
-                        return Promise.resolve(true);
-                    }).catch(reason => {
-                        return Promise.reject(`${errMsg} Reason: ${reason.message}`);
-                    });
-
-            } else if (args.chargerAction === 'RESUME') {
-                return args.device.resumeCharging()
-                    .then(function (result) {
-                        return Promise.resolve(true);
-                    }).catch(reason => {
-                        return Promise.reject(`${errMsg} Reason: ${reason.message}`);
-                    });
-            }
-        });
-
         const circuitCurrentControlPerPhase = this.homey.flow.getActionCard('circuitCurrentControlPerPhase');
         circuitCurrentControlPerPhase.registerRunListener(async (args) => {
             this.log(`[${args.device.getName()}] Action 'circuitCurrentControlPerPhase' triggered`);

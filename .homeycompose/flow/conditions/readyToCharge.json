@@ -1,6 +1,5 @@
 {
     "id": "readyToCharge",
-    "highlight": true,
     "title": {
         "en": "Charger is !{{|not}} ready to start charging",
         "sv": "Laddarens är !{{|inte}} redo att börja ladda"
@@ -19,5 +18,6 @@
             "name": "device",
             "filter": "driver_id=charger"
         }
-    ]
+    ],
+    "deprecated": true
 }

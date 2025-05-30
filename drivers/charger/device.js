@@ -51,6 +51,26 @@ class ChargerDevice extends Homey.Device {
     }
 
     async setupCapabilityListeners() {
+        // Homey 12.4.5+: New mandatory EV charger capabilities
+        this.registerCapabilityListener('evcharger_charging', async (value) => {
+            this.logMessage(`Homey set evcharger_charging: ${value}`);
+            if (value) {
+                //Start
+                await this.startCharging()
+                    .catch(reason => {
+                        let defaultMsg = 'Failed to start charging!';
+                        return Promise.reject(new Error(this.createFriendlyErrorMsg(reason, defaultMsg)));
+                    });
+            } else {
+                //Stop
+                await this.stopCharging()
+                    .catch(reason => {
+                        let defaultMsg = 'Failed to stop charging!';
+                        return Promise.reject(new Error(this.createFriendlyErrorMsg(reason, defaultMsg)));
+                    });
+            }
+        });
+
         this.registerCapabilityListener('onoff', async (value) => {
             if (value) {
                 //Start
@@ -59,7 +79,6 @@ class ChargerDevice extends Homey.Device {
                         let defaultMsg = 'Failed to start charging!';
                         return Promise.reject(new Error(this.createFriendlyErrorMsg(reason, defaultMsg)));
                     });
-
             } else {
                 //Stop
                 await this.stopCharging()
@@ -180,6 +199,10 @@ class ChargerDevice extends Homey.Device {
         await this.removeCapabilityHelper('button.reconnect');
         // Capabilities can't be ordered in HP23
         await this.removeCapabilityHelper('button.organize');
+
+        // Homey v12.4.5+ mandatory EV charger capabilities
+        await this.addCapabilityHelper('evcharger_charging');
+        await this.addCapabilityHelper('evcharger_charging_state');
 
         let capability = 'measure_charge';
         if (!this.hasCapability(capability) && this.getSetting('showLast30daysStats')) {
@@ -326,17 +349,16 @@ class ChargerDevice extends Homey.Device {
 
                             case 48:
                                 self._updateProperty('target_charger_current', observation.value);
-                                // self.logMessage(`target_charger_current = '${observation.value}'`);
                                 break;
 
                             case 109:
-                                self._updateProperty('charger_status', enums.decodeChargerMode(observation.value));
+                                const chargerModeStr = enums.decodeChargerMode(observation.value);
+                                self._updateProperty('charger_status', chargerModeStr);
 
-                                if (enums.decodeChargerMode(observation.value) == enums.decodeChargerMode('Charging')) {
-                                    self._updateProperty('onoff', true);
-                                } else {
-                                    self._updateProperty('onoff', false);
-                                }
+                                const isCharging = enums.decodeChargerMode(observation.value) == enums.decodeChargerMode('Charging');
+                                self._updateProperty('onoff', isCharging);
+                                self._updateProperty('evcharger_charging', isCharging);
+                                self._updateProperty('evcharger_charging_state', enums.decodeEnergyChargerMode(observation.value));
                                 break;
 
                             case 111:
