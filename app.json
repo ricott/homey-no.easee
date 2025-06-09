@@ -1740,24 +1740,6 @@
               "value": ""
             }
           ]
-        },
-        {
-          "type": "group",
-          "label": {
-            "en": "Debug",
-            "sv": "Felsökning"
-          },
-          "children": [
-            {
-              "id": "log",
-              "type": "textarea",
-              "label": {
-                "en": "Log",
-                "sv": "Logg"
-              },
-              "value": ""
-            }
-          ]
         }
       ]
     }

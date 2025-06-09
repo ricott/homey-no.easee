@@ -9,7 +9,7 @@ const conditionHandler = require('../../lib/conditionHandler.js');
 class ChargerDriver extends Homey.Driver {
 
     async onInit() {
-        this.log(`[Easee Home Charger driver has been initialized`);
+        this.log(`Easee Home Charger driver has been initialized`);
         this.tokenManager = TokenManager;
 
         // Register device triggers
@@ -429,103 +429,97 @@ class ChargerDriver extends Homey.Driver {
     }
 
     async onPair(session) {
-        let devices = [];
-        let self = this;
+        const devices = [];
 
         session.setHandler('login', async (data) => {
-            if (data.username == '' || data.password == '') {
+            if (data.username === '' || data.password === '') {
                 throw new Error('User name and password is mandatory!');
             }
 
-            return self.tokenManager.getToken(data.username, data.password)
-                .then(function (token) {
-                    let options = {
-                        accessToken: token.accessToken,
-                        appVersion: self.homey.app.getAppVersion(),
-                        device: self
-                    };
-                    const easee = new Easee(options);
-                    return easee.getChargers().then(function (chargers) {
-                        chargers.forEach(charger => {
-                            let name = 'charger.name';
-                            if (charger.id != charger.name) {
-                                name = `${charger.name} (${charger.id})`;
-                            }
+            try {
+                const token = await this.tokenManager.getToken(data.username, data.password, this);
+                
+                const options = {
+                    accessToken: token.accessToken,
+                    appVersion: this.homey.app.getAppVersion(),
+                    device: this
+                };
+                
+                const easee = new Easee(options);
+                const chargers = await easee.getChargers();
+                
+                chargers.forEach(charger => {
+                    let name = 'charger.name';
+                    if (charger.id !== charger.name) {
+                        name = `${charger.name} (${charger.id})`;
+                    }
 
-                            devices.push({
-                                name: name,
-                                data: {
-                                    id: charger.id
-                                },
-                                store: {
-                                    username: data.username,
-                                    password: data.password
-                                }
-                            });
-                        });
-
-                        return true;
-
-                    }).catch(reason => {
-                        self.error(reason);
-                        throw reason;
+                    devices.push({
+                        name: name,
+                        data: {
+                            id: charger.id
+                        },
+                        store: {
+                            username: data.username,
+                            password: data.password
+                        }
                     });
-                }).catch(reason => {
-                    self.error(reason);
-                    throw reason;
                 });
+
+                return true;
+            } catch (error) {
+                this.error(error);
+                throw error;
+            }
         });
 
-        session.setHandler('list_devices', async (data) => {
+        session.setHandler('list_devices', async () => {
             return devices;
         });
     }
 
-    onRepair(session, device) {
-        let self = this;
-
+    async onRepair(session, device) {
         session.setHandler('login', async (data) => {
-            if (data.username == '' || data.password == '') {
+            if (data.username === '' || data.password === '') {
                 throw new Error('User name and password is mandatory!');
             }
 
-            return self.tokenManager.getToken(data.username, data.password, true)
-                .then(function (token) {
-                    let options = {
-                        accessToken: token.accessToken,
-                        appVersion: self.homey.app.getAppVersion(),
-                        device: self
-                    };
-                    const easee = new Easee(options);
-                    return easee.getChargers()
-                        .then(function (chargers) {
-                            const msg = `Charger '${device.getName()}' is not connected to the Easee account '${data.username}'`;
-                            if (!Array.isArray(chargers)) {
-                                // The account doesnt have any linked chargers
-                                self.error(msg);
-                                throw new Error(msg);
-                            }
+            try {
+                const token = await this.tokenManager.getToken(data.username, data.password, this, true);
+                
+                const options = {
+                    accessToken: token.accessToken,
+                    appVersion: this.homey.app.getAppVersion(),
+                    device: this
+                };
+                
+                const easee = new Easee(options);
+                const chargers = await easee.getChargers();
+                
+                const msg = `Charger '${device.getName()}' is not connected to the Easee account '${data.username}'`;
+                
+                if (!Array.isArray(chargers)) {
+                    // The account doesn't have any linked chargers
+                    this.error(msg);
+                    throw new Error(msg);
+                }
 
-                            // Verify the new account has access to the charger being repaired
-                            const charger = chargers.find(charger => charger.id == device.getData().id);
-                            if (charger) {
-                                self.log(`Found charger with id '${charger.id}'`);
-                                device.storeCredentialsEncrypted(data.username, data.password);
-                                return true;
-                            } else {
-                                self.error(msg);
-                                throw new Error(msg);
-                            }
-                        }).catch(reason => {
-                            self.error(reason);
-                            throw reason;
-                        });
-                }).catch(reason => {
-                    self.error(reason);
-                    throw reason;
-                });
+                // Verify the new account has access to the charger being repaired
+                const charger = chargers.find(ch => ch.id === device.getData().id);
+                
+                if (charger) {
+                    this.log(`Found charger with id '${charger.id}'`);
+                    await device.storeCredentialsEncrypted(data.username, data.password);
+                    return true;
+                } else {
+                    this.error(msg);
+                    throw new Error(msg);
+                }
+            } catch (error) {
+                this.error(error);
+                throw error;
+            }
         });
-
     }
 }
 
