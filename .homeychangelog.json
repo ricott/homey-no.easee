@@ -1,4 +1,8 @@
 {
+    "1.8.8": {
+        "en": "Stability improvements",
+        "sv": "Stabilitetsförbättringar"
+    },
     "1.8.7": {
         "en": "Added support for Homey Energy",
         "sv": "Lade till stöd för Homey Energy"

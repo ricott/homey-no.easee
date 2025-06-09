@@ -8,6 +8,7 @@ const deviceClass = 'evcharger';
 class ChargerDevice extends BaseDevice {
 
     #pollIntervals = [];
+    #isDeleted = false;
 
     async onInit() {
         this.logMessage(`Easee charger initialized, '${this.getName()}'`);
@@ -748,27 +749,32 @@ class ChargerDevice extends BaseDevice {
         this.logMessage('Adding timers');
         // Update last 30 days kWh
         this.#pollIntervals.push(this.homey.setInterval(async () => {
+            if (this.#isDeleted) return;
             await this.updateChargerStatistics();
         }, 60 * 1000 * 60));
 
         // Refresh charger settings
         this.#pollIntervals.push(this.homey.setInterval(async () => {
+            if (this.#isDeleted) return;
             await this.refreshChargerSettings();
         }, 60 * 1000 * 5));
 
         // Refresh charger state
         this.#pollIntervals.push(this.homey.setInterval(async () => {
+            if (this.#isDeleted) return;
             await this.refreshChargerState();
         }, 30 * 1000));
 
         // Update once per day for the sake of it
         // Fragile to only run once upon startup if the Easee API doesnt respond at that time
         this.#pollIntervals.push(this.homey.setInterval(async () => {
+            if (this.#isDeleted) return;
             await this.updateChargerSiteInfo();
         }, 24 * 60 * 60 * 1000));
 
         // Refresh access token, each 1 min from tokenManager
         this.#pollIntervals.push(this.homey.setInterval(async () => {
+            if (this.#isDeleted) return;
             await this.refreshAccessToken();
         }, 60 * 1000 * 1));
     }
@@ -784,12 +790,19 @@ class ChargerDevice extends BaseDevice {
 
     onDeleted() {
         this.logMessage('Deleting Easee charger');
-        this.homey.settings.unset(`${this.getData().id}.username`);
-        this.homey.settings.unset(`${this.getData().id}.password`);
 
+        // Set deletion flag first to prevent interval callbacks from executing
+        this.#isDeleted = true;
+
+        // Clear all intervals
         this.#pollIntervals.forEach(interval => {
             this.homey.clearInterval(interval);
         });
+        this.#pollIntervals = [];
+
+        // Remove credentials
+        this.homey.settings.unset(`${this.getData().id}.username`);
+        this.homey.settings.unset(`${this.getData().id}.password`);
     }
 
     async onSettings({ oldSettings, newSettings, changedKeys }) {
