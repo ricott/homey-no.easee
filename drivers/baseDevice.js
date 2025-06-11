@@ -9,6 +9,31 @@ class BaseDevice extends Homey.Device {
 
     tokenManager = TokenManager;
 
+    // Override this method in child classes to implement custom availability logic
+    _shouldDeviceBeAvailable() {
+        return true;
+    }
+
+    async setDeviceAvailable() {
+        try {
+            if (this._shouldDeviceBeAvailable()) {
+                await this.setAvailable();
+            } else {
+                this.logMessage('Device cannot be made available');
+            }
+        } catch (error) {
+            this.error('Failed to set device available:', error);
+        }
+    }
+
+    async setDeviceUnavailable(message) {
+        try {
+            await this.setUnavailable(message);
+        } catch (error) {
+            this.error('Failed to set device unavailable:', error);
+        }
+    }
+
     async refreshAccessToken() {
         try {
             const token = await this.tokenManager.getToken(
@@ -22,8 +47,16 @@ class BaseDevice extends Homey.Device {
             }
 
             await this.setToken(token);
+
+            await this.setDeviceAvailable();
         } catch (error) {
             this.error('Failed to refresh access token:', error);
+
+            // Check if it's an invalid credentials error
+            if (error.message && error.message.includes('InvalidUserPassword')) {
+                // Set device as unavailable
+                await this.setDeviceUnavailable('Username or password is invalid! Please use the repair function on the device to reset the credentials.');
+            }
         }
     }
 

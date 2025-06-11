@@ -61,5 +61,23 @@
                 "value": ""
             }
         ]
+    },
+    {
+        "type": "group",
+        "label": {
+            "en": "Debug",
+            "sv": "Felsökning"
+        },
+        "children": [
+            {
+                "id": "last_error",
+                "type": "textarea",
+                "label": {
+                    "en": "Last API error",
+                    "sv": "Senaste API felet"
+                },
+                "value": ""
+            }
+        ]
     }
 ]

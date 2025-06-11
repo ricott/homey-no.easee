@@ -459,15 +459,10 @@ class ChargerDevice extends BaseDevice {
         }
 
         // Check if site/circuit IDs were successfully set
-        try {
-            if (!this.isInt(this.getSetting('siteId')) || !this.isInt(this.getSetting('circuitId'))) {
-                // We failed to set circuitId and/or siteId and we have no previous values
-                await this.setUnavailable('Failed to retrieve site id and circuit id from Easee Cloud. Please restart the app to retry.');
-            } else {
-                await this.setAvailable();
-            }
-        } catch (error) {
-            this.error('Failed to update device availability:', error);
+        if (this._shouldDeviceBeAvailable()) {
+            await this.setDeviceAvailable();
+        } else {
+            await this.setDeviceUnavailable('Failed to retrieve site id and circuit id from Easee Cloud. Please restart the app to retry.');
         }
     }
 
@@ -786,6 +781,10 @@ class ChargerDevice extends BaseDevice {
             }
             await this.driver.triggerStatusChanged(this, tokens);
         }
+    }
+
+    _shouldDeviceBeAvailable() {
+        return this.isInt(this.getSetting('siteId')) && this.isInt(this.getSetting('circuitId'));
     }
 
     onDeleted() {

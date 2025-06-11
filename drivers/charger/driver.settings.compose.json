@@ -196,20 +196,11 @@
                 "value": ""
             },
             {
-                "id": "easee_last_error",
+                "id": "last_error",
                 "type": "textarea",
                 "label": {
                     "en": "Last API error",
                     "sv": "Senaste API felet"
-                },
-                "value": ""
-            },
-            {
-                "id": "log",
-                "type": "textarea",
-                "label": {
-                    "en": "Log",
-                    "sv": "Logg"
                 },
                 "value": ""
             }
