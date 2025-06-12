@@ -93,7 +93,7 @@ class ChargerDevice extends BaseDevice {
         });
     }
 
-    async setupCapabilities() {
+    async setupCapabilities(newSettings = null) {
         this.logMessage('Setting up capabilities');
 
         // Define capability configuration
@@ -159,7 +159,9 @@ class ChargerDevice extends BaseDevice {
             // Process conditional capabilities
             const conditionalPromises = capabilityConfig.conditional.map(async ({ capability, setting }) => {
                 const hasCapability = this.hasCapability(capability);
-                const settingEnabled = this.getSetting(setting);
+                // Use newSettings if provided (from onSettings), otherwise fall back to getSetting
+                const settingEnabled = newSettings ? newSettings[setting] : this.getSetting(setting);
+                this.logMessage(`Checking conditional capability: ${capability}, setting: ${setting}, hasCapability: ${hasCapability}, settingEnabled: ${settingEnabled}`);
 
                 if (!hasCapability && settingEnabled) {
                     return this.addCapabilityHelper(capability);
@@ -808,16 +810,16 @@ class ChargerDevice extends BaseDevice {
         let fieldsChanged = false;
 
         if (changedKeys.indexOf("showLast30daysStats") > -1) {
-            this.logMessage('showLast30daysStats changed to:', newSettings.showLast30daysStats);
+            this.logMessage(`showLast30daysStats changed to: ${newSettings.showLast30daysStats}`);
             fieldsChanged = true;
         }
         if (changedKeys.indexOf("showLastMonthStats") > -1) {
-            this.logMessage('showLastMonthStats changed to:', newSettings.showLastMonthStats);
+            this.logMessage(`showLastMonthStats changed to: ${newSettings.showLastMonthStats}`);
             fieldsChanged = true;
         }
 
         if (fieldsChanged) {
-            await this.setupCapabilities();
+            await this.setupCapabilities(newSettings);
         }
     }
 }
