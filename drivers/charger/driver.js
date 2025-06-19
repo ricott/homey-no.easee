@@ -521,6 +521,11 @@ class ChargerDriver extends Homey.Driver {
             }
         });
     }
+
+    // Used for logging messages from the tokenManager
+    logMessage(message) {
+        this.log(`[ChargerDriver] ${message}`);
+    }
 }
 
 module.exports = ChargerDriver;

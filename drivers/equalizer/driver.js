@@ -71,16 +71,16 @@ class EqualizerDriver extends Homey.Driver {
 
             try {
                 const token = await this.tokenManager.getToken(data.username, data.password, this);
-                
+
                 const options = {
                     accessToken: token.accessToken,
                     appVersion: this.homey.app.getAppVersion(),
                     device: this
                 };
-                
+
                 const easee = new Easee(options);
                 const equalizers = await easee.getEqualizers();
-                
+
                 equalizers.forEach(equalizer => {
                     let name = 'charger.name';
                     if (equalizer.id !== equalizer.name) {
@@ -119,18 +119,18 @@ class EqualizerDriver extends Homey.Driver {
 
             try {
                 const token = await this.tokenManager.getToken(data.username, data.password, this, true);
-                
+
                 const options = {
                     accessToken: token.accessToken,
                     appVersion: this.homey.app.getAppVersion(),
                     device: this
                 };
-                
+
                 const easee = new Easee(options);
                 const equalizers = await easee.getEqualizers();
-                
+
                 const msg = `Equalizer '${device.getName()}' is not connected to the Easee account '${data.username}'`;
-                
+
                 if (!Array.isArray(equalizers)) {
                     // The account doesn't have any linked equalizers
                     this.error(msg);
@@ -139,7 +139,7 @@ class EqualizerDriver extends Homey.Driver {
 
                 // Verify the new account has access to the equalizer being repaired
                 const equalizer = equalizers.find(eq => eq.id === device.getData().id);
-                
+
                 if (equalizer) {
                     this.log(`Found equalizer with id '${equalizer.id}'`);
                     await device.storeCredentialsEncrypted(data.username, data.password);
@@ -153,6 +153,11 @@ class EqualizerDriver extends Homey.Driver {
                 throw error;
             }
         });
+    }
+
+    // Used for logging messages from the tokenManager
+    logMessage(message) {
+        this.log(`[EqualizerDriver] ${message}`);
     }
 }
 
