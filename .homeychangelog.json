@@ -1,4 +1,8 @@
 {
+    "1.9.2": {
+        "en": "Added back old trigger for status changed, and fixed status changed trigger",
+        "sv": "Lade tillbaka den gamla triggern för statusändring, och fixat statusändring triggern"
+    },
     "1.9.1": {
         "en": "Fixed problem with adding a new device",
         "sv": "Fixat problem med att lägga till en ny enhet"

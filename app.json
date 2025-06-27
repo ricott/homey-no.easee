@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "no.easee",
-  "version": "1.9.1",
+  "version": "1.9.2",
   "brandColor": "#323232",
   "compatibility": ">=12.4.5",
   "sdk": 3,
@@ -104,8 +104,8 @@
             "name": "status",
             "type": "string",
             "title": {
-              "en": "Charger status",
-              "sv": "Laddarens status"
+              "en": "Status",
+              "sv": "Status"
             },
             "example": {
               "en": "Car connected",
@@ -119,14 +119,13 @@
             "name": "device",
             "filter": "driver_id=charger"
           }
-        ],
-        "deprecated": true
+        ]
       },
       {
         "id": "charger_status_changedv2",
         "title": {
-          "en": "Charger status changed",
-          "sv": "Laddarens status ändrades"
+          "en": "Charger status changed to",
+          "sv": "Laddarens status ändrades till"
         },
         "titleFormatted": {
           "en": "Charger status changed to [[status]]",

@@ -145,11 +145,13 @@ class BaseDevice extends Homey.Device {
         }
 
         try {
+            const changed = this.isCapabilityValueChanged(key, value);
+
             // Update capability value
             await this.setCapabilityValue(key, value);
 
             // Trigger device-specific events only for changed values
-            if (this.isCapabilityValueChanged(key, value)) {
+            if (changed) {
                 await this._handlePropertyTriggers(key, value);
             }
         } catch (error) {

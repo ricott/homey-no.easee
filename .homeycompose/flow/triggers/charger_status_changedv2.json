@@ -1,8 +1,8 @@
 {
     "id": "charger_status_changedv2",
     "title": {
-        "en": "Charger status changed",
-        "sv": "Laddarens status ändrades"
+        "en": "Charger status changed to",
+        "sv": "Laddarens status ändrades till"
     },
     "titleFormatted": {
         "en": "Charger status changed to [[status]]",

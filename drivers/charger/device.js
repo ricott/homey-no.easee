@@ -29,8 +29,8 @@ class ChargerDevice extends BaseDevice {
 
         await this.refreshAccessToken();
 
-        this.refreshChargerSettings();
-        this.updateChargerSiteInfo();
+        await this.refreshChargerSettings();
+        await this.updateChargerSiteInfo();
         await this.updateChargerStatistics();
         this._initilializeTimers();
     }
@@ -192,6 +192,11 @@ class ChargerDevice extends BaseDevice {
     }
 
     createEaseeChargerClient() {
+
+        if (!this.getToken()?.accessToken) {
+            return Promise.reject(new Error('No access token found'));
+        }
+
         let options = {
             accessToken: this.getToken().accessToken,
             appVersion: this.homey.app.getAppVersion(),
