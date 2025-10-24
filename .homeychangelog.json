@@ -1,4 +1,8 @@
 {
+    "1.9.4": {
+        "en": "Stability improvements",
+        "sv": "Stabilitetsförbättringar"
+    },
     "1.9.3": {
         "en": "Fixed problem with creating a schedule",
         "sv": "Fixat problem med att skapa ett schema"

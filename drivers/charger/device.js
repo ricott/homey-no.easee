@@ -418,58 +418,62 @@ class ChargerDevice extends BaseDevice {
     //Invoked upon startup of app, refreshed once per day
     async updateChargerSiteInfo() {
         this.logMessage('Getting charger site info');
-        const client = this.createEaseeChargerClient();
-        const chargerId = this.getData().id;
+        try {
+            const client = this.createEaseeChargerClient();
+            const chargerId = this.getData().id;
 
-        // Execute both API calls in parallel
-        const [siteInfoResult, chargerDetailsResult] = await Promise.allSettled([
-            client.getSiteInfo(chargerId),
-            client.getChargerDetails(chargerId)
-        ]);
+            // Execute both API calls in parallel
+            const [siteInfoResult, chargerDetailsResult] = await Promise.allSettled([
+                client.getSiteInfo(chargerId),
+                client.getChargerDetails(chargerId)
+            ]);
 
-        // Handle site info result
-        if (siteInfoResult.status === 'fulfilled') {
-            try {
-                const site = siteInfoResult.value;
-                const circuitFuse = Math.round(site.circuits[0].ratedCurrent);
+            // Handle site info result
+            if (siteInfoResult.status === 'fulfilled') {
+                try {
+                    const site = siteInfoResult.value;
+                    const circuitFuse = Math.round(site.circuits[0].ratedCurrent);
 
-                await this.setSettings({
-                    mainFuse: `${Math.round(site.ratedCurrent)}`,
-                    circuitFuse: `${circuitFuse}`,
-                    siteId: `${site.circuits[0].siteId}`,
-                    circuitId: `${site.circuits[0].id}`
-                });
-            } catch (error) {
-                this.error('Failed to update site settings:', error);
-            }
-        } else {
-            this.error('Failed to get site info:', siteInfoResult.reason);
-        }
-
-        // Handle charger details result
-        if (chargerDetailsResult.status === 'fulfilled') {
-            try {
-                const details = chargerDetailsResult.value;
-                let partnerName = 'n/a';
-                if (details.partner && details.partner.name) {
-                    partnerName = details.partner.name;
+                    await this.setSettings({
+                        mainFuse: `${Math.round(site.ratedCurrent)}`,
+                        circuitFuse: `${circuitFuse}`,
+                        siteId: `${site.circuits[0].siteId}`,
+                        circuitId: `${site.circuits[0].id}`
+                    });
+                } catch (error) {
+                    this.error('Failed to update site settings:', error);
                 }
-
-                await this.setSettings({
-                    partner: partnerName
-                });
-            } catch (error) {
-                this.error('Failed to update partner setting:', error);
+            } else {
+                this.error('Failed to get site info:', siteInfoResult.reason);
             }
-        } else {
-            this.error('Failed to get charger details:', chargerDetailsResult.reason);
-        }
 
-        // Check if site/circuit IDs were successfully set
-        if (this._shouldDeviceBeAvailable()) {
-            await this.setDeviceAvailable();
-        } else {
-            await this.setDeviceUnavailable('Failed to retrieve site id and circuit id from Easee Cloud. Please restart the app to retry.');
+            // Handle charger details result
+            if (chargerDetailsResult.status === 'fulfilled') {
+                try {
+                    const details = chargerDetailsResult.value;
+                    let partnerName = 'n/a';
+                    if (details.partner && details.partner.name) {
+                        partnerName = details.partner.name;
+                    }
+
+                    await this.setSettings({
+                        partner: partnerName
+                    });
+                } catch (error) {
+                    this.error('Failed to update partner setting:', error);
+                }
+            } else {
+                this.error('Failed to get charger details:', chargerDetailsResult.reason);
+            }
+
+            // Check if site/circuit IDs were successfully set
+            if (this._shouldDeviceBeAvailable()) {
+                await this.setDeviceAvailable();
+            } else {
+                await this.setDeviceUnavailable('Failed to retrieve site id and circuit id from Easee Cloud. Please restart the app to retry.');
+            }
+        } catch (error) {
+            this.error('Failed to update charger site info:', error);
         }
     }
 
