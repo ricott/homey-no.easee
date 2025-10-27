@@ -100,100 +100,100 @@ class ChargerDriver extends Homey.Driver {
         const turnOn = this.homey.flow.getActionCard('on');
         turnOn.registerRunListener(async (args) => {
             this.log(`[${args.device.getName()}] Action 'on' triggered`);
-            return args.device.startCharging()
-                .then(function (result) {
-                    return Promise.resolve(true);
-                }).catch(reason => {
-                    return Promise.reject(`Failed to turn on the charger. Reason: ${reason.message}`);
-                });
+            try {
+                await args.device.startCharging();
+                return true;
+            } catch (reason) {
+                throw new Error(`Failed to turn on the charger. Reason: ${reason.message}`);
+            }
         });
 
         const turnOff = this.homey.flow.getActionCard('off');
         turnOff.registerRunListener(async (args) => {
             this.log(`[${args.device.getName()}] Action 'off' triggered`);
-            return args.device.stopCharging()
-                .then(function (result) {
-                    return Promise.resolve(true);
-                }).catch(reason => {
-                    return Promise.reject(`Failed to turn off the charger. Reason: ${reason.message}`);
-                });
+            try {
+                await args.device.stopCharging();
+                return true;
+            } catch (reason) {
+                throw new Error(`Failed to turn off the charger. Reason: ${reason.message}`);
+            }
         });
 
         const toggle = this.homey.flow.getActionCard('toggle');
         toggle.registerRunListener(async (args) => {
             this.log(`[${args.device.getName()}] Action 'toggle' triggered`);
-            return args.device.toggleCharging()
-                .then(function (result) {
-                    return Promise.resolve(true);
-                }).catch(reason => {
-                    return Promise.reject(`Failed to toggle the charger. Reason: ${reason.message}`);
-                });
+            try {
+                await args.device.toggleCharging();
+                return true;
+            } catch (reason) {
+                throw new Error(`Failed to toggle the charger. Reason: ${reason.message}`);
+            }
         });
 
         const rebootCharger = this.homey.flow.getActionCard('rebootCharger');
         rebootCharger.registerRunListener(async (args) => {
             this.log(`[${args.device.getName()}] Action 'rebootCharger' triggered`);
-            return args.device.rebootCharger()
-                .then(function (result) {
-                    return Promise.resolve(true);
-                }).catch(reason => {
-                    return Promise.reject(`Failed to reboot the charger. Reason: ${reason.message}`);
-                });
+            try {
+                await args.device.rebootCharger();
+                return true;
+            } catch (reason) {
+                throw new Error(`Failed to reboot the charger. Reason: ${reason.message}`);
+            }
         });
 
         const disableSmartCharging = this.homey.flow.getActionCard('disableSmartCharging');
         disableSmartCharging.registerRunListener(async (args) => {
             this.log(`[${args.device.getName()}] Action 'disableSmartCharging' triggered`);
-            return args.device.disableSmartCharging()
-                .then(function (result) {
-                    return Promise.resolve(true);
-                }).catch(reason => {
-                    return Promise.reject(`Failed to disable smart charging. Reason: ${reason.message}`);
-                });
+            try {
+                await args.device.disableSmartCharging();
+                return true;
+            } catch (reason) {
+                throw new Error(`Failed to disable smart charging. Reason: ${reason.message}`);
+            }
         });
 
         const pauseSmartCharging = this.homey.flow.getActionCard('pauseSmartCharging');
         pauseSmartCharging.registerRunListener(async (args) => {
             this.log(`[${args.device.getName()}] Action 'pauseSmartCharging' triggered`);
-            return args.device.pauseSmartCharging()
-                .then(function (result) {
-                    return Promise.resolve(true);
-                }).catch(reason => {
-                    return Promise.reject(`Failed to pause smart charging. Reason: ${reason.message}`);
-                });
+            try {
+                await args.device.pauseSmartCharging();
+                return true;
+            } catch (reason) {
+                throw new Error(`Failed to pause smart charging. Reason: ${reason.message}`);
+            }
         });
 
         const enableSmartCharging = this.homey.flow.getActionCard('enableSmartCharging');
         enableSmartCharging.registerRunListener(async (args) => {
             this.log(`[${args.device.getName()}] Action 'enableSmartCharging' triggered`);
-            return args.device.enableSmartCharging()
-                .then(function (result) {
-                    return Promise.resolve(true);
-                }).catch(reason => {
-                    return Promise.reject(`Failed to enable smart charging. Reason: ${reason.message}`);
-                });
+            try {
+                await args.device.enableSmartCharging();
+                return true;
+            } catch (reason) {
+                throw new Error(`Failed to enable smart charging. Reason: ${reason.message}`);
+            }
         });
 
         const overrideSchedule = this.homey.flow.getActionCard('overrideSchedule');
         overrideSchedule.registerRunListener(async (args) => {
             this.log(`[${args.device.getName()}] Action 'overrideSchedule' triggered`);
-            return args.device.overrideSchedule()
-                .then(function (result) {
-                    return Promise.resolve(true);
-                }).catch(reason => {
-                    return Promise.reject(`Failed to override schedule. Reason: ${reason.message}`);
-                });
+            try {
+                await args.device.overrideSchedule();
+                return true;
+            } catch (reason) {
+                throw new Error(`Failed to override schedule. Reason: ${reason.message}`);
+            }
         });
 
         const deleteSchedule = this.homey.flow.getActionCard('deleteSchedule');
         deleteSchedule.registerRunListener(async (args) => {
             this.log(`[${args.device.getName()}] Action 'deleteSchedule' triggered`);
-            return args.device.deleteSchedule()
-                .then(function (result) {
-                    return Promise.resolve(true);
-                }).catch(reason => {
-                    return Promise.reject(`Failed to delete schedule. Reason: ${reason.message}`);
-                });
+            try {
+                await args.device.deleteSchedule();
+                return true;
+            } catch (reason) {
+                throw new Error(`Failed to delete schedule. Reason: ${reason.message}`);
+            }
         });
 
         const createSchedule = this.homey.flow.getActionCard('createSchedule');
@@ -203,30 +203,36 @@ class ChargerDriver extends Homey.Driver {
             this.log(`[${args.device.getName()}] - endTime: '${args.endTime}'`);
             this.log(`[${args.device.getName()}] - repeat: '${args.repeat}'`);
 
-            return args.device.createSchedule(args.startTime, args.endTime, args.repeat)
-                .then(function (result) {
-                    return Promise.resolve(true);
-                }).catch(reason => {
-                    return Promise.reject(`Failed to create schedule. Reason: ${reason.message}`);
-                });
+            try {
+                await args.device.createSchedule(args.startTime, args.endTime, args.repeat);
+                return true;
+            } catch (reason) {
+                throw new Error(`Failed to create schedule. Reason: ${reason.message}`);
+            }
         });
 
         // Register flow card for pausing charging
         const pauseCharging = this.homey.flow.getActionCard('pauseCharging');
         pauseCharging.registerRunListener(async (args) => {
             this.log(`[${args.device.getName()}] Action 'pauseCharging' triggered`);
-            return args.device.pauseCharging()
-                .then(() => Promise.resolve(true))
-                .catch(reason => Promise.reject(`Failed to pause charging. Reason: ${reason.message}`));
+            try {
+                await args.device.pauseCharging();
+                return true;
+            } catch (reason) {
+                throw new Error(`Failed to pause charging. Reason: ${reason.message}`);
+            }
         });
 
         // Register flow card for resuming charging
         const resumeCharging = this.homey.flow.getActionCard('resumeCharging');
         resumeCharging.registerRunListener(async (args) => {
             this.log(`[${args.device.getName()}] Action 'resumeCharging' triggered`);
-            return args.device.resumeCharging()
-                .then(() => Promise.resolve(true))
-                .catch(reason => Promise.reject(`Failed to resume charging. Reason: ${reason.message}`));
+            try {
+                await args.device.resumeCharging();
+                return true;
+            } catch (reason) {
+                throw new Error(`Failed to resume charging. Reason: ${reason.message}`);
+            }
         });
 
         const circuitCurrentControlPerPhase = this.homey.flow.getActionCard('circuitCurrentControlPerPhase');
@@ -239,13 +245,13 @@ class ChargerDriver extends Homey.Driver {
             let current3 = Math.min(args.current3, args.device.getSettings().circuitFuse);
             this.log(`[${args.device.getName()}] - actual used: '${current1}/${current2}/${current3}' Amps`);
 
-            return args.device.setDynamicCurrentPerPhase(current1, current2, current3)
-                .then(function (result) {
-                    return Promise.resolve(true);
-                }).catch(reason => {
-                    this.log(reason);
-                    return Promise.reject(`Failed to set dynamic Circuit current. Reason: ${reason.message}`);
-                });
+            try {
+                await args.device.setDynamicCurrentPerPhase(current1, current2, current3);
+                return true;
+            } catch (reason) {
+                this.log(reason);
+                throw new Error(`Failed to set dynamic Circuit current. Reason: ${reason.message}`);
+            }
         });
 
         const circuitCurrentControl = this.homey.flow.getActionCard('circuitCurrentControl');
@@ -256,12 +262,12 @@ class ChargerDriver extends Homey.Driver {
             let current = Math.min(args.current, args.device.getSettings().circuitFuse);
             this.log(`[${args.device.getName()}] - actual used: '${current}' Amps`);
 
-            return args.device.setDynamicCurrentPerPhase(current, current, current)
-                .then(function (result) {
-                    return Promise.resolve(true);
-                }).catch(reason => {
-                    return Promise.reject(`Failed to set dynamic Circuit current. Reason: ${reason.message}`);
-                });
+            try {
+                await args.device.setDynamicCurrentPerPhase(current, current, current);
+                return true;
+            } catch (reason) {
+                throw new Error(`Failed to set dynamic Circuit current. Reason: ${reason.message}`);
+            }
         });
 
         const chargerState = this.homey.flow.getActionCard('chargerState');
@@ -271,12 +277,12 @@ class ChargerDriver extends Homey.Driver {
 
             let errMsg = `Failed to change state to '${args.chargerState}'`;
             let chargerState = (args.chargerState === 'true') ? true : false;
-            return args.device.setChargerState(chargerState)
-                .then(function (result) {
-                    return Promise.resolve(true);
-                }).catch(reason => {
-                    return Promise.reject(`${errMsg} Reason: ${reason.message}`);
-                });
+            try {
+                await args.device.setChargerState(chargerState);
+                return true;
+            } catch (reason) {
+                throw new Error(`${errMsg} Reason: ${reason.message}`);
+            }
         });
 
         const enableIdleCurrent = this.homey.flow.getActionCard('enableIdleCurrent');
@@ -286,12 +292,12 @@ class ChargerDriver extends Homey.Driver {
 
             let errMsg = `Failed to change idle current to '${args.idleCurrent}'`;
             let idleCurrent = (args.idleCurrent === 'true') ? true : false;
-            return args.device.enableIdleCurrent(idleCurrent)
-                .then(function (result) {
-                    return Promise.resolve(true);
-                }).catch(reason => {
-                    return Promise.reject(`${errMsg} Reason: ${reason.message}`);
-                });
+            try {
+                await args.device.enableIdleCurrent(idleCurrent);
+                return true;
+            } catch (reason) {
+                throw new Error(`${errMsg} Reason: ${reason.message}`);
+            }
         });
 
         const lockCablePermanently = this.homey.flow.getActionCard('lockCablePermanently');
@@ -301,12 +307,12 @@ class ChargerDriver extends Homey.Driver {
 
             let errMsg = `Failed to change lock cable permanently to '${args.lockCable}'`;
             let lockCable = (args.lockCable === 'true') ? true : false;
-            return args.device.lockCablePermanently(lockCable)
-                .then(function (result) {
-                    return Promise.resolve(true);
-                }).catch(reason => {
-                    return Promise.reject(`${errMsg} Reason: ${reason.message}`);
-                });
+            try {
+                await args.device.lockCablePermanently(lockCable);
+                return true;
+            } catch (reason) {
+                throw new Error(`${errMsg} Reason: ${reason.message}`);
+            }
         });
 
         const ledStripBrightness = this.homey.flow.getActionCard('ledStripBrightness');
@@ -315,75 +321,67 @@ class ChargerDriver extends Homey.Driver {
             this.log(`[${args.device.getName()}] - brightness: '${args.ledBrightness}'`);
 
             let errMsg = `Failed to change brightness to '${args.ledBrightness}'`;
-            return args.device.ledStripBrightness(args.ledBrightness)
-                .then(function (result) {
-                    return Promise.resolve(true);
-                }).catch(reason => {
-                    return Promise.reject(`${errMsg} Reason: ${reason.message}`);
-                });
+            try {
+                await args.device.ledStripBrightness(args.ledBrightness);
+                return true;
+            } catch (reason) {
+                throw new Error(`${errMsg} Reason: ${reason.message}`);
+            }
         });
 
         const decreaseCircuitCurrent = this.homey.flow.getActionCard('decreaseCircuitCurrent');
         decreaseCircuitCurrent.registerRunListener(async (args) => {
             this.log(`[${args.device.getName()}] Action 'decreaseCircuitCurrent' triggered`);
             //Lets fetch the current dynamic current via API, to make sure we are adjusting the real current
-            return args.device.getDynamicCircuitCurrent()
-                .then(dynamicCurrent => {
-                    this.log(`[${args.device.getName()}] - dynamic current: '${dynamicCurrent.phase1}/${dynamicCurrent.phase2}/${dynamicCurrent.phase3}'`);
-                    //A user can have locked current to a single phase for one phase charging, lets skip adjusting phases with 0 current
-                    if (dynamicCurrent.phase1 > 0) {
-                        dynamicCurrent.phase1 = Math.min(dynamicCurrent.phase1 -= 1, args.device.getSettings().circuitFuse);
-                    }
-                    if (dynamicCurrent.phase2 > 0) {
-                        dynamicCurrent.phase2 = Math.min(dynamicCurrent.phase2 -= 1, args.device.getSettings().circuitFuse);
-                    }
-                    if (dynamicCurrent.phase3 > 0) {
-                        dynamicCurrent.phase3 = Math.min(dynamicCurrent.phase3 -= 1, args.device.getSettings().circuitFuse);
-                    }
-                    this.log(`[${args.device.getName()}] - setting dynamic current: '${dynamicCurrent.phase1}/${dynamicCurrent.phase2}/${dynamicCurrent.phase3}'`);
+            try {
+                const dynamicCurrent = await args.device.getDynamicCircuitCurrent();
+                this.log(`[${args.device.getName()}] - dynamic current: '${dynamicCurrent.phase1}/${dynamicCurrent.phase2}/${dynamicCurrent.phase3}'`);
+                //A user can have locked current to a single phase for one phase charging, lets skip adjusting phases with 0 current
+                if (dynamicCurrent.phase1 > 0) {
+                    dynamicCurrent.phase1 = Math.min(dynamicCurrent.phase1 -= 1, args.device.getSettings().circuitFuse);
+                }
+                if (dynamicCurrent.phase2 > 0) {
+                    dynamicCurrent.phase2 = Math.min(dynamicCurrent.phase2 -= 1, args.device.getSettings().circuitFuse);
+                }
+                if (dynamicCurrent.phase3 > 0) {
+                    dynamicCurrent.phase3 = Math.min(dynamicCurrent.phase3 -= 1, args.device.getSettings().circuitFuse);
+                }
+                this.log(`[${args.device.getName()}] - setting dynamic current: '${dynamicCurrent.phase1}/${dynamicCurrent.phase2}/${dynamicCurrent.phase3}'`);
 
-                    return args.device.setDynamicCurrentPerPhase(
-                        dynamicCurrent.phase1, dynamicCurrent.phase2, dynamicCurrent.phase3)
-                        .then(function (result) {
-                            return Promise.resolve(true);
-                        }).catch(reason => {
-                            return Promise.reject(`Failed to decrease dynamic circuit current. Reason: ${reason.message}`);
-                        });
-                }).catch(reason => {
-                    return Promise.reject(`Failed to decrease dynamic circuit current. Reason: ${reason.message}`);
-                });
+                await args.device.setDynamicCurrentPerPhase(
+                    dynamicCurrent.phase1, dynamicCurrent.phase2, dynamicCurrent.phase3);
+                return true;
+            } catch (reason) {
+                throw new Error(`Failed to decrease dynamic circuit current. Reason: ${reason.message}`);
+            }
         });
 
         const increaseCircuitCurrent = this.homey.flow.getActionCard('increaseCircuitCurrent');
         increaseCircuitCurrent.registerRunListener(async (args) => {
             this.log(`[${args.device.getName()}] Action 'increaseCircuitCurrent' triggered`);
             //Lets fetch the current dynamic current via API, to make sure we are adjusting the real current
-            return args.device.getDynamicCircuitCurrent()
-                .then(dynamicCurrent => {
-                    this.log(`[${args.device.getName()}] - dynamic current: '${dynamicCurrent.phase1}/${dynamicCurrent.phase2}/${dynamicCurrent.phase3}'`);
-                    //A user can have locked current to a single phase for one phase charging, lets skip adjusting phases with 0 current
-                    //Don't set current larger than installed fuse size
-                    if (dynamicCurrent.phase1 > 0) {
-                        dynamicCurrent.phase1 = Math.min(dynamicCurrent.phase1 += 1, args.device.getSettings().circuitFuse);
-                    }
-                    if (dynamicCurrent.phase2 > 0) {
-                        dynamicCurrent.phase2 = Math.min(dynamicCurrent.phase2 += 1, args.device.getSettings().circuitFuse);
-                    }
-                    if (dynamicCurrent.phase3 > 0) {
-                        dynamicCurrent.phase3 = Math.min(dynamicCurrent.phase3 += 1, args.device.getSettings().circuitFuse);
-                    }
-                    this.log(`[${args.device.getName()}] - setting dynamic current: '${dynamicCurrent.phase1}/${dynamicCurrent.phase2}/${dynamicCurrent.phase3}'`);
+            try {
+                const dynamicCurrent = await args.device.getDynamicCircuitCurrent();
+                this.log(`[${args.device.getName()}] - dynamic current: '${dynamicCurrent.phase1}/${dynamicCurrent.phase2}/${dynamicCurrent.phase3}'`);
+                //A user can have locked current to a single phase for one phase charging, lets skip adjusting phases with 0 current
+                //Don't set current larger than installed fuse size
+                if (dynamicCurrent.phase1 > 0) {
+                    dynamicCurrent.phase1 = Math.min(dynamicCurrent.phase1 += 1, args.device.getSettings().circuitFuse);
+                }
+                if (dynamicCurrent.phase2 > 0) {
+                    dynamicCurrent.phase2 = Math.min(dynamicCurrent.phase2 += 1, args.device.getSettings().circuitFuse);
+                }
+                if (dynamicCurrent.phase3 > 0) {
+                    dynamicCurrent.phase3 = Math.min(dynamicCurrent.phase3 += 1, args.device.getSettings().circuitFuse);
+                }
+                this.log(`[${args.device.getName()}] - setting dynamic current: '${dynamicCurrent.phase1}/${dynamicCurrent.phase2}/${dynamicCurrent.phase3}'`);
 
-                    return args.device.setDynamicCurrentPerPhase(
-                        dynamicCurrent.phase1, dynamicCurrent.phase2, dynamicCurrent.phase3)
-                        .then(function (result) {
-                            return Promise.resolve(true);
-                        }).catch(reason => {
-                            return Promise.reject(`Failed to increase dynamic circuit current. Reason: ${reason.message}`);
-                        });
-                }).catch(reason => {
-                    return Promise.reject(`Failed to increase dynamic circuit current. Reason: ${reason.message}`);
-                });
+                await args.device.setDynamicCurrentPerPhase(
+                    dynamicCurrent.phase1, dynamicCurrent.phase2, dynamicCurrent.phase3);
+                return true;
+            } catch (reason) {
+                throw new Error(`Failed to increase dynamic circuit current. Reason: ${reason.message}`);
+            }
         });
 
         const setChargingPrice = this.homey.flow.getActionCard('setChargingPrice');
@@ -393,12 +391,12 @@ class ChargerDriver extends Homey.Driver {
             this.log(`[${args.device.getName()}] - costPerKWh: '${args.costPerKWh}'`);
             this.log(`[${args.device.getName()}] - taxPerKWh: '${args.taxPerKWh}'`);
 
-            return args.device.setChargingPrice(args.currency, args.costPerKWh, args.taxPerKWh)
-                .then(function (result) {
-                    return Promise.resolve(true);
-                }).catch(reason => {
-                    return Promise.reject(`Failed to set charging price. Reason: ${reason.message}`);
-                });
+            try {
+                await args.device.setChargingPrice(args.currency, args.costPerKWh, args.taxPerKWh);
+                return true;
+            } catch (reason) {
+                throw new Error(`Failed to set charging price. Reason: ${reason.message}`);
+            }
         });
 
         const setMaxChargerCurrent = this.homey.flow.getActionCard('setMaxChargerCurrent');
@@ -406,12 +404,12 @@ class ChargerDriver extends Homey.Driver {
             this.log(`[${args.device.getName()}] Action 'setMaxChargerCurrent' triggered`);
             this.log(`[${args.device.getName()}] - current: '${args.current}'`);
 
-            return args.device.setMaxChargerCurrent(args.current)
-                .then(function (result) {
-                    return Promise.resolve(true);
-                }).catch(reason => {
-                    return Promise.reject(`Failed to set max charging current. Reason: ${reason.message}`);
-                });
+            try {
+                await args.device.setMaxChargerCurrent(args.current);
+                return true;
+            } catch (reason) {
+                throw new Error(`Failed to set max charging current. Reason: ${reason.message}`);
+            }
         });
 
         const setDynamicChargerCurrent = this.homey.flow.getActionCard('setDynamicChargerCurrent');
@@ -419,12 +417,12 @@ class ChargerDriver extends Homey.Driver {
             this.log(`[${args.device.getName()}] Action 'setDynamicChargerCurrent' triggered`);
             this.log(`[${args.device.getName()}] - current: '${args.current}'`);
 
-            return args.device.setDynamicChargerCurrent(args.current)
-                .then(function (result) {
-                    return Promise.resolve(true);
-                }).catch(reason => {
-                    return Promise.reject(`Failed to set charger dynamic current. Reason: ${reason.message}`);
-                });
+            try {
+                await args.device.setDynamicChargerCurrent(args.current);
+                return true;
+            } catch (reason) {
+                throw new Error(`Failed to set charger dynamic current. Reason: ${reason.message}`);
+            }
         });
     }
 

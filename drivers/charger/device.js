@@ -41,55 +41,61 @@ class ChargerDevice extends BaseDevice {
             this.logMessage(`Homey set evcharger_charging: ${value}`);
             if (value) {
                 //Start
-                await this.startCharging()
-                    .catch(reason => {
-                        let defaultMsg = 'Failed to start charging!';
-                        return Promise.reject(new Error(this.createFriendlyErrorMsg(reason, defaultMsg)));
-                    });
+                try {
+                    await this.startCharging();
+                } catch (reason) {
+                    let defaultMsg = 'Failed to start charging!';
+                    throw new Error(this.createFriendlyErrorMsg(reason, defaultMsg));
+                }
             } else {
                 //Stop
-                await this.stopCharging()
-                    .catch(reason => {
-                        let defaultMsg = 'Failed to stop charging!';
-                        return Promise.reject(new Error(this.createFriendlyErrorMsg(reason, defaultMsg)));
-                    });
+                try {
+                    await this.stopCharging();
+                } catch (reason) {
+                    let defaultMsg = 'Failed to stop charging!';
+                    throw new Error(this.createFriendlyErrorMsg(reason, defaultMsg));
+                }
             }
         });
 
         this.registerCapabilityListener('onoff', async (value) => {
             if (value) {
                 //Start
-                await this.startCharging()
-                    .catch(reason => {
-                        let defaultMsg = 'Failed to start charging!';
-                        return Promise.reject(new Error(this.createFriendlyErrorMsg(reason, defaultMsg)));
-                    });
+                try {
+                    await this.startCharging();
+                } catch (reason) {
+                    let defaultMsg = 'Failed to start charging!';
+                    throw new Error(this.createFriendlyErrorMsg(reason, defaultMsg));
+                }
             } else {
                 //Stop
-                await this.stopCharging()
-                    .catch(reason => {
-                        let defaultMsg = 'Failed to stop charging!';
-                        return Promise.reject(new Error(this.createFriendlyErrorMsg(reason, defaultMsg)));
-                    });
+                try {
+                    await this.stopCharging();
+                } catch (reason) {
+                    let defaultMsg = 'Failed to stop charging!';
+                    throw new Error(this.createFriendlyErrorMsg(reason, defaultMsg));
+                }
             }
         });
 
         this.registerCapabilityListener('target_circuit_current', async (current) => {
             this.logMessage(`Set dynamic circuit current to '${current}'`);
-            await this.setDynamicCurrentPerPhase(current, current, current)
-                .catch(reason => {
-                    let defaultMsg = 'Failed to set dynamic circuit current!';
-                    return Promise.reject(new Error(this.createFriendlyErrorMsg(reason, defaultMsg)));
-                });
+            try {
+                await this.setDynamicCurrentPerPhase(current, current, current);
+            } catch (reason) {
+                let defaultMsg = 'Failed to set dynamic circuit current!';
+                throw new Error(this.createFriendlyErrorMsg(reason, defaultMsg));
+            }
         });
 
         this.registerCapabilityListener('target_charger_current', async (current) => {
             this.logMessage(`Set dynamic charger current to '${current}'`);
-            await this.setDynamicChargerCurrent(current)
-                .catch(reason => {
-                    let defaultMsg = 'Failed to set dynamic charger current!';
-                    return Promise.reject(new Error(this.createFriendlyErrorMsg(reason, defaultMsg)));
-                });
+            try {
+                await this.setDynamicChargerCurrent(current);
+            } catch (reason) {
+                let defaultMsg = 'Failed to set dynamic charger current!';
+                throw new Error(this.createFriendlyErrorMsg(reason, defaultMsg));
+            }
         });
     }
 
@@ -194,7 +200,7 @@ class ChargerDevice extends BaseDevice {
     createEaseeChargerClient() {
 
         if (!this.getToken()?.accessToken) {
-            return Promise.reject(new Error('No access token found'));
+            throw new Error('No access token found');
         }
 
         let options = {
@@ -514,22 +520,12 @@ class ChargerDevice extends BaseDevice {
     // first trigger start charge, if fails then try resume
     async startCharging() {
         this.logMessage('Starting charge');
-        const client = this.createEaseeChargerClient();
-        const chargerId = this.getData().id;
-
         try {
-            const result = await client.startCharging(chargerId);
+            const result = await this.createEaseeChargerClient().startCharging(this.getData().id);
             return result;
         } catch (startError) {
             this.logMessage('Failed to start charging, trying resume');
-
-            try {
-                const result = await client.resumeCharging(chargerId);
-                return result;
-            } catch (resumeError) {
-                this.logMessage('Failed to resume charging, out of luck');
-                throw resumeError;
-            }
+            return await this.resumeCharging();
         }
     }
 
@@ -537,22 +533,12 @@ class ChargerDevice extends BaseDevice {
     // first trigger stop charge, if fails then try pause
     async stopCharging() {
         this.logMessage('Stopping charge');
-        const client = this.createEaseeChargerClient();
-        const chargerId = this.getData().id;
-
         try {
-            const result = await client.stopCharging(chargerId);
+            const result = await this.createEaseeChargerClient().stopCharging(this.getData().id);
             return result;
         } catch (stopError) {
             this.logMessage('Failed to stop charging, trying pause');
-
-            try {
-                const result = await client.pauseCharging(chargerId);
-                return result;
-            } catch (pauseError) {
-                this.logMessage('Failed to pause charging, out of luck');
-                throw pauseError;
-            }
+            return await this.pauseCharging();
         }
     }
 
