@@ -59,6 +59,42 @@ class EqualizerDriver extends Homey.Driver {
                 return false;
             }
         });
+
+        //Actions
+        const disableSurplusCharging = this.homey.flow.getActionCard('disableSurplusCharging');
+        disableSurplusCharging.registerRunListener(async (args, state) => {
+            this.log(`[${args.device.getName()}] Action 'disableSurplusCharging' triggered`);
+            try {
+                await args.device.createEaseeChargerClient().disableSurplusCharging(args.device.getData().id);
+                this.log(`[${args.device.getName()}] Successfully disabled surplus charging`);
+                return true;
+            } catch (error) {
+                this.error(`[${args.device.getName()}] Failed to disable surplus charging:`, error);
+                throw new Error(`Failed to disable surplus charging: ${error.message}`);
+            }
+        });
+
+        const enableSurplusCharging = this.homey.flow.getActionCard('enableSurplusCharging');
+        enableSurplusCharging.registerRunListener(async (args, state) => {
+            this.log(`[${args.device.getName()}] Action 'enableSurplusCharging' triggered`);
+            this.log(`[${args.device.getName()}] maxImportCurrent: ${args.maxImportCurrent}A`);
+
+            // Validate input
+            const maxImportCurrent = Number(args.maxImportCurrent);
+            if (isNaN(maxImportCurrent) || maxImportCurrent < 0 || maxImportCurrent > 12) {
+                this.error(`[${args.device.getName()}] Invalid maxImportCurrent value: ${args.maxImportCurrent}`);
+                throw new Error('Maximum import current must be between 0 and 12 amps');
+            }
+
+            try {
+                await args.device.createEaseeChargerClient().enableSurplusCharging(args.device.getData().id, maxImportCurrent);
+                this.log(`[${args.device.getName()}] Successfully enabled surplus charging with ${maxImportCurrent}A max import`);
+                return true;
+            } catch (error) {
+                this.error(`[${args.device.getName()}] Failed to enable surplus charging:`, error);
+                throw new Error(`Failed to enable surplus charging: ${error.message}`);
+            }
+        });
     }
 
     async onPair(session) {
