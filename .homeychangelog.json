@@ -1,4 +1,8 @@
 {
+    "1.9.6": {
+        "en": "Fixed problem with starting and stopping charging",
+        "sv": "Fixat problem med att starta och stoppa laddning"
+    },
     "1.9.5": {
         "en": "Stability improvements",
         "sv": "Stabilitetsförbättringar"

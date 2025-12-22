@@ -524,8 +524,17 @@ class ChargerDevice extends BaseDevice {
             const result = await this.createEaseeChargerClient().startCharging(this.getData().id);
             return result;
         } catch (startError) {
-            this.logMessage('Failed to start charging, trying resume');
-            return await this.resumeCharging();
+            // Log as info since we're handling it with fallback - don't show as error to user yet
+            this.logMessage(`Start charging returned error (${startError.message}), trying resume as fallback`);
+            try {
+                const resumeResult = await this.resumeCharging();
+                this.logMessage('Resume charging succeeded as fallback');
+                return resumeResult;
+            } catch (resumeError) {
+                // Only now show as error since both attempts failed
+                this.error(`Both startCharging and resumeCharging failed. Start error: ${startError.message}, Resume error: ${resumeError.message}`);
+                throw new Error(`Failed to start charging. Start error: ${startError.message}. Fallback (resume) also failed: ${resumeError.message}`);
+            }
         }
     }
 
@@ -537,8 +546,17 @@ class ChargerDevice extends BaseDevice {
             const result = await this.createEaseeChargerClient().stopCharging(this.getData().id);
             return result;
         } catch (stopError) {
-            this.logMessage('Failed to stop charging, trying pause');
-            return await this.pauseCharging();
+            // Log as info since we're handling it with fallback - don't show as error to user yet
+            this.logMessage(`Stop charging returned error (${stopError.message}), trying pause as fallback`);
+            try {
+                const pauseResult = await this.pauseCharging();
+                this.logMessage('Pause charging succeeded as fallback');
+                return pauseResult;
+            } catch (pauseError) {
+                // Only now show as error since both attempts failed
+                this.error(`Both stopCharging and pauseCharging failed. Stop error: ${stopError.message}, Pause error: ${pauseError.message}`);
+                throw new Error(`Failed to stop charging. Stop error: ${stopError.message}. Fallback (pause) also failed: ${pauseError.message}`);
+            }
         }
     }
 

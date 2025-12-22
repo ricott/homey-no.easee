@@ -264,12 +264,85 @@ class BaseDevice extends Homey.Device {
 
     createFriendlyErrorMsg(reason, baseMsg) {
         let errMsg = baseMsg;
-        if (reason.message.indexOf('Access token') > -1) {
+        const errorMsg = reason.message || '';
+        
+        // Check if error object has structured error information
+        let errorCodeName = null;
+        if (reason.errors && typeof reason.errors === 'object') {
+            errorCodeName = reason.errors.errorCodeName || reason.errors.title;
+        }
+        
+        // Try to extract errorCodeName from JSON string in message
+        if (!errorCodeName) {
+            const jsonMatch = errorMsg.match(/errorCodeName["\s:]+"([^"]+)"/);
+            if (jsonMatch && jsonMatch[1]) {
+                errorCodeName = jsonMatch[1];
+            }
+        }
+        
+        // Handle specific error cases
+        if (errorMsg.indexOf('Access token') > -1) {
             errMsg = 'Access token expired';
-        } else if (reason.message.indexOf('Rate limit') > -1) {
+        } else if (errorMsg.indexOf('Rate limit') > -1) {
             errMsg = 'The Easee Cloud API rejected the call due to a rate limit';
+        } else if (errorCodeName === 'ChargerDisconnected' || errorMsg.indexOf('ChargerDisconnected') > -1) {
+            errMsg = 'Charger is disconnected. Please check the charger connection and try again.';
+        } else if (errorMsg.indexOf('timed out') > -1 || errorMsg.indexOf('timeout') > -1 || errorMsg.indexOf('aborted due to timeout') > -1) {
+            // Check if it's a timeout during command status check
+            if (errorMsg.indexOf('command status') > -1) {
+                errMsg = 'Charger did not respond in time. The charger may be offline or busy. Please try again.';
+            } else {
+                errMsg = 'Request timed out. Please check your internet connection and try again.';
+            }
+        } else if (errorMsg.indexOf('Fallback') > -1) {
+            // Extract the most relevant error from the fallback message
+            // Try to find ChargerDisconnected or timeout first
+            if (errorCodeName === 'ChargerDisconnected' || errorMsg.indexOf('ChargerDisconnected') > -1) {
+                errMsg = 'Charger is disconnected. Please check the charger connection and try again.';
+            } else if (errorMsg.indexOf('timed out') > -1 || errorMsg.indexOf('timeout') > -1) {
+                errMsg = 'Charger did not respond in time. The charger may be offline or busy. Please try again.';
+            } else {
+                // Extract the last error (fallback error) as it's usually more relevant
+                const fallbackMatch = errorMsg.match(/Fallback.*?failed:\s*(.+?)(?:\.|$)/);
+                if (fallbackMatch && fallbackMatch[1]) {
+                    const fallbackError = fallbackMatch[1].trim();
+                    // Check for ChargerDisconnected in fallback error
+                    if (fallbackError.indexOf('ChargerDisconnected') > -1) {
+                        errMsg = 'Charger is disconnected. Please check the charger connection and try again.';
+                    } else if (fallbackError.indexOf('400') > -1) {
+                        errMsg = 'Charger rejected the command. Please check the charger status and try again.';
+                    } else {
+                        // Clean up technical details
+                        const cleanError = fallbackError
+                            .replace(/post\s+'[^']+':\s*/gi, '')
+                            .replace(/Failed\s*\(\d+\)\.\s*/gi, '')
+                            .trim();
+                        if (cleanError && cleanError.length < 100) {
+                            errMsg = `${baseMsg} ${cleanError}`;
+                        } else {
+                            errMsg = `${baseMsg} Please check the charger connection and try again.`;
+                        }
+                    }
+                } else {
+                    errMsg = `${baseMsg} Please check the charger connection and try again.`;
+                }
+            }
         } else {
-            errMsg = `${errMsg} ${reason.message}`;
+            // For other errors, try to extract meaningful information
+            // Remove technical details like HTTP status codes and JSON
+            let cleanMsg = errorMsg
+                .replace(/post\s+'[^']+':\s*/gi, '')
+                .replace(/Failed\s*\(\d+\)\.\s*/gi, '')
+                .replace(/Errors:\s*\{[^}]+\}/gi, '')
+                .replace(/errorCode:\d+/gi, '')
+                .replace(/errorCodeName:"[^"]+"/gi, '')
+                .trim();
+            
+            if (cleanMsg && cleanMsg.length > 0 && cleanMsg.length < 200) {
+                errMsg = `${baseMsg} ${cleanMsg}`;
+            } else {
+                errMsg = `${baseMsg} Please check the charger connection and try again.`;
+            }
         }
 
         return errMsg;
