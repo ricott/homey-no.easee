@@ -1,0 +1,18 @@
+{
+    "id": "disableSurplusCharging",
+    "title": {
+        "en": "Disable surplus charging",
+        "sv": "Inaktivera överskottsladdning"
+    },
+    "titleFormatted": {
+        "en": "Disable surplus charging",
+        "sv": "Inaktivera överskottsladdning"
+    },
+    "args": [
+        {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=equalizer"
+        }
+    ]
+}

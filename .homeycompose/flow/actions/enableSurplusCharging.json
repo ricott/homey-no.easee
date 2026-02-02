@@ -1,0 +1,35 @@
+{
+    "id": "enableSurplusCharging",
+    "title": {
+        "en": "Enable surplus charging",
+        "sv": "Aktivera överskottsladdning"
+    },
+    "titleFormatted": {
+        "en": "Enable surplus charging with [[maxImportCurrent]] grid import",
+        "sv": "Aktivera överskottsladdning med [[maxImportCurrent]] nätimport"
+    },
+    "hint": {
+        "en": "Set to 0A for surplus only (no grid use). Set to 1-12A to allow limited grid import.",
+        "sv": "Sätt till 0A för endast överskott (ingen nätanvändning). Sätt till 1-12A för att tillåta begränsad nätimport."
+    },
+    "args": [
+        {
+            "name": "maxImportCurrent",
+            "type": "range",
+            "title": {
+                "en": "Maximum grid import current",
+                "sv": "Max nätimportström"
+            },
+            "min": 0,
+            "max": 12,
+            "step": 1,
+            "label": " A",
+            "labelDecimals": 0
+        },
+        {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=equalizer"
+        }
+    ]
+}
